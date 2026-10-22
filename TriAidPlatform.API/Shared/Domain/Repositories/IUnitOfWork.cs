@@ -1,4 +1,4 @@
-﻿namespace TriAidPlatform.API.Shared.Domain.Repositoriesn;
+﻿namespace TriAidPlatform.API.Shared.Domain.Repositories;
 
 public interface IUnitOfWork
 {
