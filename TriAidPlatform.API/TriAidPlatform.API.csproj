@@ -26,8 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Alerting\Application\" />
-      <Folder Include="Alerting\Domain\Model\ValueObjects\" />
+      <Folder Include="Alerting\Application\Errors\" />
       <Folder Include="Alerting\Domain\Repositories\" />
       <Folder Include="Alerting\Infrastructure\" />
     </ItemGroup>
