@@ -1,6 +1,51 @@
 @TriAidPlatform.API_HostAddress = http://localhost:5090
 
-GET {{TriAidPlatform.API_HostAddress}}/weatherforecast/
+### Patient Registration - list patients
+GET {{TriAidPlatform.API_HostAddress}}/patients
 Accept: application/json
 
-###
+### Patient Registration - register patient with DNI (US06)
+POST {{TriAidPlatform.API_HostAddress}}/patients
+Content-Type: application/json
+
+{
+  "dni": "10101010",
+  "firstName": "Elena",
+  "lastName": "Rojas Nunez",
+  "birthDate": "1988-05-05",
+  "sex": "Female",
+  "phone": "987654321",
+  "address": "Av. Javier Prado 123, Lima"
+}
+
+### Patient Registration - search by DNI (US06)
+GET {{TriAidPlatform.API_HostAddress}}/patients/dni/10101010
+Accept: application/json
+
+### Patient Registration - create temporary profile (US07)
+POST {{TriAidPlatform.API_HostAddress}}/patients/temporary
+Content-Type: application/json
+
+{
+  "firstName": "Marco",
+  "lastName": "Diaz Soto",
+  "birthDate": "1990-01-15",
+  "sex": "Male"
+}
+
+### Patient Registration - regularize identity (US07)
+PUT {{TriAidPlatform.API_HostAddress}}/patients/2/identity
+Content-Type: application/json
+
+{
+  "dni": "20202020"
+}
+
+### Patient Registration - update contact data
+PUT {{TriAidPlatform.API_HostAddress}}/patients/1/contact
+Content-Type: application/json
+
+{
+  "phone": "912345678",
+  "address": "Jr. Lampa 456, Lima"
+}
