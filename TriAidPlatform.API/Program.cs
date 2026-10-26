@@ -1,5 +1,8 @@
-var builder = WebApplication.CreateBuilder(args);
+using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration;
 
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+builder.Services.AddControllers(options=> options.Conventions.Add(new KebabCaseRouteNamingConvention()));
 // Add services to the container.
 
 builder.Services.AddControllers();
