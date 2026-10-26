@@ -25,4 +25,11 @@
         <PackageReference Include="Humanizer" Version="3.0.10"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Alerting\Application\" />
+      <Folder Include="Alerting\Domain\Model\ValueObjects\" />
+      <Folder Include="Alerting\Domain\Repositories\" />
+      <Folder Include="Alerting\Infrastructure\" />
+    </ItemGroup>
+
 </Project>
