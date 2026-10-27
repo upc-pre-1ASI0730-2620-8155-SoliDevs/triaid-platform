@@ -8,6 +8,9 @@ public class Alert
     public AlertLevel Level { get; private set; }
     public AlertStatus Status { get; private set; }
     public DateTime RaisedAt { get; private set; }
+    
+    public string? EscalatedTo { get; private set; }
+    public DateTime? AcknowledgedAt { get; private set; }
 
     protected Alert() { }
 
@@ -20,6 +23,13 @@ public class Alert
     }
     
     //Reglas de negocio (en progreso)
+
+    public void Acknowledge()
+    {
+        if (Status == AlertStatus.Resolved) throw new InvalidOperationException("Cannot acknowledge an already resolved alert.");
+        Status = AlertStatus.Acknowledged;
+        AcknowledgedAt = DateTime.UtcNow;
+    }
     
     //Esta función escalará la alerta a la zona de mayor prioridad
     public void Escalate(string destination = "Trauma Shock")
