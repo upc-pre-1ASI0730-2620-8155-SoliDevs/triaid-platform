@@ -27,7 +27,6 @@
 
     <ItemGroup>
       <Folder Include="Alerting\Application\Errors\" />
-      <Folder Include="Alerting\Domain\Repositories\" />
       <Folder Include="Alerting\Infrastructure\" />
     </ItemGroup>
 
