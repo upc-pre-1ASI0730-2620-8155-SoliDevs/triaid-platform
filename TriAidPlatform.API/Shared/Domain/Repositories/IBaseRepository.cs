@@ -1,8 +1,8 @@
-﻿namespace TriAidPlatform.API.Shared.Domain.Repositoriesn;
+﻿namespace TriAidPlatform.API.Shared.Domain.Repositories;
 
 public interface IBaseRepository <TEntity>
 {
-    Task AddSync(TEntity entity, CancellationToken cancellationToken = default);
+    Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);
     Task<TEntity?> FindByIdAsync(int id, CancellationToken cancellationToken = default);
     void Update(TEntity entity);
     void Remove(TEntity entity);

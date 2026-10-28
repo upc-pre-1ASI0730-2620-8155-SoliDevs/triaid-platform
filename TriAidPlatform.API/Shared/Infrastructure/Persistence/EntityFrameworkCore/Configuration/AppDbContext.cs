@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TriAidPlatform.API.Subscription.Domain.Model;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Extensions;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
 
