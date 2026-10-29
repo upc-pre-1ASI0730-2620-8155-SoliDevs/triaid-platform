@@ -5,7 +5,7 @@ namespace TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.Enti
 
 /// <summary>
 /// Entity Framework Core mapping of the Patient Registration bounded context.
-/// Follows the patients table of the database diagram.
+/// Follows the patients and triage_episodes tables of the database diagram.
 /// </summary>
 public static class ModelBuilderExtensions
 {
@@ -29,5 +29,17 @@ public static class ModelBuilderExtensions
         builder.Entity<Patient>().Property(p => p.IsTemporary).IsRequired();
         builder.Entity<Patient>().Property(p => p.TemporaryCode).HasMaxLength(12);
         builder.Entity<Patient>().HasIndex(p => p.TemporaryCode).IsUnique();
+
+        builder.Entity<TriageEpisode>().ToTable("triage_episodes");
+        builder.Entity<TriageEpisode>().HasKey(e => e.Id);
+        builder.Entity<TriageEpisode>().Property(e => e.Id).IsRequired().ValueGeneratedOnAdd();
+        builder.Entity<TriageEpisode>().Property(e => e.PatientId).IsRequired();
+        builder.Entity<TriageEpisode>().Property(e => e.ArrivalTime).IsRequired();
+        builder.Entity<TriageEpisode>().Property(e => e.State).IsRequired().HasConversion<int>().HasColumnName("StateId");
+        builder.Entity<TriageEpisode>()
+            .HasOne<Patient>()
+            .WithMany()
+            .HasForeignKey(e => e.PatientId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
