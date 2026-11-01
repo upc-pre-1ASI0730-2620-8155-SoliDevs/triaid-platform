@@ -27,6 +27,7 @@
 
     <ItemGroup>
       <Folder Include="Alerting\Application\Errors\" />
+      <Folder Include="Alerting\Application\Internal\CommandServices\" />
     </ItemGroup>
 
 </Project>
