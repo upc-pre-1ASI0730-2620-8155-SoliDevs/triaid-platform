@@ -4,7 +4,7 @@
 /// Defines the clinical severity levels for a medical alert within the Alerting bounded context.
 /// </summary>
 
-public enum AlertLevel
+public enum EAlertLevel
 {
     Warning,
     Critical
