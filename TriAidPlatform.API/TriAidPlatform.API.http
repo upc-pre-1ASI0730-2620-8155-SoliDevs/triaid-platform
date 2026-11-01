@@ -49,3 +49,21 @@ Content-Type: application/json
   "phone": "912345678",
   "address": "Jr. Lampa 456, Lima"
 }
+
+### Triage Episode - open episode for patient 1
+POST {{TriAidPlatform.API_HostAddress}}/triage-episodes
+Content-Type: application/json
+
+{
+  "patientId": 1
+}
+
+### Triage Episode - list episodes of patient 1
+GET {{TriAidPlatform.API_HostAddress}}/triage-episodes/patient/1
+Accept: application/json
+
+### Triage Episode - start triage
+PUT {{TriAidPlatform.API_HostAddress}}/triage-episodes/1/start-triage
+
+### Triage Episode - mark as referred
+PUT {{TriAidPlatform.API_HostAddress}}/triage-episodes/1/referred
