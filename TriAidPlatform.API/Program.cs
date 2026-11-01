@@ -16,6 +16,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // Patient Registration bounded context
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPatientRegistrationService, PatientRegistrationService>();
+builder.Services.AddScoped<ITriageEpisodeRepository, TriageEpisodeRepository>();
+builder.Services.AddScoped<ITriageEpisodeService, TriageEpisodeService>();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options=> options.Conventions.Add(new KebabCaseRouteNamingConvention()));
