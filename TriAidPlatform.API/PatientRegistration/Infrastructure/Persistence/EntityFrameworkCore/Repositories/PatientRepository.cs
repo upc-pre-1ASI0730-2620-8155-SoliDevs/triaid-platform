@@ -13,14 +13,25 @@ namespace TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.Enti
 /// <param name="context">The database context provided via dependency injection.</param>
 public class PatientRepository(AppDbContext context) : BaseRepository<Patient>(context), IPatientRepository
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Retrieves a patient by its national identity document number.
+    /// Used by the admission search to autocomplete the patient data.
+    /// </summary>
+    /// <param name="dni">The DNI to search.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>An asynchronous task returning the <see cref="Patient"/> if found; otherwise, null.</returns>
     public async Task<Patient?> GetByDniAsync(string dni, CancellationToken cancellationToken = default)
     {
         return await Context.Set<Patient>()
             .FirstOrDefaultAsync(p => p.Dni == dni, cancellationToken);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Retrieves a temporary patient by its emergency code.
+    /// </summary>
+    /// <param name="code">The temporary code to search.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>An asynchronous task returning the <see cref="Patient"/> if found; otherwise, null.</returns>
     public async Task<Patient?> GetByTemporaryCodeAsync(string code, CancellationToken cancellationToken = default)
     {
         return await Context.Set<Patient>()

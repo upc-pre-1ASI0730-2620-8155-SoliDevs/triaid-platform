@@ -21,7 +21,13 @@ public class TriageEpisodeService(
     IPatientRepository patientRepository,
     IUnitOfWork unitOfWork) : ITriageEpisodeService
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Opens a new triage episode for a registered patient. Rejects the operation when the
+    /// patient does not exist or already has an episode in progress.
+    /// </summary>
+    /// <param name="command">The patient that arrives.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>The opened episode, or a NotFound or Conflict failure.</returns>
     public async Task<Result<TriageEpisode, PatientRegistrationError>> OpenAsync(
         OpenTriageEpisodeCommand command, CancellationToken cancellationToken = default)
     {
@@ -39,17 +45,32 @@ public class TriageEpisodeService(
         return new Result<TriageEpisode, PatientRegistrationError>.Success(episode);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Moves a waiting episode to the InTriage state.
+    /// </summary>
+    /// <param name="episodeId">Identifier of the episode.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>The updated episode, or a NotFound or Validation failure.</returns>
     public Task<Result<TriageEpisode, PatientRegistrationError>> StartTriageAsync(
         int episodeId, CancellationToken cancellationToken = default) =>
         ChangeStateAsync(episodeId, episode => episode.StartTriage(), cancellationToken);
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Closes an episode in triage as attended in the emergency service.
+    /// </summary>
+    /// <param name="episodeId">Identifier of the episode.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>The updated episode, or a NotFound or Validation failure.</returns>
     public Task<Result<TriageEpisode, PatientRegistrationError>> MarkAttendedAsync(
         int episodeId, CancellationToken cancellationToken = default) =>
         ChangeStateAsync(episodeId, episode => episode.MarkAttended(), cancellationToken);
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Closes an episode in triage as referred to a specialty.
+    /// </summary>
+    /// <param name="episodeId">Identifier of the episode.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>The updated episode, or a NotFound or Validation failure.</returns>
     public Task<Result<TriageEpisode, PatientRegistrationError>> MarkReferredAsync(
         int episodeId, CancellationToken cancellationToken = default) =>
         ChangeStateAsync(episodeId, episode => episode.MarkReferred(), cancellationToken);

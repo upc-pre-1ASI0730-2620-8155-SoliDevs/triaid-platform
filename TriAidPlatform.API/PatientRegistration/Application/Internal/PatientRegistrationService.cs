@@ -18,13 +18,24 @@ namespace TriAidPlatform.API.PatientRegistration.Application.Internal;
 public class PatientRegistrationService(IPatientRepository patientRepository, IUnitOfWork unitOfWork)
     : IPatientRegistrationService
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Searches a patient by its national identity document number (US06).
+    /// </summary>
+    /// <param name="dni">The DNI to search.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>The <see cref="Patient"/> if found; otherwise, null.</returns>
     public async Task<Patient?> FindByDniAsync(string dni, CancellationToken cancellationToken = default)
     {
         return await patientRepository.GetByDniAsync(dni, cancellationToken);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Registers a patient with identity document. Rejects the operation when the DNI
+    /// is already registered or when the patient data breaks a business rule (US06, US08).
+    /// </summary>
+    /// <param name="command">The registration data.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>The registered patient, or a Conflict or Validation failure.</returns>
     public async Task<Result<Patient, PatientRegistrationError>> RegisterAsync(
         CreatePatientCommand command, CancellationToken cancellationToken = default)
     {
@@ -46,7 +57,13 @@ public class PatientRegistrationService(IPatientRepository patientRepository, IU
         return new Result<Patient, PatientRegistrationError>.Success(patient);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Creates an emergency temporary profile for a patient without identity document
+    /// and assigns a unique temporary code (US07).
+    /// </summary>
+    /// <param name="command">The basic patient data.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>The temporary patient, or a Validation failure.</returns>
     public async Task<Result<Patient, PatientRegistrationError>> CreateTemporaryProfileAsync(
         CreateTemporaryProfileCommand command, CancellationToken cancellationToken = default)
     {
@@ -65,7 +82,14 @@ public class PatientRegistrationService(IPatientRepository patientRepository, IU
         return new Result<Patient, PatientRegistrationError>.Success(patient);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Assigns the official DNI to a temporary patient, keeping the same record so the
+    /// temporary history stays linked to the official identity (US07, scenario 2).
+    /// </summary>
+    /// <param name="patientId">Identifier of the temporary patient.</param>
+    /// <param name="command">The official DNI.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>The regularized patient, or a NotFound, Conflict or Validation failure.</returns>
     public async Task<Result<Patient, PatientRegistrationError>> RegularizeIdentityAsync(
         int patientId, RegularizeIdentityCommand command, CancellationToken cancellationToken = default)
     {
@@ -90,7 +114,13 @@ public class PatientRegistrationService(IPatientRepository patientRepository, IU
         return new Result<Patient, PatientRegistrationError>.Success(patient);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Updates the contact phone and address of a registered patient.
+    /// </summary>
+    /// <param name="patientId">Identifier of the patient.</param>
+    /// <param name="command">The new contact data.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>The updated patient, or a NotFound failure.</returns>
     public async Task<Result<Patient, PatientRegistrationError>> UpdateContactDataAsync(
         int patientId, UpdateContactCommand command, CancellationToken cancellationToken = default)
     {

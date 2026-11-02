@@ -15,7 +15,12 @@ namespace TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.Enti
 public class TriageEpisodeRepository(AppDbContext context)
     : BaseRepository<TriageEpisode>(context), ITriageEpisodeRepository
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Retrieves every triage episode of a patient, ordered from the most recent arrival.
+    /// </summary>
+    /// <param name="patientId">Identifier of the patient.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>An asynchronous task returning the episodes of the patient.</returns>
     public async Task<IEnumerable<TriageEpisode>> FindByPatientIdAsync(
         int patientId, CancellationToken cancellationToken = default)
     {
@@ -25,7 +30,13 @@ public class TriageEpisodeRepository(AppDbContext context)
             .ToListAsync(cancellationToken);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Reports whether the patient already has an episode in progress (Waiting or InTriage).
+    /// Used to prevent opening duplicated episodes for the same patient.
+    /// </summary>
+    /// <param name="patientId">Identifier of the patient.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>An asynchronous task returning true when an open episode exists; otherwise, false.</returns>
     public async Task<bool> ExistsOpenByPatientIdAsync(int patientId, CancellationToken cancellationToken = default)
     {
         return await Context.Set<TriageEpisode>()
