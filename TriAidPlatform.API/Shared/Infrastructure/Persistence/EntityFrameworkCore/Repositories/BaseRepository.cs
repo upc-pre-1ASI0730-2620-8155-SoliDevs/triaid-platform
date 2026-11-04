@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TriAidPlatform.API.Shared.Domain.Repositoriesn;
+using TriAidPlatform.API.Shared.Domain.Repositories;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 
 namespace TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
@@ -8,7 +8,7 @@ public class BaseRepository <TEntity>(AppDbContext context): IBaseRepository<TEn
 {
     protected readonly AppDbContext Context = context;
     
-    public  async Task AddSync(TEntity entity, CancellationToken cancellationToken = default)
+    public async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         await Context.Set<TEntity>().AddAsync(entity, cancellationToken);
     }

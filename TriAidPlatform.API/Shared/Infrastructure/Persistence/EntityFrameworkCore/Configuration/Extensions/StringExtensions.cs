@@ -8,7 +8,7 @@ public static class StringExtensions
     {
         static IEnumerable<char> Convert(CharEnumerator e)
         {
-            if (e!.MoveNext()) yield break;
+            if (!e.MoveNext()) yield break;
             yield return char.ToLower(e.Current);
             while (e.MoveNext())
             {
