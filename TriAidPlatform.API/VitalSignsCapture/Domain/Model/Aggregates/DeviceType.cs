@@ -1,4 +1,4 @@
-﻿namespace TriAidPlatform.API.VitalSignsCaptureOla.Domain.Model.Aggregates
+﻿namespace TriAidPlatform.API.VitalSignsCapture.Domain.Model.Aggregates
 {
     /// <summary>
     /// Represents the catalog of supported vital sign measurement types and their clinical limits.

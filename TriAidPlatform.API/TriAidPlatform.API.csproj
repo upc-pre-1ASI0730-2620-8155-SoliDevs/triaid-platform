@@ -26,12 +26,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="VitalSignsCaptureOla\Application\Internal\" />
-      <Folder Include="VitalSignsCaptureOla\Domain\Model\ValueObjects\" />
-      <Folder Include="VitalSignsCaptureOla\Domain\Repositories\" />
-      <Folder Include="VitalSignsCaptureOla\Infrastructure\Persistence\EntityFrameworkCore\" />
-      <Folder Include="VitalSignsCaptureOla\Interfaces\REST\Resources\" />
-      <Folder Include="VitalSignsCaptureOla\Interfaces\REST\Transform\" />
+      <Folder Include="VitalSignsCapture\Application\Internal\" />
+      <Folder Include="VitalSignsCapture\Domain\Model\ValueObjects\" />
+      <Folder Include="VitalSignsCapture\Domain\Repositories\" />
+      <Folder Include="VitalSignsCapture\Infrastructure\Persistence\EntityFrameworkCore\" />
+      <Folder Include="VitalSignsCapture\Interfaces\REST\Resources\" />
+      <Folder Include="VitalSignsCapture\Interfaces\REST\Transform\" />
     </ItemGroup>
 
 </Project>
