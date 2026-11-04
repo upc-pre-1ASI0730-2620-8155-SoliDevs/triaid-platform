@@ -1,59 +1,66 @@
-namespace TriAidPlatform.API.Iam.Interfaces.REST.Resources;
+namespace TriAidPlatform.API.Iam.Interfaces.Rest.Resources;
 
-/// <summary>Sign-in payload.</summary>
-/// <param name="Username">Account username.</param>
-/// <param name="Password">Plain-text password (hashed server-side).</param>
-public record LoginResource(string Username, string Password);
+/**
+ * <summary>
+ *     The sign in resource
+ * </summary>
+ * <remarks>
+ *     This resource is used to sign in a user
+ * </remarks>
+ */
+public record SignInResource(string Username, string Password);
 
-/// <summary>Institution self-service registration payload (US54).</summary>
-/// <param name="Institution">Official institution name.</param>
-/// <param name="Names">Administrator given names.</param>
-/// <param name="Surnames">Administrator family names.</param>
-/// <param name="Email">Administrator contact email.</param>
-/// <param name="Username">Administrator username.</param>
-/// <param name="Password">Administrator password.</param>
-/// <param name="PlanId">Contracted plan identifier.</param>
-/// <param name="CardNumber">Card captured for the trial-end charge.</param>
-public record RegisterResource(
-    string Institution, string Names, string Surnames,
-    string? Email, string Username, string Password,
-    string? PlanId, string? CardNumber);
+/**
+ * <summary>
+ *     The institution registration resource
+ * </summary>
+ * <remarks>
+ *     This resource is used to register an institution together with
+ *     its administrator account and the trial subscription (US54).
+ * </remarks>
+ */
+public record InstitutionRegisterResource(
+    string Institution,
+    string Names,
+    string Surnames,
+    string? Email,
+    string Username,
+    string Password,
+    string? PlanId,
+    string? CardNumber);
 
-/// <summary>Authenticated user projection (never includes credentials).</summary>
-/// <param name="Id">User identifier.</param>
-/// <param name="Username">Login identifier.</param>
-/// <param name="Names">Given names.</param>
-/// <param name="Surnames">Family names.</param>
-/// <param name="Email">Contact email.</param>
-/// <param name="Role">Platform role.</param>
-/// <param name="Unit">Work unit.</param>
-/// <param name="Shift">Work shift.</param>
-/// <param name="Institution">Tenant institution.</param>
-public record UserResource(
-    int Id, string Username, string Names, string Surnames,
-    string Email, string Role, string Unit, string Shift, string Institution);
-
-/// <summary>Staff account creation payload (admin-only, US55).</summary>
-/// <param name="Username">Login identifier.</param>
-/// <param name="Password">Initial password.</param>
-/// <param name="Names">Given names.</param>
-/// <param name="Surnames">Family names.</param>
-/// <param name="Email">Contact email.</param>
-/// <param name="Role">Platform role.</param>
-/// <param name="Unit">Work unit.</param>
-/// <param name="Shift">Work shift.</param>
+/**
+ * <summary>
+ *     The staff account creation resource
+ * </summary>
+ * <remarks>
+ *     This resource is used by administrators to create staff
+ *     accounts under their institution (US55).
+ * </remarks>
+ */
 public record StaffResource(
-    string? Username, string? Password, string? Names, string? Surnames,
-    string? Email, string? Role, string? Unit, string? Shift);
+    string? Username,
+    string? Password,
+    string? Names,
+    string? Surnames,
+    string? Email,
+    string? Role,
+    string? Unit,
+    string? Shift);
 
-/// <summary>Profile update payload; omitted or empty fields keep their value.</summary>
-/// <param name="Names">Given names.</param>
-/// <param name="Surnames">Family names.</param>
-/// <param name="Email">Contact email.</param>
-/// <param name="Role">Platform role (admin edits only).</param>
-/// <param name="Shift">Work shift (admin edits only).</param>
-/// <param name="Unit">Work unit (admin edits only).</param>
-/// <param name="Password">New password (optional).</param>
+/**
+ * <summary>
+ *     The user update resource
+ * </summary>
+ * <remarks>
+ *     Omitted or empty values keep their stored content.
+ * </remarks>
+ */
 public record UpdateUserResource(
-    string? Names, string? Surnames, string? Email,
-    string? Role, string? Shift, string? Unit, string? Password);
+    string? Names,
+    string? Surnames,
+    string? Email,
+    string? Role,
+    string? Shift,
+    string? Unit,
+    string? Password);
