@@ -25,4 +25,13 @@
         <PackageReference Include="Humanizer" Version="3.0.10"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="VitalSignsCaptureOla\Application\Internal\" />
+      <Folder Include="VitalSignsCaptureOla\Domain\Model\ValueObjects\" />
+      <Folder Include="VitalSignsCaptureOla\Domain\Repositories\" />
+      <Folder Include="VitalSignsCaptureOla\Infrastructure\Persistence\EntityFrameworkCore\" />
+      <Folder Include="VitalSignsCaptureOla\Interfaces\REST\Resources\" />
+      <Folder Include="VitalSignsCaptureOla\Interfaces\REST\Transform\" />
+    </ItemGroup>
+
 </Project>
