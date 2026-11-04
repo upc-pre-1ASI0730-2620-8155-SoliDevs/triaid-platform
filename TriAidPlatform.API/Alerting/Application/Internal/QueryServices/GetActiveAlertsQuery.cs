@@ -1,5 +1,6 @@
 ﻿namespace TriAidPlatform.API.Alerting.Application.Internal.QueryServices;
 /// <summary>
-/// Query object to request all currently active medical alerts in the triage queue.
+/// Query object to request all currently active medical alerts for a specific clinic.
 /// </summary>
-public record GetActiveAlertsQuery();
+/// <param name="ClinicId">The unique identifier of the clinic to ensure data isolation.</param>
+public record GetActiveAlertsQuery(int ClinicId);
