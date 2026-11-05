@@ -1,6 +1,10 @@
 ﻿namespace TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
 
-public record ClinicId
+/// <summary>
+/// Value Object that represents the unique identifier of a Clinic.
+/// Prevents Primitive Obsession and ensures valid tenant identifiers.
+/// </summary>
+public sealed record ClinicId
 {
     public int Value { get; }
     
