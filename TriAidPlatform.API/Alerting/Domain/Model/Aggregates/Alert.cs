@@ -16,7 +16,7 @@ public class Alert
     /// <summary>
     /// Ensures data isolation between different clinics/hospitals.
     /// </summary>
-    public int ClinicId { get; private set; }
+    public ClinicId ClinicId { get; private set; }
    /// <summary>
    /// Identifier of the specific vital sign reading that trigger the alert
    /// </summary>
@@ -53,14 +53,12 @@ public class Alert
     /// <param name="clinicId">The ID of the clinic where the alert was generated.</param>
     /// <param name="readingId">The ID of the anomalous reading.</param>
     /// <param name="level">The severity level assigned to this alert.</param>
-    public Alert(int clinicId, int readingId, EAlertLevel level)
+    public Alert(ClinicId clinicId, int readingId, EAlertLevel level)
     {
-        if (clinicId <= 0) 
-         throw new ArgumentException("Clinic ID must be a valid identifier to ensure data isolation.");
+        ClinicId = clinicId ?? throw new ArgumentNullException(nameof(clinicId));
         if (readingId <= 0) 
          throw new ArgumentException("Reading ID is required.");
         
-        ClinicId = clinicId;
         ReadingId = readingId;
         Level = level;
         Status = new AlertStatus(EAlertStatus.Active);
