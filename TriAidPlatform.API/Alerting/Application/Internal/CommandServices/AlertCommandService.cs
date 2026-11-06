@@ -46,4 +46,31 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
 
         return alert;
     }
+    /// <summary>
+    /// Handles the execution of the <see cref="EscalateAlertCommand"/>.
+    /// Validates clinic ownership and escalates the alert to the requested destination.
+    /// </summary>
+    public async Task<Alert?> Handle(EscalateAlertCommand command, CancellationToken cancellationToken = default)
+    {
+        var alert = await alertRepository.FindByIdAsync(command.AlertId, cancellationToken);
+        
+        if (alert == null || alert.ClinicId.Value != command.ClinicId.Value)
+        {
+            throw new UnauthorizedAccessException("Alert not found or does not belong to your clinic.");
+        }
+
+        alert.Escalate();
+        
+        try
+        {
+            alertRepository.Update(alert);
+            await unitOfWork.CompleteAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"An error occurred while escalating the alert: {e.Message}");
+        }
+        
+        return alert;
+    }
 }
