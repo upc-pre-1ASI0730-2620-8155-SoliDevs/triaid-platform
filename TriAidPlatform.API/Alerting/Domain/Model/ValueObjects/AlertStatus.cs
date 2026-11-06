@@ -12,9 +12,9 @@ public sealed record AlertStatus
     public EAlertStatus StatusValue { get; init; }
     
     /// <summary>
-    /// Protected parameterless constructor strictly required by Entity Framework Core for object materialization.
+    /// Private parameterless constructor strictly required by Entity Framework Core for object materialization.
     /// </summary>
-    protected AlertStatus() { }
+    private AlertStatus() { }
     
     
     /// <summary>
