@@ -59,7 +59,7 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
             throw new UnauthorizedAccessException("Alert not found or does not belong to your clinic.");
         }
 
-        alert.Escalate();
+        alert.Escalate(command.Destination);
         
         try
         {
