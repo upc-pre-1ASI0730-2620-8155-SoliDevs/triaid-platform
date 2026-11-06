@@ -21,9 +21,9 @@ public sealed record AlertMetric
     public string SafeRange {get; init; }
 
     /// <summary>
-    /// Protected parameterless constructor for materialization
+    /// Private parameterless constructor for materialization
     /// </summary>
-    protected AlertMetric() {}
+    private AlertMetric() {}
 
     
     /// <summary>
