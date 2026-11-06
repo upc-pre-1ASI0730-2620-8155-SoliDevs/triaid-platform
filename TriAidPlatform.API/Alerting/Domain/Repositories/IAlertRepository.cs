@@ -1,4 +1,5 @@
 ﻿using TriAidPlatform.API.Alerting.Domain.Model.Aggregates;
+using TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 
 namespace TriAidPlatform.API.Alerting.Domain.Repositories;
@@ -15,14 +16,14 @@ public interface IAlertRepository : IBaseRepository <Alert>
     /// <param name="clinicId">The unique identifier of the clinic to ensure data isolation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>A collection of active <see cref="Alert"/> instances.</returns>
-    Task<IEnumerable<Alert>> FindActiveAlertsAsync(int clinicId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Alert>> FindActiveAlertsAsync(ClinicId clinicId, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Retrieves a specific alert based on its associated reading ID.
     /// </summary>
-    /// <param name="clinicId">The ID of the clinic where the alert was generated.</param>
+    /// <param name="clinicId">The unique identifier of the clinic where the alert was generated.</param>
     /// <param name="readingId">The ID of the vital sign reading.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>The <see cref="Alert"/> instance if found; otherwise, null.</returns>
-    Task<Alert?> FindByReadingIdAsync(int clinicId, int readingId, CancellationToken cancellationToken = default);
+    Task<Alert?> FindByReadingIdAsync(ClinicId clinicId, int readingId, CancellationToken cancellationToken = default);
 } 
