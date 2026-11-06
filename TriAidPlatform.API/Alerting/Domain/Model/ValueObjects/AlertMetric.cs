@@ -9,16 +9,17 @@ public sealed record AlertMetric
     /// <summary>
     /// Human-readable name of the altered vital sign.
     /// </summary>
-    public string SignName { get; init; }
+    public string SignName { get; init; } = null!;
 
     /// <summary>
-     ///  Exact anomalous value captured by the device during a triage.
-     /// </summary>
-    public string MeasuredValue {get; init; }
+    ///  Exact anomalous value captured by the device during a triage.
+    /// </summary>
+    public string MeasuredValue { get; init; } = null!;
+
     /// <summary>
     /// Normative parameter indicating the healthy levels for the vital sign 
     /// </summary>
-    public string SafeRange {get; init; }
+    public string SafeRange { get; init; } = null!;
 
     /// <summary>
     /// Private parameterless constructor for materialization
