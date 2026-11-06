@@ -27,9 +27,8 @@ public class AlertRepository : BaseRepository<Alert>, IAlertRepository
     /// <param name="clinicId">The unique identifier of the clinic to ensure data isolation.</param>
     /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
     /// <returns>An asynchronous task returning a collection of active <see cref="Alert"/> instances belonging to the specified clinic.</returns>
-    public async Task<IEnumerable<Alert>> FindActiveAlertsAsync(int clinicId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Alert>> FindActiveAlertsAsync(ClinicId clinicId, CancellationToken cancellationToken = default)
     {
-        
         return await Context.Set<Alert>()
             .Where(a => a.ClinicId == clinicId && a.Status.StatusValue != EAlertStatus.Resolved)
             .ToListAsync(cancellationToken);
@@ -46,7 +45,7 @@ public class AlertRepository : BaseRepository<Alert>, IAlertRepository
     /// An asynchronous task returning the <see cref="Alert"/> instance if found; 
     /// otherwise, null.
     /// </returns>
-    public async Task<Alert?> FindByReadingIdAsync(int clinicId, int readingId, CancellationToken cancellationToken = default)
+    public async Task<Alert?> FindByReadingIdAsync(ClinicId clinicId, int readingId, CancellationToken cancellationToken = default)
     {
         return await Context.Set<Alert>()
             .FirstOrDefaultAsync(a => a.ClinicId == clinicId && a.ReadingId == readingId, cancellationToken);
