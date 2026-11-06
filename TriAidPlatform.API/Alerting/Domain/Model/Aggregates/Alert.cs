@@ -66,8 +66,7 @@ public class Alert
          throw new ArgumentException("Reading ID is required.");
         
         ReadingId = readingId;
-        Level = level;
-        Metric = metric;
+        Level = level; ;
         Status = new AlertStatus(EAlertStatus.Active);
         RaisedAt= DateTime.UtcNow;
     }
