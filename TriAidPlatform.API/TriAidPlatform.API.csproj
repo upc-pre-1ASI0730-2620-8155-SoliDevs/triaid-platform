@@ -25,4 +25,8 @@
         <PackageReference Include="Humanizer" Version="3.0.10"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Alerting\Application\Errors\" />
+    </ItemGroup>
+
 </Project>
