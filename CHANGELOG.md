@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-06
+
+### Added
+- Alerting workflows to retrieve active alerts, acknowledge them, and escalate them to a destination.
+- REST endpoints and resources for alert operations, with Entity Framework Core persistence configuration.
+
+### Security
+- Clinic-scoped alert queries and commands to isolate alert data by clinic.
+
+### Fixed
+- Initialized alert metric properties to prevent null reference exceptions.
+
 ## [0.1.0] - 2026-11-04
 
 ### Added
