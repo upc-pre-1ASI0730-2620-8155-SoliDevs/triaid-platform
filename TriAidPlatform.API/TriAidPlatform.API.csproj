@@ -27,6 +27,10 @@
 
     <ItemGroup>
       <Folder Include="Alerting\Application\Errors\" />
+      <Folder Include="Devices\Application\Internal\" />
+      <Folder Include="Devices\Domain\Model\Commands\" />
+      <Folder Include="Devices\Domain\Model\Events\" />
+      <Folder Include="Devices\Domain\Services\" />
     </ItemGroup>
 
 </Project>
