@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TriAidPlatform.API.Alerting.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using TriAidPlatform.API.Devices.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Extensions;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
@@ -8,19 +9,18 @@ namespace TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCo
 
 public class AppDbContext(DbContextOptions options) : DbContext(options)
 {
-   
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
         builder.AddInterceptors(new AuditableEntityInterceptor());
         base.OnConfiguring(builder);   
     }
+    
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
         builder.ApplyPatientRegistrationConfiguration();
         builder.ApplyAlertingConfiguration();
+        builder.ApplyDevicesConfiguration(); 
         builder.UseSnakeCaseNamingConvention();
     }
-
-   
 }
