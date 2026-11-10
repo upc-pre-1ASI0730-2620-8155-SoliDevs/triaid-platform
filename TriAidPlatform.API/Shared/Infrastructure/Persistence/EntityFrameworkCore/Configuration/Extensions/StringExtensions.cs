@@ -1,6 +1,6 @@
 ﻿using Humanizer;
 
-namespace TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Extensions;
+namespace TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 
 public static class StringExtensions
 {
@@ -8,7 +8,7 @@ public static class StringExtensions
     {
         static IEnumerable<char> Convert(CharEnumerator e)
         {
-            if (e!.MoveNext()) yield break;
+            if (!e.MoveNext()) yield break;
             yield return char.ToLower(e.Current);
             while (e.MoveNext())
             {
