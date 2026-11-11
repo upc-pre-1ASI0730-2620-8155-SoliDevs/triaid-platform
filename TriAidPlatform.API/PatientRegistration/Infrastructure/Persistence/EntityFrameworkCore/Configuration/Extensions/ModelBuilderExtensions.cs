@@ -35,6 +35,7 @@ public static class ModelBuilderExtensions
         builder.Entity<TriageEpisode>().Property(e => e.Id).IsRequired().ValueGeneratedOnAdd();
         builder.Entity<TriageEpisode>().Property(e => e.PatientId).IsRequired();
         builder.Entity<TriageEpisode>().Property(e => e.ArrivalTime).IsRequired();
+        builder.Entity<TriageEpisode>().Property(e => e.Vitals).HasColumnName("vitals");
         builder.Entity<TriageEpisode>().Property(e => e.State).IsRequired().HasConversion<int>().HasColumnName("StateId");
         builder.Entity<TriageEpisode>()
             .HasOne<Patient>()

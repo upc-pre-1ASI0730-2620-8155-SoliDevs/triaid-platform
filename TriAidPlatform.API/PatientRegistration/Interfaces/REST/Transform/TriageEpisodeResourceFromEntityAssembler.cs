@@ -9,7 +9,7 @@ public static class TriageEpisodeResourceFromEntityAssembler
 {
     /// <summary>Converts an entity into its REST representation.</summary>
     public static TriageEpisodeResource ToResourceFromEntity(TriageEpisode entity) =>
-        new(entity.Id, entity.PatientId, entity.ArrivalTime, entity.State.ToString());
+        new(entity.Id, entity.PatientId, entity.ArrivalTime, entity.State.ToString(), entity.Vitals);
 
     /// <summary>Converts an open episode payload into a command.</summary>
     public static OpenTriageEpisodeCommand ToCommandFromResource(OpenTriageEpisodeResource resource) =>

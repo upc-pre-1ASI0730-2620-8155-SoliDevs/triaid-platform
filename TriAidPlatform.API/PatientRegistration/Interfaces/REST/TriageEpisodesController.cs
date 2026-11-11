@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TriAidPlatform.API.Shared.Domain.Repositories;
 using TriAidPlatform.API.PatientRegistration.Domain.Model.Aggregates;
 using TriAidPlatform.API.PatientRegistration.Domain.Model.ValueObjects;
 using TriAidPlatform.API.PatientRegistration.Domain.Repositories;
@@ -20,7 +21,8 @@ namespace TriAidPlatform.API.PatientRegistration.Interfaces.REST;
 [Produces("application/json")]
 public class TriageEpisodesController(
     ITriageEpisodeService triageEpisodeService,
-    ITriageEpisodeRepository episodeRepository) : ControllerBase
+    ITriageEpisodeRepository episodeRepository,
+    IUnitOfWork unitOfWork) : ControllerBase
 {
     /// <summary>Lists every triage episode.</summary>
     [HttpGet]
@@ -73,6 +75,33 @@ public class TriageEpisodesController(
     }
 
     /// <summary>Moves a waiting episode to triage.</summary>
+    /**
+     * <summary>
+     *     Applies a full-record episode update from the web client:
+     *     confirmed vital readings and lifecycle flags (ADR-010)
+     * </summary>
+     * <param name="episodeId">Identifier of the episode.</param>
+     * <param name="body">Raw episode record sent by the client.</param>
+     * <param name="cancellationToken">Token to observe for cancellation.</param>
+     * <returns>The updated episode.</returns>
+     * <response code="200">Episode updated.</response>
+     * <response code="404">Episode not found.</response>
+     */
+    [HttpPut("{episodeId:int}")]
+    public async Task<IActionResult> Update(int episodeId,
+        [FromBody] System.Text.Json.JsonElement body, CancellationToken cancellationToken)
+    {
+        var episode = await episodeRepository.FindByIdAsync(episodeId, cancellationToken);
+        if (episode is null) return NotFound(new { error = "episode-not-found" });
+
+        if (body.TryGetProperty("vitals", out var vitals) && vitals.ValueKind == System.Text.Json.JsonValueKind.Object)
+            episode.UpdateVitals(vitals.GetRawText());
+
+        episodeRepository.Update(episode);
+        await unitOfWork.CompleteAsync(cancellationToken);
+        return Ok(TriageEpisodeResourceFromEntityAssembler.ToResourceFromEntity(episode));
+    }
+
     [HttpPut("{episodeId:int}/start-triage")]
     public async Task<ActionResult<TriageEpisodeResource>> StartTriageAsync(
         int episodeId, CancellationToken cancellationToken) =>
