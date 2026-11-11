@@ -13,6 +13,9 @@ public interface ISubscriptionRepository
     Task<IEnumerable<SubscriptionEntity>> ListByInstitutionAsync(string institution,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Lists every subscription across institutions.</summary>
+    Task<IEnumerable<SubscriptionEntity>> ListAsync(CancellationToken cancellationToken = default);
+
     /// <summary>Inserts a subscription.</summary>
     Task AddAsync(SubscriptionEntity subscription, CancellationToken cancellationToken = default);
 

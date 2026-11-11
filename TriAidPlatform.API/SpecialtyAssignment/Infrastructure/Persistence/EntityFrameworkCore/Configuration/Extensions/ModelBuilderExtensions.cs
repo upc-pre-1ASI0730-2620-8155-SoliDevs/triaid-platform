@@ -46,9 +46,23 @@ public static class SpecialtyAssignmentContextConfigurationExtensions
             referral.Property(r => r.State).HasColumnName("state").IsRequired();
             referral.Property(r => r.ChangeReason).HasColumnName("change_reason");
             referral.Property(r => r.ReferredAt).HasColumnName("referred_at").IsRequired();
+            referral.Property(r => r.Symptom).HasColumnName("symptom");
+            referral.Property(r => r.Institution).HasColumnName("institution").IsRequired();
             referral.Property(r => r.CreatedAt).HasColumnName("created_at");
             referral.Property(r => r.UpdatedAt).HasColumnName("updated_at");
             referral.HasIndex(r => r.EpisodeId).IsUnique();
+        });
+
+        builder.Entity<Voucher>(voucher =>
+        {
+            voucher.ToTable("vouchers");
+            voucher.HasKey(v => v.Id);
+            voucher.Property(v => v.Id).IsRequired().ValueGeneratedOnAdd();
+            voucher.Property(v => v.ReferralId).HasColumnName("referral_id").IsRequired();
+            voucher.Property(v => v.QrCode).HasColumnName("qr_code").IsRequired();
+            voucher.Property(v => v.Channel).HasColumnName("channel").IsRequired();
+            voucher.Property(v => v.SentAt).HasColumnName("sent_at");
+            voucher.Property(v => v.Institution).HasColumnName("institution").IsRequired();
         });
 
         return builder;

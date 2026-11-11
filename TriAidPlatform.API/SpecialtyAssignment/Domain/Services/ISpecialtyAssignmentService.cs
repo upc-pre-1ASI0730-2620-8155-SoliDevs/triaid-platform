@@ -46,7 +46,7 @@ public interface ISpecialtyAssignmentService
 
     /// <summary>Retrieves the referral of an episode (US33, US37).</summary>
     Task<Result<Referral, SpecialtyError>> GetByEpisodeAsync(
-        int episodeId, CancellationToken cancellationToken = default);
+        string episodeId, CancellationToken cancellationToken = default);
 
     /// <summary>Lists the specialty catalog.</summary>
     Task<IEnumerable<Specialty>> ListSpecialtiesAsync(

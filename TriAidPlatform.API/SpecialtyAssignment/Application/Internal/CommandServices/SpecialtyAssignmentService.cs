@@ -1,5 +1,3 @@
-using TriAidPlatform.API.PatientRegistration.Domain.Model.Aggregates;
-using TriAidPlatform.API.PatientRegistration.Domain.Repositories;
 using TriAidPlatform.API.Shared.Application.Patterns;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
@@ -19,16 +17,12 @@ namespace TriAidPlatform.API.SpecialtyAssignment.Application.Internal.CommandSer
 /// </summary>
 /// <param name="referralRepository">Repository of the Referral aggregate.</param>
 /// <param name="specialtyRepository">Repository of the Specialty catalog.</param>
-/// <param name="episodeRepository">Repository of the TriageEpisode aggregate (cross-context read).</param>
 /// <param name="classificationRepository">Repository of the Classification aggregate (cross-context read).</param>
-/// <param name="patientRepository">Repository of the Patient aggregate (demographics).</param>
 /// <param name="unitOfWork">Unit of work used to commit the changes.</param>
 public class SpecialtyAssignmentService(
     IReferralRepository referralRepository,
     ISpecialtyRepository specialtyRepository,
-    ITriageEpisodeRepository episodeRepository,
     IClassificationRepository classificationRepository,
-    IPatientRepository patientRepository,
     IUnitOfWork unitOfWork) : ISpecialtyAssignmentService
 {
     /// <inheritdoc />
@@ -56,10 +50,6 @@ public class SpecialtyAssignmentService(
     public async Task<Result<Referral, SpecialtyError>> ReferAsync(
         ReferEpisodeCommand command, string symptom, CancellationToken cancellationToken = default)
     {
-        var episode = await episodeRepository.FindByIdAsync(command.EpisodeId, cancellationToken);
-        if (episode is null)
-            return Failure(ESpecialtyError.NotFound, $"Episode with id {command.EpisodeId} was not found.");
-
         if (await referralRepository.FindByEpisodeIdAsync(command.EpisodeId, cancellationToken) is not null)
             return Failure(ESpecialtyError.Conflict, $"Episode with id {command.EpisodeId} is already referred.");
 
@@ -75,17 +65,12 @@ public class SpecialtyAssignmentService(
             return Failure(ESpecialtyError.Conflict,
                 $"Specialty {specialty.Name} is inactive and cannot receive patients.");
 
-        var patient = await patientRepository.FindByIdAsync(episode.PatientId, cancellationToken);
         var suggestion = SpecialtyRules.Suggest(symptom, (int)classification.FinalLevel);
         if (suggestion.HasSuggestion &&
             !string.Equals(suggestion.SpecialtyKey, specialty.Key, StringComparison.OrdinalIgnoreCase) &&
             suggestion.Rule == "symptom")
             return Failure(ESpecialtyError.Conflict,
                 $"The clinical rules suggest {suggestion.SpecialtyKey} for the registered symptom.");
-
-        if (!specialty.Admits(patient is null ? null : AgeOf(patient), patient?.Sex.ToString()))
-            return Failure(ESpecialtyError.Conflict,
-                $"Specialty {specialty.Name} does not admit the patient demographic profile.");
 
         var waiting = await referralRepository.CountWaitingBySpecialtyAsync(command.SpecialtyId, cancellationToken);
         var referral = new Referral(command, specialty.Room, waiting + 1);
@@ -126,7 +111,7 @@ public class SpecialtyAssignmentService(
 
     /// <inheritdoc />
     public async Task<Result<Referral, SpecialtyError>> GetByEpisodeAsync(
-        int episodeId, CancellationToken cancellationToken = default)
+        string episodeId, CancellationToken cancellationToken = default)
     {
         var referral = await referralRepository.FindByEpisodeIdAsync(episodeId, cancellationToken);
         return referral is null
@@ -138,9 +123,6 @@ public class SpecialtyAssignmentService(
     public Task<IEnumerable<Specialty>> ListSpecialtiesAsync(
         bool onlyActive = false, CancellationToken cancellationToken = default) =>
         specialtyRepository.ListAsync(cancellationToken);
-
-    private static int? AgeOf(Patient patient) =>
-        (int?)((DateTime.UtcNow.Date - patient.BirthDate.ToDateTime(TimeOnly.MinValue)).TotalDays / 365.25);
 
     private static Result<Referral, SpecialtyError> Failure(ESpecialtyError type, string message) =>
         new Result<Referral, SpecialtyError>.Failure(new SpecialtyError(type, message));

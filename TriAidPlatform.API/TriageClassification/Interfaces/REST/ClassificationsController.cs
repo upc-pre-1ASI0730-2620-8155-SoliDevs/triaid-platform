@@ -29,8 +29,8 @@ public class ClassificationsController(
     /// <param name="resource">Vital signs captured for the episode.</param>
     /// <param name="cancellationToken">Token to observe for cancellation.</param>
     /// <returns>The created classification with the suggested level.</returns>
-    [HttpPost("episode/{episodeId:int}")]
-    public async Task<ActionResult<ClassificationResource>> Suggest(int episodeId,
+    [HttpPost("episode/{episodeId}")]
+    public async Task<ActionResult<ClassificationResource>> Suggest(string episodeId,
         [FromBody] SuggestClassificationResource resource, CancellationToken cancellationToken)
     {
         var readings = SuggestCommandFromResourceAssembler.ToReadingsMap(resource);
@@ -79,14 +79,32 @@ public class ClassificationsController(
     /// <param name="episodeId">Identifier of the episode.</param>
     /// <param name="cancellationToken">Token to observe for cancellation.</param>
     /// <returns>The classification, or 404 when the episode is not classified.</returns>
-    [HttpGet("episode/{episodeId:int}")]
-    public async Task<ActionResult<ClassificationResource>> GetByEpisode(int episodeId,
+    [HttpGet("episode/{episodeId}")]
+    public async Task<ActionResult<ClassificationResource>> GetByEpisode(string episodeId,
         CancellationToken cancellationToken)
     {
         var classification = await queryService.GetByEpisodeAsync(episodeId, cancellationToken);
         return classification is null
             ? NotFound(new { message = $"Episode with id {episodeId} is not classified yet." })
             : Ok(ClassificationResourceFromEntityAssembler.ToResourceFromEntity(classification));
+    }
+
+    /**
+     * <summary>
+     *     Gets the classification of an episode through the query-string
+     *     style used by the web client (ADR-010 backend swap contract)
+     * </summary>
+     * <param name="episodeId">The episode identifier taken from the query</param>
+     * <param name="cancellationToken">The cancellation token</param>
+     * <returns>The classification of the episode</returns>
+     * <response code="200">Classification found</response>
+     * <response code="404">Episode is not classified yet</response>
+     */
+    [HttpGet]
+    public async Task<ActionResult<ClassificationResource>> GetByEpisodeQuery(
+        [FromQuery(Name = "episodeId")] string episodeId, CancellationToken cancellationToken)
+    {
+        return await GetByEpisode(episodeId, cancellationToken);
     }
 
     private ActionResult<ClassificationResource> ToErrorResponse(ClassificationError error) => error.Type switch

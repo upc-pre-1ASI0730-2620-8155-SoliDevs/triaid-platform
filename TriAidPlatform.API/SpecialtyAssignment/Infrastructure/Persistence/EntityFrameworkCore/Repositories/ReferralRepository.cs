@@ -11,7 +11,7 @@ namespace TriAidPlatform.API.SpecialtyAssignment.Infrastructure.Persistence.Enti
 public class ReferralRepository(AppDbContext context) : BaseRepository<Referral>(context), IReferralRepository
 {
     /// <inheritdoc />
-    public async Task<Referral?> FindByEpisodeIdAsync(int episodeId, CancellationToken cancellationToken = default) =>
+    public async Task<Referral?> FindByEpisodeIdAsync(string episodeId, CancellationToken cancellationToken = default) =>
         await Context.Set<Referral>()
             .FirstOrDefaultAsync(r => r.EpisodeId == episodeId, cancellationToken);
 

@@ -6,4 +6,4 @@ namespace TriAidPlatform.API.TriageClassification.Domain.Model.Events;
 /// <param name="ClassificationId">Identifier of the classification.</param>
 /// <param name="EpisodeId">Identifier of the episode.</param>
 /// <param name="FinalLevel">Level that rules the attention.</param>
-public record ClassificationConfirmedEvent(int ClassificationId, int EpisodeId, ETriageLevel FinalLevel);
+public record ClassificationConfirmedEvent(int ClassificationId, string EpisodeId, ETriageLevel FinalLevel);

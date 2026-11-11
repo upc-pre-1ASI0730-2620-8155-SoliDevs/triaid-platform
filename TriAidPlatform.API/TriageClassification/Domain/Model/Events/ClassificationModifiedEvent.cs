@@ -7,4 +7,4 @@ namespace TriAidPlatform.API.TriageClassification.Domain.Model.Events;
 /// <param name="EpisodeId">Identifier of the episode.</param>
 /// <param name="NewLevel">Clinically justified level.</param>
 /// <param name="Justification">Written reason of the change.</param>
-public record ClassificationModifiedEvent(int ClassificationId, int EpisodeId, ETriageLevel NewLevel, string Justification);
+public record ClassificationModifiedEvent(int ClassificationId, string EpisodeId, ETriageLevel NewLevel, string Justification);
