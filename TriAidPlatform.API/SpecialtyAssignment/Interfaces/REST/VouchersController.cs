@@ -48,8 +48,16 @@ public class VouchersController(IVoucherRepository voucherRepository, IUnitOfWor
      */
     [HttpPost]
     [EndpointSummary("Create a voucher")]
-    public async Task<IActionResult> Create([FromBody] Voucher voucher, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] SaveVoucherResource resource, CancellationToken cancellationToken)
     {
+        var voucher = new Voucher
+        {
+            ReferralId = resource.ReferralId,
+            QrCode = resource.QrCode,
+            Channel = resource.Channel,
+            SentAt = resource.SentAt,
+            Institution = resource.Institution
+        };
         await voucherRepository.AddAsync(voucher, cancellationToken);
         await unitOfWork.CompleteAsync(cancellationToken);
         return Ok(voucher);

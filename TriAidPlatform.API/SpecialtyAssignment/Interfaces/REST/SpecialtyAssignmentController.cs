@@ -136,7 +136,7 @@ public class SpecialtyAssignmentController(
      */
     [HttpPost("referrals")]
     public async Task<ActionResult<ReferralResource>> CreateReferral(
-        [FromBody] ReferralResource resource, CancellationToken cancellationToken)
+        [FromBody] SaveReferralResource resource, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(resource.Institution))
             return BadRequest(new { message = "The institution is required." });

@@ -27,3 +27,21 @@ public class Voucher
     /// <summary>Institution the voucher belongs to.</summary>
     public string Institution { get; set; } = string.Empty;
 }
+
+/**
+ * <summary>
+ *     Voucher body used by the web client save flows, tolerant of a
+ *     null identifier on creation (ADR-010).
+ * </summary>
+ * <param name="ReferralId">Identifier of the referral the voucher proves.</param>
+ * <param name="QrCode">QR payload with the referral summary.</param>
+ * <param name="Channel">Delivery channel of the voucher.</param>
+ * <param name="SentAt">UTC timestamp when the voucher was sent.</param>
+ * <param name="Institution">Institution the voucher belongs to.</param>
+ */
+public record SaveVoucherResource(
+    int ReferralId,
+    string QrCode,
+    string Channel,
+    DateTime? SentAt,
+    string Institution);

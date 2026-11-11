@@ -129,7 +129,7 @@ public class ClassificationsController(
      */
     [HttpPost]
     public async Task<ActionResult<ClassificationResource>> CreateRecord(
-        [FromBody] ClassificationResource resource, CancellationToken cancellationToken)
+        [FromBody] SaveClassificationResource resource, CancellationToken cancellationToken)
     {
         if (await classificationRepository.FindByEpisodeIdAsync(resource.EpisodeId, cancellationToken) is not null)
             return Conflict(new { message = $"Episode with id {resource.EpisodeId} is already classified." });
@@ -163,7 +163,7 @@ public class ClassificationsController(
      */
     [HttpPut("{id:int}")]
     public async Task<ActionResult<ClassificationResource>> UpdateRecord(int id,
-        [FromBody] ClassificationResource resource, CancellationToken cancellationToken)
+        [FromBody] SaveClassificationResource resource, CancellationToken cancellationToken)
     {
         var classification = await classificationRepository.FindByIdAsync(id, cancellationToken);
         if (classification is null)
