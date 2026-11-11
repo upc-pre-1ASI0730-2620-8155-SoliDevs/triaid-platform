@@ -120,7 +120,8 @@ public static class UserResourceFromEntityAssembler
      */
     public static UserResource ToResourceFromEntity(User entity) =>
         new(entity.Id, entity.Username, entity.Names, entity.Surnames,
-            entity.Email, entity.Role, entity.Unit, entity.Shift, entity.Institution);
+            entity.Email, entity.Role, entity.Unit, entity.Shift, entity.Institution,
+            entity.Password);
 }
 
 /**

@@ -46,7 +46,8 @@ public record StaffResource(
     string? Email,
     string? Role,
     string? Unit,
-    string? Shift);
+    string? Shift,
+    string? Institution);
 
 /**
  * <summary>

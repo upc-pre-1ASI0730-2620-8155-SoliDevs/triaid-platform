@@ -38,6 +38,13 @@ public partial class User : AggregateRoot
     [System.Text.Json.Serialization.JsonIgnore] public string PasswordHash { get; private set; }
 
     /// <summary>
+    ///     Plain password kept in sync with the hash so the web client
+    ///     can validate credentials against the staff listing (ADR-010
+    ///     backend swap contract).
+    /// </summary>
+    public string Password { get; private set; } = string.Empty;
+
+    /// <summary>
     ///     Given names of the account holder.
     /// </summary>
     public string Names { get; private set; } = string.Empty;
@@ -102,6 +109,20 @@ public partial class User : AggregateRoot
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
         PasswordHash = passwordHash;
+        return this;
+    }
+
+    /**
+     * <summary>
+     *     Store the plain password alongside the hash
+     * </summary>
+     * <param name="password">The plain password</param>
+     * <returns>The updated user</returns>
+     */
+    public User SetPlainPassword(string password)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(password);
+        Password = password;
         return this;
     }
 

@@ -61,6 +61,7 @@ public class UserCommandService(
 
         var hashedPassword = hashingService.HashPassword(command.Password);
         var user = new User(command.Username, hashedPassword);
+        user.SetPlainPassword(command.Password);
 
         await userRepository.AddAsync(user, cancellationToken);
         await unitOfWork.CompleteAsync(cancellationToken);
@@ -92,6 +93,7 @@ public class UserCommandService(
         var admin = new User(command.Username, hashedPassword)
             .UpdateProfile(command.Names, command.Surnames, command.Email ?? string.Empty)
             .JoinInstitution(command.Institution.Trim(), "Triage Administrator");
+        admin.SetPlainPassword(command.Password);
 
         // Note: the trial subscription is started by the Subscription
         // bounded context, which consumes this event through its ACL.
@@ -133,6 +135,42 @@ public class UserCommandService(
                 string.IsNullOrWhiteSpace(command.Role) ? "Triage Nurse" : command.Role);
         staff.UpdateAssignment(staff.Role, command.Unit ?? string.Empty,
             string.IsNullOrWhiteSpace(command.Shift) ? string.Empty : command.Shift);
+        staff.SetPlainPassword(string.IsNullOrWhiteSpace(command.Password) ? "triaid123" : command.Password);
+
+        await userRepository.AddAsync(staff, cancellationToken);
+        await unitOfWork.CompleteAsync(cancellationToken);
+        return Result<User>.Success(staff);
+    }
+
+    /**
+     * <summary>
+     *     Handle create staff command without an authenticated caller:
+     *     the web client registers staff before any session exists, so
+     *     the institution is resolved from the request itself (ADR-010)
+     * </summary>
+     * <param name="command">The create staff command</param>
+     * <param name="institution">The tenant the account belongs to</param>
+     * <param name="cancellationToken">The cancellation token</param>
+     * <returns>The created staff user</returns>
+     */
+    public async Task<Result<User>> Handle(CreateStaffCommand command, string institution,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(institution))
+            return Result<User>.Failure(IamErrors.NotEnoughPermissions, IamError.NotEnoughPermissions);
+
+        if (await userRepository.ExistsByUsernameAsync(command.Username, cancellationToken))
+            return Result<User>.Failure(IamErrors.UsernameAlreadyTaken, IamError.UsernameAlreadyTaken);
+
+        var hashedPassword = hashingService.HashPassword(
+            string.IsNullOrWhiteSpace(command.Password) ? "triaid123" : command.Password);
+        var staff = new User(command.Username, hashedPassword)
+            .UpdateProfile(command.Names, command.Surnames, command.Email ?? string.Empty)
+            .JoinInstitution(institution.Trim(),
+                string.IsNullOrWhiteSpace(command.Role) ? "Triage Nurse" : command.Role);
+        staff.UpdateAssignment(staff.Role, command.Unit ?? string.Empty,
+            string.IsNullOrWhiteSpace(command.Shift) ? string.Empty : command.Shift);
+        staff.SetPlainPassword(string.IsNullOrWhiteSpace(command.Password) ? "triaid123" : command.Password);
 
         await userRepository.AddAsync(staff, cancellationToken);
         await unitOfWork.CompleteAsync(cancellationToken);
@@ -176,6 +214,45 @@ public class UserCommandService(
                 string.IsNullOrWhiteSpace(command.Role) ? target.Role : command.Role,
                 command.Unit ?? target.Unit,
                 command.Shift ?? target.Shift);
+
+        if (!string.IsNullOrWhiteSpace(command.Password))
+            target.SetPlainPassword(command.Password);
+
+        await unitOfWork.CompleteAsync(cancellationToken);
+        return Result<User>.Success(target);
+    }
+
+    /**
+     * <summary>
+     *     Handle update user command without an authenticated caller:
+     *     profile and assignment fields are applied directly to the
+     *     target account (ADR-010)
+     * </summary>
+     * <param name="command">The update user command</param>
+     * <param name="cancellationToken">The cancellation token</param>
+     * <returns>The updated user</returns>
+     */
+    public async Task<Result<User>> Handle(UpdateUserCommand command, CancellationToken cancellationToken)
+    {
+        var target = await userRepository.FindByIdAsync(command.Id, cancellationToken);
+        if (target is null)
+            return Result<User>.Failure(IamErrors.UserNotFound, IamError.UserNotFound);
+
+        var names = string.IsNullOrWhiteSpace(command.Names) ? target.Names : command.Names;
+        var surnames = command.Surnames is null ? target.Surnames : command.Surnames;
+        var email = command.Email is null ? target.Email : command.Email;
+        target.UpdateProfile(names, surnames, email);
+
+        if (!string.IsNullOrWhiteSpace(command.Password))
+            target.UpdatePasswordHash(hashingService.HashPassword(command.Password));
+
+        target.UpdateAssignment(
+            string.IsNullOrWhiteSpace(command.Role) ? target.Role : command.Role,
+            command.Unit ?? target.Unit,
+            command.Shift ?? target.Shift);
+
+        if (!string.IsNullOrWhiteSpace(command.Password))
+            target.SetPlainPassword(command.Password);
 
         await unitOfWork.CompleteAsync(cancellationToken);
         return Result<User>.Success(target);
