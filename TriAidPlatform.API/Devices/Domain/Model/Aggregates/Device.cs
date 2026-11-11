@@ -37,6 +37,7 @@ public class Device
         Type = type;
         Model = model.Trim();
         IsActive = true;
+        RegisteredAt = DateTime.UtcNow;
     }
 
     /// <summary>
