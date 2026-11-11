@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TriAidPlatform.API.Alerting.Domain.Model.Aggregates;
+using TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
 
 namespace TriAidPlatform.API.Alerting.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
@@ -23,21 +24,14 @@ public static class AlertingContextConfigurationExtensions
             alert.Property(a => a.Id).IsRequired().ValueGeneratedOnAdd();
             
             
-            alert.OwnsOne(a => a.ClinicId, c =>
-            {
-                c.WithOwner().HasForeignKey("Id");
-                c.Property(p => p.Value).HasColumnName("clinic_id").IsRequired();
-            });
+            alert.Property(a => a.ClinicId).HasConversion(
+                c => c.Value, v => new ClinicId(v)).HasColumnName("clinic_id").IsRequired();
 
-            alert.OwnsOne(a => a.Status, s =>
-            {
-                s.WithOwner().HasForeignKey("Id");
-                s.Property(p => p.StatusValue).HasColumnName("status").IsRequired();
-            });
+            alert.Property(a => a.Status).HasConversion(
+                s => s.StatusValue, v => new AlertStatus(v)).HasColumnName("status").IsRequired();
 
             alert.OwnsOne(a => a.Metric, m =>
             {
-                m.WithOwner().HasForeignKey("Id");
                 m.Property(p => p.SignName).HasColumnName("metric_sign_name").IsRequired();
                 m.Property(p => p.MeasuredValue).HasColumnName("metric_measured_value").IsRequired();
                 m.Property(p => p.SafeRange).HasColumnName("metric_safe_range").IsRequired();
