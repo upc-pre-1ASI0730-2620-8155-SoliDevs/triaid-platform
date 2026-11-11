@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TriAidPlatform.API.SpecialtyAssignment.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.TriageClassification.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.Alerting.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using TriAidPlatform.API.Devices.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Extensions;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
@@ -11,7 +12,6 @@ namespace TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCo
 
 public class AppDbContext(DbContextOptions options) : DbContext(options)
 {
-   
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
         builder.AddInterceptors(new AuditableEntityInterceptor());
@@ -33,6 +33,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         builder.ApplyAlertingConfiguration();
         builder.ApplyTriageClassificationConfiguration();
         builder.ApplySpecialtyAssignmentConfiguration();
+        builder.ApplyDevicesConfiguration();
         builder.UseSnakeCaseNamingConvention();
     }
 
