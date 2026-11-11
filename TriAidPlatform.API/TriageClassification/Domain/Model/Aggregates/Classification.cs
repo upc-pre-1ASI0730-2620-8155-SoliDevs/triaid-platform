@@ -40,6 +40,12 @@ public class Classification : IAuditableEntity
     /// <summary>Metrics reported as missing when the suggestion was partial.</summary>
     public string? MissingMetrics { get; private set; }
 
+    /// <summary>Staff member who overrode the suggested level (web client audit).</summary>
+    public string? OverriddenBy { get; private set; }
+
+    /// <summary>Institution the classification belongs to (web client tenancy).</summary>
+    public string Institution { get; private set; } = string.Empty;
+
     /// <summary>Creation timestamp (auditable).</summary>
     public DateTimeOffset? CreatedAt { get; set; }
 
@@ -89,6 +95,34 @@ public class Classification : IAuditableEntity
     /// <param name="newLevel">Clinically justified level.</param>
     /// <param name="justification">Mandatory written reason.</param>
     /// <exception cref="InvalidOperationException">Thrown without justification or when already decided.</exception>
+    /**
+     * <summary>
+     *     Applies a full classification record from the web client:
+     *     levels, state, justification and audit fields (ADR-010)
+     * </summary>
+     * <param name="suggestedLevel">Level suggested by the engine.</param>
+     * <param name="finalLevel">Level in force reported by the client.</param>
+     * <param name="state">Lifecycle state reported by the client.</param>
+     * <param name="confirmedAt">Client-reported confirmation timestamp.</param>
+     * <param name="justification">Clinical justification of a change.</param>
+     * <param name="overriddenBy">Staff member who overrode the level.</param>
+     * <param name="institution">Institution the record belongs to.</param>
+     * <returns>The updated classification.</returns>
+     */
+    public Classification ApplyRecord(ETriageLevel suggestedLevel, ETriageLevel finalLevel,
+        EClassificationState state, DateTime? confirmedAt, string? justification,
+        string? overriddenBy, string institution)
+    {
+        SuggestedLevel = suggestedLevel;
+        FinalLevel = finalLevel;
+        State = state;
+        ConfirmedAt = confirmedAt ?? ConfirmedAt;
+        Justification = justification ?? Justification;
+        OverriddenBy = overriddenBy;
+        Institution = institution;
+        return this;
+    }
+
     public void Modify(ETriageLevel newLevel, string justification)
     {
         if (IsDecided())

@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using TriAidPlatform.API.Shared.Domain.Repositories;
 using TriAidPlatform.API.TriageClassification.Application.Internal.CommandServices;
 using TriAidPlatform.API.TriageClassification.Application.Internal.QueryServices;
+using TriAidPlatform.API.TriageClassification.Domain.Model.Aggregates;
 using TriAidPlatform.API.TriageClassification.Domain.Model.Commands;
+using TriAidPlatform.API.TriageClassification.Domain.Model.Queries;
 using TriAidPlatform.API.TriageClassification.Domain.Model.ValueObjects;
+using TriAidPlatform.API.TriageClassification.Domain.Repositories;
 using TriAidPlatform.API.TriageClassification.Domain.Services;
 using TriAidPlatform.API.TriageClassification.Interfaces.REST.Resources;
 using TriAidPlatform.API.TriageClassification.Interfaces.REST.Transform;
@@ -17,12 +21,16 @@ namespace TriAidPlatform.API.TriageClassification.Interfaces.REST;
 /// </summary>
 /// <param name="classificationService">Write use cases of the bounded context.</param>
 /// <param name="queryService">Read use cases of the bounded context.</param>
+/// <param name="classificationRepository">Repository of the Classification aggregate.</param>
+/// <param name="unitOfWork">Unit of work used to commit the changes.</param>
 [ApiController]
 [Route("triage-classifications")]
 [Produces("application/json")]
 public class ClassificationsController(
     IClassificationService classificationService,
-    ClassificationQueryService queryService) : ControllerBase
+    ClassificationQueryService queryService,
+    IClassificationRepository classificationRepository,
+    IUnitOfWork unitOfWork) : ControllerBase
 {
     /// <summary>Records the NT-158 suggestion for an episode (US19).</summary>
     /// <param name="episodeId">Identifier of the episode.</param>
@@ -105,6 +113,69 @@ public class ClassificationsController(
         [FromQuery(Name = "episodeId")] string episodeId, CancellationToken cancellationToken)
     {
         return await GetByEpisode(episodeId, cancellationToken);
+    }
+
+    /**
+     * <summary>
+     *     Creates a classification record from the web client. The
+     *     client reports the computed level and state; the NT-158
+     *     engine endpoint above stays for API-only clients (ADR-010)
+     * </summary>
+     * <param name="resource">The classification record sent by the client.</param>
+     * <param name="cancellationToken">Token to observe for cancellation.</param>
+     * <returns>The created classification.</returns>
+     * <response code="200">Classification created.</response>
+     * <response code="409">Episode already classified.</response>
+     */
+    [HttpPost]
+    public async Task<ActionResult<ClassificationResource>> CreateRecord(
+        [FromBody] ClassificationResource resource, CancellationToken cancellationToken)
+    {
+        if (await classificationRepository.FindByEpisodeIdAsync(resource.EpisodeId, cancellationToken) is not null)
+            return Conflict(new { message = $"Episode with id {resource.EpisodeId} is already classified." });
+
+        var classification = new Classification(new SuggestClassificationCommand(
+                resource.EpisodeId,
+                ClassificationResourceFromEntityAssembler.FromLevelKey(resource.SuggestedLevel),
+                string.IsNullOrEmpty(resource.MissingMetrics) ? [] : [resource.MissingMetrics]))
+            .ApplyRecord(
+                ClassificationResourceFromEntityAssembler.FromLevelKey(resource.SuggestedLevel),
+                ClassificationResourceFromEntityAssembler.FromLevelKey(resource.Level),
+                ClassificationResourceFromEntityAssembler.FromStateKey(resource.State),
+                resource.ConfirmedAt, resource.Justification, resource.OverriddenBy, resource.Institution);
+        await classificationRepository.AddAsync(classification, cancellationToken);
+        await unitOfWork.CompleteAsync(cancellationToken);
+        return Ok(ClassificationResourceFromEntityAssembler.ToResourceFromEntity(classification));
+    }
+
+    /**
+     * <summary>
+     *     Applies a full classification record update from the web
+     *     client: level in force, state, justification and audit
+     *     fields (ADR-010)
+     * </summary>
+     * <param name="id">Identifier of the classification.</param>
+     * <param name="resource">The classification record sent by the client.</param>
+     * <param name="cancellationToken">Token to observe for cancellation.</param>
+     * <returns>The updated classification.</returns>
+     * <response code="200">Classification updated.</response>
+     * <response code="404">Classification not found.</response>
+     */
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<ClassificationResource>> UpdateRecord(int id,
+        [FromBody] ClassificationResource resource, CancellationToken cancellationToken)
+    {
+        var classification = await classificationRepository.FindByIdAsync(id, cancellationToken);
+        if (classification is null)
+            return NotFound(new { message = $"Classification with id {id} was not found." });
+
+        classification.ApplyRecord(
+            ClassificationResourceFromEntityAssembler.FromLevelKey(resource.SuggestedLevel),
+            ClassificationResourceFromEntityAssembler.FromLevelKey(resource.Level),
+            ClassificationResourceFromEntityAssembler.FromStateKey(resource.State),
+            resource.ConfirmedAt, resource.Justification, resource.OverriddenBy, resource.Institution);
+        await unitOfWork.CompleteAsync(cancellationToken);
+        return Ok(ClassificationResourceFromEntityAssembler.ToResourceFromEntity(classification));
     }
 
     private ActionResult<ClassificationResource> ToErrorResponse(ClassificationError error) => error.Type switch
