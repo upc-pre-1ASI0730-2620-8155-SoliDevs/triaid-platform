@@ -23,22 +23,24 @@ public static class AlertingContextConfigurationExtensions
             alert.Property(a => a.Id).IsRequired().ValueGeneratedOnAdd();
             
             
-            alert.OwnsOne(a => a.ClinicId, c => 
+            alert.OwnsOne(a => a.ClinicId, c =>
             {
+                c.WithOwner().HasForeignKey("Id");
                 c.Property(p => p.Value).HasColumnName("clinic_id").IsRequired();
             });
 
-            
             alert.OwnsOne(a => a.Status, s =>
             {
+                s.WithOwner().HasForeignKey("Id");
                 s.Property(p => p.StatusValue).HasColumnName("status").IsRequired();
             });
-            
-            alert.OwnsOne(a => a.Metric, m => 
+
+            alert.OwnsOne(a => a.Metric, m =>
             {
-                m.Property(p => p.SignName).IsRequired();
-                m.Property(p => p.MeasuredValue).IsRequired();
-                m.Property(p => p.SafeRange).IsRequired();
+                m.WithOwner().HasForeignKey("Id");
+                m.Property(p => p.SignName).HasColumnName("metric_sign_name").IsRequired();
+                m.Property(p => p.MeasuredValue).HasColumnName("metric_measured_value").IsRequired();
+                m.Property(p => p.SafeRange).HasColumnName("metric_safe_range").IsRequired();
             });
         });
 
