@@ -30,7 +30,6 @@ using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.R
 using TriAidPlatform.API.SpecialtyAssignment.Application.Internal.CommandServices;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Repositories;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Services;
-using TriAidPlatform.API.SpecialtyAssignment.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.SpecialtyAssignment.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using TriAidPlatform.API.Subscription.Application.Internal.CommandServices;
 using TriAidPlatform.API.Subscription.Application.Internal.QueryServices;
@@ -42,7 +41,6 @@ using TriAidPlatform.API.TriageClassification.Application.Internal.CommandServic
 using TriAidPlatform.API.TriageClassification.Application.Internal.QueryServices;
 using TriAidPlatform.API.TriageClassification.Domain.Repositories;
 using TriAidPlatform.API.TriageClassification.Domain.Services;
-using TriAidPlatform.API.TriageClassification.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.TriageClassification.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
