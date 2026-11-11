@@ -6,4 +6,4 @@ namespace TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Queries;
 /// <param name="TriageLevel">Confirmed triage level (1-5).</param>
 /// <param name="PatientAge">Patient age in years.</param>
 /// <param name="PatientSex">Patient sex code (F/M).</param>
-public record SuggestSpecialtyQuery(int EpisodeId, string Symptom, int? TriageLevel, int? PatientAge, string? PatientSex);
+public record SuggestSpecialtyQuery(string EpisodeId, string Symptom, int? TriageLevel, int? PatientAge, string? PatientSex);
