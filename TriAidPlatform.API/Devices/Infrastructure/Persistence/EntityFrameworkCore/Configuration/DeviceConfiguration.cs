@@ -15,7 +15,7 @@ public class DeviceConfiguration : IEntityTypeConfiguration<Device>
             .ValueGeneratedOnAdd();
 
         builder.Property(d => d.SerialNumber)
-            .IsRequired()
+            .IsRequired(false)
             .HasMaxLength(100);
 
         builder.HasIndex(d => d.SerialNumber)
