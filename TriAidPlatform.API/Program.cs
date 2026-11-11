@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using TriAidPlatform.API.Iam.Application.Acl;
@@ -95,7 +97,14 @@ builder.Services.AddScoped<ISpecialtyAssignmentService, SpecialtyAssignmentServi
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options =>
-    options.Conventions.Add(new KebabCaseRouteNamingConvention()));
+    {
+        options.Conventions.Insert(0, new RoutePrefixConvention("api/v1"));
+        options.Conventions.Add(new KebabCaseRouteNamingConvention());
+    })
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+    });
 
 // OpenAPI / Scalar documentation (no Swagger UI)
 builder.Services.AddOpenApi(options =>
@@ -119,8 +128,16 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-// Catalog seed (idempotent, runs after the host is ready)
+// Create the database schema if it does not exist yet
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.EnsureCreated();
+}
+
+// Catalog seeds (idempotent, run after the host is ready)
 await CatalogSeed.SeedAsync(app.Services);
+await SpecialtySeed.SeedAsync(app.Services);
 
 app.UseHttpsRedirection();
 app.UseCors();
