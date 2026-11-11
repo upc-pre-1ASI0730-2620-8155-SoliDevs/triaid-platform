@@ -54,7 +54,12 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
             .Property(p => p.Features)
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>());
+                v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>())
+            .Metadata.SetValueComparer(
+                new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<string>>(
+                    (a, b) => a!.SequenceEqual(b!),
+                    list => list.Aggregate(0, (hash, item) => HashCode.Combine(hash, item)),
+                    list => list.ToList()));
     }
 }
 

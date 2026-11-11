@@ -30,12 +30,10 @@ public static class AlertingContextConfigurationExtensions
             alert.Property(a => a.Status).HasConversion(
                 s => s.StatusValue, v => new AlertStatus(v)).HasColumnName("status").IsRequired();
 
-            alert.OwnsOne(a => a.Metric, m =>
-            {
-                m.Property(p => p.SignName).HasColumnName("metric_sign_name").IsRequired();
-                m.Property(p => p.MeasuredValue).HasColumnName("metric_measured_value").IsRequired();
-                m.Property(p => p.SafeRange).HasColumnName("metric_safe_range").IsRequired();
-            });
+            alert.Property(a => a.Metric).HasConversion(
+                m => System.Text.Json.JsonSerializer.Serialize(m, (System.Text.Json.JsonSerializerOptions?)null),
+                v => System.Text.Json.JsonSerializer.Deserialize<AlertMetric>(v, (System.Text.Json.JsonSerializerOptions?)null)!)
+                .HasColumnName("metric").IsRequired();
         });
 
         return builder;
