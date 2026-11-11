@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Humanizer;
 using Microsoft.EntityFrameworkCore;
 
-namespace TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Extensions;
+namespace TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 
 public static class ModelBuilderExtensions
 {
@@ -9,29 +9,44 @@ public static class ModelBuilderExtensions
     {
         foreach (var entity in builder.Model.GetEntityTypes())
         {
-            //Replace all table names
-            entity.SetTableName(entity.GetTableName()!.ToSnakeCase());
-            //Replace column names from tables
+            // Table name: fall back to the CLR type name when the table
+            // has not been explicitly configured yet.
+            var tableName = entity.GetTableName();
+            entity.SetTableName(string.IsNullOrEmpty(tableName)
+                ? entity.ClrType.Name.ToSnakeCase()
+                : tableName.ToSnakeCase());
+
+            // Column names
             foreach (var property in entity.GetProperties())
             {
-                property.SetColumnName(property.GetColumnName()!.ToSnakeCase());
+                var columnName = property.GetColumnName();
+                if (!string.IsNullOrEmpty(columnName))
+                    property.SetColumnName(columnName.ToSnakeCase());
             }
-            //Replace key names
+
+            // Key names
             foreach (var key in entity.GetKeys())
             {
-                key.SetName(key.GetName()!.ToSnakeCase());
+                var keyName = key.GetName();
+                if (!string.IsNullOrEmpty(keyName))
+                    key.SetName(keyName.ToSnakeCase());
             }
-            //Replace foreign key names
+
+            // Foreign key constraint names
             foreach (var foreignKey in entity.GetForeignKeys())
             {
-                foreignKey.SetConstraintName(foreignKey.GetConstraintName()!.ToSnakeCase());
+                var constraintName = foreignKey.GetConstraintName();
+                if (!string.IsNullOrEmpty(constraintName))
+                    foreignKey.SetConstraintName(constraintName.ToSnakeCase());
             }
-            //Replace index names
+
+            // Index names
             foreach (var index in entity.GetIndexes())
             {
-                index.SetDatabaseName(index.GetDatabaseName()!.ToSnakeCase());
+                var indexName = index.GetDatabaseName();
+                if (!string.IsNullOrEmpty(indexName))
+                    index.SetDatabaseName(indexName.ToSnakeCase());
             }
-            
         }
     }
 }
