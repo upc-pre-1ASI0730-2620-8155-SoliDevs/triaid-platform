@@ -93,6 +93,7 @@ builder.Services.AddScoped<ClassificationQueryService>();
 // Specialty Assignment bounded context
 builder.Services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
 builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
+builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<ISpecialtyAssignmentService, SpecialtyAssignmentService>();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
