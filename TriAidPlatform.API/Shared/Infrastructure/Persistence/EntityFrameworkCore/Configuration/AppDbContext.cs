@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using TriAidPlatform.API.SpecialtyAssignment.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.TriageClassification.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.Alerting.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
@@ -16,6 +17,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         builder.AddInterceptors(new AuditableEntityInterceptor());
         base.OnConfiguring(builder);   
     }
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         // The MySQL connector stores DateOnly as datetime on this setup.
@@ -24,18 +26,19 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         configurationBuilder.Properties<DateOnly?>()
             .HaveConversion<NullableDateOnlyConverter>();
     }
-
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
         builder.ApplyPatientRegistrationConfiguration();
         builder.ApplyAlertingConfiguration();
         builder.ApplyTriageClassificationConfiguration();
+        builder.ApplySpecialtyAssignmentConfiguration();
         builder.UseSnakeCaseNamingConvention();
     }
 
    
 }
+
 /// <summary>Converts DateOnly properties to DateTime for the MySQL provider.</summary>
 public class DateOnlyConverter : ValueConverter<DateOnly, DateTime>
 {
