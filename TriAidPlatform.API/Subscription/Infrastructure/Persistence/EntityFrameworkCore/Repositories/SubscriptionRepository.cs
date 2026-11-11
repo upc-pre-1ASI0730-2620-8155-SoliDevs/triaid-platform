@@ -21,6 +21,9 @@ public class SubscriptionRepository(AppDbContext context) : ISubscriptionReposit
         return list;
     }
 
+    public async Task<IEnumerable<SubscriptionEntity>> ListAsync(CancellationToken cancellationToken = default) =>
+        await context.Set<SubscriptionEntity>().ToListAsync(cancellationToken);
+
     public async Task AddAsync(SubscriptionEntity subscription, CancellationToken cancellationToken = default) =>
         await context.Set<SubscriptionEntity>().AddAsync(subscription, cancellationToken);
 
