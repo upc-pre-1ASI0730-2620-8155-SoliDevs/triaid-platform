@@ -1,6 +1,6 @@
 ﻿using Humanizer;
 
-namespace TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Extensions;
+namespace TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 
 public static class StringExtensions
 {
