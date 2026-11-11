@@ -16,7 +16,7 @@ namespace TriAidPlatform.API.PatientRegistration.Interfaces.REST;
 /// <param name="triageEpisodeService">Use cases of the triage episode.</param>
 /// <param name="episodeRepository">Repository used for read-only queries.</param>
 [ApiController]
-[Route("triage-episodes")]
+[Route("episodes")]
 [Produces("application/json")]
 public class TriageEpisodesController(
     ITriageEpisodeService triageEpisodeService,
