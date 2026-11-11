@@ -9,7 +9,7 @@ namespace TriAidPlatform.API.Devices.Domain.Model.Aggregates;
 public class Device
 {
     public int Id { get; }
-    public string SerialNumber { get; private set; }
+    public string? SerialNumber { get; private set; }
     public EDeviceType Type { get; private set; }
     public string Model { get; private set; }
     public bool IsActive { get; private set; }
@@ -18,7 +18,6 @@ public class Device
     // Required by Entity Framework Core
     protected Device()
     {
-        SerialNumber = string.Empty;
         Model = string.Empty;
         IsActive = true;
     }
@@ -26,17 +25,15 @@ public class Device
     /// <summary>
     /// Initializes a new instance of the <see cref="Device"/> class.
     /// </summary>
-    /// <param name="serialNumber">The unique serial number of the hardware.</param>
+    /// <param name="serialNumber">The unique serial number of the hardware, when it is known.</param>
     /// <param name="type">The type of medical device (PulseOximeter, BloodPressureMonitor, etc.).</param>
     /// <param name="model">The commercial model name or description.</param>
-    public Device(string serialNumber, EDeviceType type, string model)
+    public Device(string? serialNumber, EDeviceType type, string model)
     {
-        if (string.IsNullOrWhiteSpace(serialNumber))
-            throw new ArgumentException("The serial number cannot be null or empty.", nameof(serialNumber));
         if (string.IsNullOrWhiteSpace(model))
             throw new ArgumentException("The model cannot be null or empty.", nameof(model));
 
-        SerialNumber = serialNumber.Trim();
+        SerialNumber = string.IsNullOrWhiteSpace(serialNumber) ? null : serialNumber.Trim();
         Type = type;
         Model = model.Trim();
         IsActive = true;
@@ -45,14 +42,12 @@ public class Device
     /// <summary>
     /// Updates the device information.
     /// </summary>
-    public void UpdateDetails(string serialNumber, EDeviceType type, string model)
+    public void UpdateDetails(string? serialNumber, EDeviceType type, string model)
     {
-        if (string.IsNullOrWhiteSpace(serialNumber))
-            throw new ArgumentException("The serial number cannot be null or empty.", nameof(serialNumber));
         if (string.IsNullOrWhiteSpace(model))
             throw new ArgumentException("The model cannot be null or empty.", nameof(model));
 
-        SerialNumber = serialNumber.Trim();
+        SerialNumber = string.IsNullOrWhiteSpace(serialNumber) ? null : serialNumber.Trim();
         Type = type;
         Model = model.Trim();
     }
