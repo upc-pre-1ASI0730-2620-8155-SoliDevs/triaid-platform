@@ -16,5 +16,8 @@ public enum EDeviceType
     Thermometer = 3,
 
     /// <summary>Glucometer for blood glucose levels.</summary>
-    Glucometer = 4
+    Glucometer = 4,
+
+    /// <summary>Heart rate monitor (pulse meter).</summary>
+    HeartRateMonitor = 5
 }
