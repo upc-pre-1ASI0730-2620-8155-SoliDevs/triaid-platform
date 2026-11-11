@@ -8,4 +8,4 @@ namespace TriAidPlatform.API.TriageClassification.Domain.Model.Commands;
 /// <param name="EpisodeId">Identifier of the classified episode.</param>
 /// <param name="SuggestedLevel">Level computed by the NT-158 engine.</param>
 /// <param name="MissingMetrics">Mandatory metrics that were not available.</param>
-public record SuggestClassificationCommand(int EpisodeId, ETriageLevel SuggestedLevel, string[] MissingMetrics);
+public record SuggestClassificationCommand(string EpisodeId, ETriageLevel SuggestedLevel, string[] MissingMetrics);

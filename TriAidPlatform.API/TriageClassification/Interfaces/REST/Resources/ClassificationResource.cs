@@ -14,7 +14,7 @@ namespace TriAidPlatform.API.TriageClassification.Interfaces.REST.Resources;
 /// <param name="MissingMetrics">Metrics reported missing during the evaluation.</param>
 public record ClassificationResource(
     int Id,
-    int EpisodeId,
+    string EpisodeId,
     ETriageLevel SuggestedLevel,
     ETriageLevel FinalLevel,
     EClassificationState State,

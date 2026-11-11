@@ -17,7 +17,7 @@ public class Classification : IAuditableEntity
     public int Id { get; private set; }
 
     /// <summary>Identifier of the classified triage episode.</summary>
-    public int EpisodeId { get; private set; }
+    public string EpisodeId { get; private set; } = string.Empty;
 
     /// <summary>Level suggested by the NT-158 engine.</summary>
     public ETriageLevel SuggestedLevel { get; private set; }

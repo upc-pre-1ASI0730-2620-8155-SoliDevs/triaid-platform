@@ -14,7 +14,7 @@ namespace TriAidPlatform.API.TriageClassification.Infrastructure.Persistence.Ent
 public class ClassificationRepository(AppDbContext context) : BaseRepository<Classification>(context), IClassificationRepository
 {
     /// <inheritdoc />
-    public async Task<Classification?> FindByEpisodeIdAsync(int episodeId, CancellationToken cancellationToken = default) =>
+    public async Task<Classification?> FindByEpisodeIdAsync(string episodeId, CancellationToken cancellationToken = default) =>
         await Context.Set<Classification>()
             .FirstOrDefaultAsync(c => c.EpisodeId == episodeId, cancellationToken);
 
