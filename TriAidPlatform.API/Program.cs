@@ -24,6 +24,8 @@ using TriAidPlatform.API.Alerting.Application.Internal.CommandServices;
 using TriAidPlatform.API.Alerting.Application.Internal.QueryServices;
 using TriAidPlatform.API.Alerting.Domain.Repositories;
 using TriAidPlatform.API.Alerting.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using TriAidPlatform.API.Devices.Domain.Repositories;
+using TriAidPlatform.API.Devices.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration.OpenApi;
@@ -67,6 +69,10 @@ builder.Services.AddScoped<ITriageEpisodeService, TriageEpisodeService>();
 builder.Services.AddScoped<IAlertRepository, AlertRepository>();
 builder.Services.AddScoped<AlertCommandService>();
 builder.Services.AddScoped<AlertQueryService>();
+
+// Devices bounded context (vital-signs-capture)
+builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
+builder.Services.AddScoped<IVitalSignsReadingRepository, VitalSignsReadingRepository>();
 
 // IAM bounded context
 builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("TokenSettings"));
