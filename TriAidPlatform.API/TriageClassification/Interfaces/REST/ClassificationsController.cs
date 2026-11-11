@@ -109,10 +109,17 @@ public class ClassificationsController(
      * <response code="404">Episode is not classified yet</response>
      */
     [HttpGet]
-    public async Task<ActionResult<ClassificationResource>> GetByEpisodeQuery(
-        [FromQuery(Name = "episodeId")] string episodeId, CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<ClassificationResource>>> GetByEpisodeQuery(
+        [FromQuery(Name = "episodeId")] string? episodeId, CancellationToken cancellationToken)
     {
-        return await GetByEpisode(episodeId, cancellationToken);
+        if (string.IsNullOrWhiteSpace(episodeId))
+        {
+            var all = await classificationRepository.ListAsync(cancellationToken);
+            return Ok(all.Select(ClassificationResourceFromEntityAssembler.ToResourceFromEntity));
+        }
+        var single = await GetByEpisode(episodeId, cancellationToken);
+        if (single.Result is not null) return new ActionResult<IEnumerable<ClassificationResource>>(single.Result);
+        return Ok(new List<ClassificationResource> { single.Value! });
     }
 
     /**
