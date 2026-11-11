@@ -123,7 +123,7 @@ if (app.Environment.IsDevelopment())
 await CatalogSeed.SeedAsync(app.Services);
 
 app.UseHttpsRedirection();
-app.UseCors();
+app.UseCors("AllowAllPolicy");
 
 // IAM request authorization: resolves the Bearer token into the user
 app.UseRequestAuthorization();
