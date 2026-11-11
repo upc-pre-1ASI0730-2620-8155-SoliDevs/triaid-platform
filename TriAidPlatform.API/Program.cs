@@ -4,6 +4,12 @@ using TriAidPlatform.API.PatientRegistration.Domain.Repositories;
 using TriAidPlatform.API.PatientRegistration.Domain.Services;
 using TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using TriAidPlatform.API.Shared.Domain.Repositories;
+using TriAidPlatform.API.TriageClassification.Application.Internal.CommandServices;
+using TriAidPlatform.API.TriageClassification.Application.Internal.QueryServices;
+using TriAidPlatform.API.TriageClassification.Domain.Repositories;
+using TriAidPlatform.API.TriageClassification.Domain.Services;
+using TriAidPlatform.API.TriageClassification.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using TriAidPlatform.API.TriageClassification.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
@@ -18,6 +24,11 @@ builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPatientRegistrationService, PatientRegistrationService>();
 builder.Services.AddScoped<ITriageEpisodeRepository, TriageEpisodeRepository>();
 builder.Services.AddScoped<ITriageEpisodeService, TriageEpisodeService>();
+
+// Triage Classification bounded context
+builder.Services.AddScoped<IClassificationRepository, ClassificationRepository>();
+builder.Services.AddScoped<ClassificationCommandService>();
+builder.Services.AddScoped<ClassificationQueryService>();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options=> options.Conventions.Add(new KebabCaseRouteNamingConvention()));
