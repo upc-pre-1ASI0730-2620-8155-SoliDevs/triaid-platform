@@ -53,7 +53,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Database connection
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")!));
+    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")!));
 
 // Shared bounded context
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
