@@ -1,5 +1,6 @@
 ﻿using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
+using TriAidPlatform.API.Devices.Domain.Model.Aggregates;
 using TriAidPlatform.API.Devices.Domain.Repositories;
 using TriAidPlatform.API.Devices.Interfaces.REST.Resources;
 using TriAidPlatform.API.Devices.Interfaces.REST.Transform;
@@ -27,7 +28,8 @@ public class DevicesController(
     {
         try
         {
-            var device = DeviceAssembler.ToModelFromCreate(resource);
+            var command = CreateDeviceCommandFromResourceAssembler.ToCommandFromResource(resource);
+            var device = new Device(command);
             await deviceRepository.AddAsync(device, cancellationToken);
             await unitOfWork.CompleteAsync(cancellationToken);
 
