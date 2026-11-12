@@ -15,7 +15,7 @@ public class DeviceConfiguration : IEntityTypeConfiguration<Device>
             .ValueGeneratedOnAdd();
 
         builder.Property(d => d.SerialNumber)
-            .IsRequired()
+            .IsRequired(false)
             .HasMaxLength(100);
 
         builder.HasIndex(d => d.SerialNumber)
@@ -34,6 +34,20 @@ public class DeviceConfiguration : IEntityTypeConfiguration<Device>
             .HasDefaultValue(true);
 
         builder.Property(d => d.RegisteredAt)
+            .IsRequired();
+
+        builder.Property(d => d.Online)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(d => d.LastUse);
+
+        builder.Property(d => d.LinkedEpisodeId)
+            .HasMaxLength(50);
+
+        builder.Property(d => d.LinkedAt);
+
+        builder.Property(d => d.Institution)
             .IsRequired();
     }
 }
