@@ -21,6 +21,12 @@ public class Device
     /// <summary>Moment of the last reading taken with the device, if any.</summary>
     public DateTime? LastUse { get; private set; }
 
+    /// <summary>Identifier of the triage episode the device is linked to (e.g. EP-261105-0001).</summary>
+    public string? LinkedEpisodeId { get; private set; }
+
+    /// <summary>Moment the device was linked to its current triage episode.</summary>
+    public DateTime? LinkedAt { get; private set; }
+
     // Required by Entity Framework Core
     protected Device()
     {
@@ -80,4 +86,30 @@ public class Device
     /// </summary>
     /// <param name="lastUse">Moment of the last reading, or null when the device was never used.</param>
     public void RegisterUse(DateTime? lastUse) => LastUse = lastUse;
+
+    /// <summary>
+    /// Links the device to a triage episode so it monitors that patient.
+    /// The link time is kept while the device stays on the same episode.
+    /// </summary>
+    /// <param name="episodeId">Identifier of the triage episode.</param>
+    /// <param name="linkedAt">Moment of the link, or null to stamp it now.</param>
+    /// <exception cref="ArgumentException">Thrown when the episode identifier is empty.</exception>
+    public void LinkToEpisode(string episodeId, DateTime? linkedAt = null)
+    {
+        if (string.IsNullOrWhiteSpace(episodeId))
+            throw new ArgumentException("The episode ID cannot be null or empty.", nameof(episodeId));
+
+        var id = episodeId.Trim();
+        LinkedAt = linkedAt ?? (LinkedEpisodeId == id && LinkedAt is not null ? LinkedAt : DateTime.UtcNow);
+        LinkedEpisodeId = id;
+    }
+
+    /// <summary>
+    /// Releases the device from its triage episode, making it available for the next patient.
+    /// </summary>
+    public void ReleaseFromEpisode()
+    {
+        LinkedEpisodeId = null;
+        LinkedAt = null;
+    }
 }
