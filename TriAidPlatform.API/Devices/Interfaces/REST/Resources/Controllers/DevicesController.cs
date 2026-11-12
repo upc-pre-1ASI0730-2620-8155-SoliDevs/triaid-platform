@@ -65,4 +65,36 @@ public class DevicesController(
 
         return Ok(deviceResources);
     }
+
+    /// <summary>
+    /// Replaces the full record of a device with the one sent by the frontend.
+    /// </summary>
+    /// <param name="id">Identifier of the device.</param>
+    /// <param name="resource">Full device record.</param>
+    /// <param name="cancellationToken">Token to observe for cancellation.</param>
+    /// <returns>The updated device, or 404 when it does not exist.</returns>
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<DeviceResource>> UpdateDevice(
+        int id,
+        [FromBody] UpdateDeviceResource resource,
+        CancellationToken cancellationToken)
+    {
+        var device = await deviceRepository.FindByIdAsync(id, cancellationToken);
+        if (device is null) return NotFound();
+
+        try
+        {
+            var command = UpdateDeviceCommandFromResourceAssembler.ToCommandFromResource(id, resource);
+            device.Update(command);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+
+        deviceRepository.Update(device);
+        await unitOfWork.CompleteAsync(cancellationToken);
+
+        return Ok(DeviceResourceFromEntityAssembler.ToResourceFromEntity(device));
+    }
 }
