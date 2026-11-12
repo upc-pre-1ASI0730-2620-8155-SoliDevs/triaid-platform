@@ -16,16 +16,4 @@ public static class DeviceAssembler
         
         return new Device(resource.SerialNumber, deviceType, resource.Model);
     }
-
-    public static DeviceResource ToResourceFromEntity(Device entity)
-    {
-        return new DeviceResource(
-            entity.Id,
-            entity.SerialNumber,
-            entity.Model,
-            entity.Type.ToString(), 
-            entity.IsActive,
-            entity.RegisteredAt
-        );
-    }
 }
