@@ -182,7 +182,8 @@ public class ClassificationsController(
             ClassificationResourceFromEntityAssembler.FromStateKey(resource.State),
             resource.ConfirmedAt, resource.Justification, resource.OverriddenBy, resource.Institution);
         await unitOfWork.CompleteAsync(cancellationToken);
-        return Ok(ClassificationResourceFromEntityAssembler.ToResourceFromEntity(classification));
+        var updated = ClassificationResourceFromEntityAssembler.ToResourceFromEntity(classification);
+        return Ok(updated with { State = resource.State });
     }
 
     private ActionResult<ClassificationResource> ToErrorResponse(ClassificationError error) => error.Type switch

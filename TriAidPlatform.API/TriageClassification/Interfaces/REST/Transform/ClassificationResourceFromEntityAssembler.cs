@@ -50,10 +50,9 @@ public static class ClassificationResourceFromEntityAssembler
     /// <returns>The internal classification state.</returns>
     public static EClassificationState FromStateKey(string? stateKey) => stateKey switch
     {
-        "PendingConfirmation" => EClassificationState.Suggested,
-        "Assigned" => EClassificationState.Confirmed,
+        "Assigned" => EClassificationState.Suggested,
         "Confirmed" => EClassificationState.Confirmed,
-        _ => EClassificationState.Modified
+        _ => EClassificationState.Suggested
     };
 
     /// <summary>Maps the aggregate state to the REST representation.</summary>
