@@ -29,9 +29,9 @@ public class AlertRepository : BaseRepository<Alert>, IAlertRepository
     /// <returns>An asynchronous task returning a collection of active <see cref="Alert"/> instances belonging to the specified clinic.</returns>
     public async Task<IEnumerable<Alert>> FindActiveAlertsAsync(ClinicId clinicId, CancellationToken cancellationToken = default)
     {
-        return await Context.Set<Alert>()
-            .Where(a => a.ClinicId == clinicId && a.Status.StatusValue != EAlertStatus.Resolved)
+        var alerts = await Context.Set<Alert>()
             .ToListAsync(cancellationToken);
+        return alerts.Where(a => a.ClinicId == clinicId && a.Status.StatusValue != EAlertStatus.Resolved);
     }
     
     /// <summary>
@@ -51,7 +51,7 @@ public class AlertRepository : BaseRepository<Alert>, IAlertRepository
             .FirstOrDefaultAsync(a => a.ClinicId == clinicId && a.ReadingId == readingId, cancellationToken);
     }
     /// <summary>
-    /// Retorna todas las alertas del sistema sin filtros de clínica (usado por el cliente web).
+    /// Lists every alert in the system without clinic filters (used by the web client).
     /// </summary>
     public async Task<IEnumerable<Alert>> ListAsync()
     {
@@ -59,7 +59,7 @@ public class AlertRepository : BaseRepository<Alert>, IAlertRepository
     }
 
     /// <summary>
-    /// Busca una alerta por su ID directo en la base de datos.
+    /// Retrieves an alert directly by its database identifier.
     /// </summary>
     public async Task<Alert?> GetByIdAsync(int id)
     {
