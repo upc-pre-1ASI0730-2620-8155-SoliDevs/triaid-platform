@@ -83,6 +83,21 @@ public class Device
     }
 
     /// <summary>
+    /// Replaces the full record of the device with the <see cref="UpdateDeviceCommand"/>.
+    /// </summary>
+    /// <param name="command">New state of the device.</param>
+    /// <exception cref="ArgumentException">Thrown when the model is empty.</exception>
+    public void Update(UpdateDeviceCommand command)
+    {
+        UpdateDetails(command.SerialNumber, command.Type, command.Model);
+        SetOnline(command.Online);
+        RegisterUse(command.LastUse);
+        AssignInstitution(command.Institution);
+        if (string.IsNullOrWhiteSpace(command.LinkedEpisodeId)) ReleaseFromEpisode();
+        else LinkToEpisode(command.LinkedEpisodeId, command.LinkedAt);
+    }
+
+    /// <summary>
     /// Deactivates the device, making it unavailable for triage measurements.
     /// </summary>
     public void Deactivate() => IsActive = false;
