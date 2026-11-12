@@ -27,10 +27,14 @@ public class Device
     /// <summary>Moment the device was linked to its current triage episode.</summary>
     public DateTime? LinkedAt { get; private set; }
 
+    /// <summary>Institution that owns the device.</summary>
+    public string Institution { get; private set; }
+
     // Required by Entity Framework Core
     protected Device()
     {
         Model = string.Empty;
+        Institution = string.Empty;
         IsActive = true;
     }
 
@@ -50,6 +54,7 @@ public class Device
         Model = model.Trim();
         IsActive = true;
         RegisteredAt = DateTime.UtcNow;
+        Institution = string.Empty;
     }
 
     /// <summary>
@@ -112,4 +117,11 @@ public class Device
         LinkedEpisodeId = null;
         LinkedAt = null;
     }
+
+    /// <summary>
+    /// Tags the device with the institution that owns it.
+    /// </summary>
+    /// <param name="institution">Name of the institution.</param>
+    public void AssignInstitution(string? institution) =>
+        Institution = institution?.Trim() ?? string.Empty;
 }
