@@ -13,11 +13,14 @@ public static class DeviceResourceFromEntityAssembler
     {
         return new DeviceResource(
             entity.Id,
-            entity.SerialNumber,
+            DeviceTypeKeyAssembler.ToTypeKey(entity.Type),
             entity.Model,
-            entity.Type.ToString(),
-            entity.IsActive,
-            entity.RegisteredAt
+            entity.Online,
+            entity.LinkedEpisodeId,
+            entity.LinkedAt,
+            LastUseAssembler.ToTime(entity.LastUse),
+            entity.Institution,
+            entity.SerialNumber
         );
     }
 }
