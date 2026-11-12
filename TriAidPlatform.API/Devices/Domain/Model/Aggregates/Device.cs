@@ -15,6 +15,9 @@ public class Device
     public bool IsActive { get; private set; }
     public DateTime RegisteredAt { get; set; }
 
+    /// <summary>Whether the device is online and able to send readings.</summary>
+    public bool Online { get; private set; }
+
     // Required by Entity Framework Core
     protected Device()
     {
@@ -62,4 +65,10 @@ public class Device
     /// Activates the device.
     /// </summary>
     public void Activate() => IsActive = true;
+
+    /// <summary>
+    /// Sets whether the device is online and able to send readings.
+    /// </summary>
+    /// <param name="online">True when the device is online.</param>
+    public void SetOnline(bool online) => Online = online;
 }
