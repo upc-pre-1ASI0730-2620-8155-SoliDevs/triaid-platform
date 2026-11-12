@@ -114,7 +114,7 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
 
         try
         {
-            // State Machine implementation (Spec 5.4 and 6)
+            
             if (command.Severity == "resolved")
             {
                 alert.Acknowledge();
@@ -123,7 +123,6 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
             {
                 alert.Escalate(command.EscalatedTo ?? "Trauma Shock");
             }
-            // Any other severity ("critical", "warning") is ignored during PUT transition
             
             alertRepository.Update(alert);
             await unitOfWork.CompleteAsync(cancellationToken);
