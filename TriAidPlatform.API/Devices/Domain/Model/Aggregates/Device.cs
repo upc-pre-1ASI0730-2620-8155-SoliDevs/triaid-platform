@@ -1,4 +1,5 @@
-﻿using TriAidPlatform.API.Devices.Domain.Model.ValueObjects;
+﻿using TriAidPlatform.API.Devices.Domain.Model.Commands;
+using TriAidPlatform.API.Devices.Domain.Model.ValueObjects;
 
 namespace TriAidPlatform.API.Devices.Domain.Model.Aggregates;
 
@@ -55,6 +56,17 @@ public class Device
         IsActive = true;
         RegisteredAt = DateTime.UtcNow;
         Institution = string.Empty;
+    }
+
+    /// <summary>
+    /// Registers a device from the <see cref="CreateDeviceCommand"/>.
+    /// </summary>
+    /// <param name="command">Data of the device to register.</param>
+    public Device(CreateDeviceCommand command) : this(command.SerialNumber, command.Type, command.Model)
+    {
+        SetOnline(command.Online);
+        RegisterUse(command.LastUse);
+        AssignInstitution(command.Institution);
     }
 
     /// <summary>
