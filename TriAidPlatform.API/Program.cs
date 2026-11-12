@@ -129,11 +129,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+// OpenAPI and Scalar documentation are exposed in every environment for public access
+app.MapOpenApi();
+app.MapScalarApiReference();
 
 // Create the database schema if it does not exist yet
 using (var scope = app.Services.CreateScope())
