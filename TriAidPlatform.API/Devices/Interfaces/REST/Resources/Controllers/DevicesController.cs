@@ -21,6 +21,9 @@ public class DevicesController(
     /// <summary>
     /// Creates a new device.
     /// </summary>
+    /// <param name="resource">Device record sent by the frontend.</param>
+    /// <param name="cancellationToken">Token to observe for cancellation.</param>
+    /// <returns>The created device with its identifier, or 400 when the record is not valid.</returns>
     [HttpPost]
     public async Task<ActionResult<DeviceResource>> CreateDevice(
         [FromBody] CreateDeviceResource resource,
@@ -45,6 +48,9 @@ public class DevicesController(
     /// <summary>
     /// Gets a device by its unique identifier.
     /// </summary>
+    /// <param name="id">Identifier of the device.</param>
+    /// <param name="cancellationToken">Token to observe for cancellation.</param>
+    /// <returns>The device, or 404 when it does not exist.</returns>
     [HttpGet("{id:int}")]
     public async Task<ActionResult<DeviceResource>> GetDeviceById(int id, CancellationToken cancellationToken)
     {
@@ -57,6 +63,8 @@ public class DevicesController(
     /// <summary>
     /// Gets all registered devices.
     /// </summary>
+    /// <param name="cancellationToken">Token to observe for cancellation.</param>
+    /// <returns>The device inventory.</returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DeviceResource>>> GetAllDevices(CancellationToken cancellationToken)
     {
