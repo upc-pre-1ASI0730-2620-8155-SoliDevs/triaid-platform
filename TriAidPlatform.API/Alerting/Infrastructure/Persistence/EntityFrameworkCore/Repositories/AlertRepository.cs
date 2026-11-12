@@ -50,4 +50,19 @@ public class AlertRepository : BaseRepository<Alert>, IAlertRepository
         return await Context.Set<Alert>()
             .FirstOrDefaultAsync(a => a.ClinicId == clinicId && a.ReadingId == readingId, cancellationToken);
     }
+    /// <summary>
+    /// Retorna todas las alertas del sistema sin filtros de clínica (usado por el cliente web).
+    /// </summary>
+    public async Task<IEnumerable<Alert>> ListAsync()
+    {
+        return await Context.Set<Alert>().ToListAsync();
+    }
+
+    /// <summary>
+    /// Busca una alerta por su ID directo en la base de datos.
+    /// </summary>
+    public async Task<Alert?> GetByIdAsync(int id)
+    {
+        return await Context.Set<Alert>().FindAsync(id);
+    }
 }
