@@ -12,7 +12,7 @@ public class AppDbContextDesignFactory : IDesignTimeDbContextFactory<AppDbContex
     public AppDbContext CreateDbContext(string[] args)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseMySQL("Server=localhost;Port=3306;Database=triaid_platform;Uid=root;Pwd=triaid2026;")
+            .UseNpgsql("Host=localhost;Port=5432;Database=triaid_platform;Username=postgres;Password=triaid2026;")
             .Options;
         return new AppDbContext(options);
     }
