@@ -41,5 +41,10 @@ public class DeviceConfiguration : IEntityTypeConfiguration<Device>
             .HasDefaultValue(false);
 
         builder.Property(d => d.LastUse);
+
+        builder.Property(d => d.LinkedEpisodeId)
+            .HasMaxLength(50);
+
+        builder.Property(d => d.LinkedAt);
     }
 }
