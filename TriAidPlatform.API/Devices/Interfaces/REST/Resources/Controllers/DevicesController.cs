@@ -97,4 +97,22 @@ public class DevicesController(
 
         return Ok(DeviceResourceFromEntityAssembler.ToResourceFromEntity(device));
     }
+
+    /// <summary>
+    /// Removes a device from the inventory.
+    /// </summary>
+    /// <param name="id">Identifier of the device.</param>
+    /// <param name="cancellationToken">Token to observe for cancellation.</param>
+    /// <returns>The removed device, or 404 when it does not exist.</returns>
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<DeviceResource>> DeleteDevice(int id, CancellationToken cancellationToken)
+    {
+        var device = await deviceRepository.FindByIdAsync(id, cancellationToken);
+        if (device is null) return NotFound();
+
+        deviceRepository.Remove(device);
+        await unitOfWork.CompleteAsync(cancellationToken);
+
+        return Ok(DeviceResourceFromEntityAssembler.ToResourceFromEntity(device));
+    }
 }
