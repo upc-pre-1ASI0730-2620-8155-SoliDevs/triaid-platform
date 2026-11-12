@@ -39,5 +39,7 @@ public class DeviceConfiguration : IEntityTypeConfiguration<Device>
         builder.Property(d => d.Online)
             .IsRequired()
             .HasDefaultValue(false);
+
+        builder.Property(d => d.LastUse);
     }
 }
