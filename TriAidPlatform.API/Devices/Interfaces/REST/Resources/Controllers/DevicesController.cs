@@ -31,7 +31,7 @@ public class DevicesController(
             await deviceRepository.AddAsync(device, cancellationToken);
             await unitOfWork.CompleteAsync(cancellationToken);
 
-            var deviceResource = DeviceAssembler.ToResourceFromEntity(device);
+            var deviceResource = DeviceResourceFromEntityAssembler.ToResourceFromEntity(device);
             return CreatedAtAction(nameof(GetDeviceById), new { id = deviceResource.Id }, deviceResource);
         }
         catch (ArgumentException ex)
@@ -49,7 +49,7 @@ public class DevicesController(
         var device = await deviceRepository.FindByIdAsync(id, cancellationToken);
         if (device is null) return NotFound();
 
-        return Ok(DeviceAssembler.ToResourceFromEntity(device));
+        return Ok(DeviceResourceFromEntityAssembler.ToResourceFromEntity(device));
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public class DevicesController(
     public async Task<ActionResult<IEnumerable<DeviceResource>>> GetAllDevices(CancellationToken cancellationToken)
     {
         var devices = await deviceRepository.ListAsync(cancellationToken);
-        var deviceResources = devices.Select(DeviceAssembler.ToResourceFromEntity);
+        var deviceResources = devices.Select(DeviceResourceFromEntityAssembler.ToResourceFromEntity);
 
         return Ok(deviceResources);
     }
