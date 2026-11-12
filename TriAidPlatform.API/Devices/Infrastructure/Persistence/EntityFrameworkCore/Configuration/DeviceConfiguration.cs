@@ -46,5 +46,8 @@ public class DeviceConfiguration : IEntityTypeConfiguration<Device>
             .HasMaxLength(50);
 
         builder.Property(d => d.LinkedAt);
+
+        builder.Property(d => d.Institution)
+            .IsRequired();
     }
 }
