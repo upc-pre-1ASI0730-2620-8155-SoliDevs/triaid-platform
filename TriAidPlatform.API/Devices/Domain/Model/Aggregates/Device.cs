@@ -18,6 +18,9 @@ public class Device
     /// <summary>Whether the device is online and able to send readings.</summary>
     public bool Online { get; private set; }
 
+    /// <summary>Moment of the last reading taken with the device, if any.</summary>
+    public DateTime? LastUse { get; private set; }
+
     // Required by Entity Framework Core
     protected Device()
     {
@@ -71,4 +74,10 @@ public class Device
     /// </summary>
     /// <param name="online">True when the device is online.</param>
     public void SetOnline(bool online) => Online = online;
+
+    /// <summary>
+    /// Records the moment of the last reading taken with the device.
+    /// </summary>
+    /// <param name="lastUse">Moment of the last reading, or null when the device was never used.</param>
+    public void RegisterUse(DateTime? lastUse) => LastUse = lastUse;
 }
