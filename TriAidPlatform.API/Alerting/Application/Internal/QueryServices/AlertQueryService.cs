@@ -23,4 +23,19 @@ public class AlertQueryService(IAlertRepository alertRepository)
         
         return await alertRepository.FindActiveAlertsAsync(query.ClinicId, cancellationToken);
     }
+    /// <summary>
+    /// Handles the execution of the <see cref="ListAllAlertsQuery"/> to retrieve all alerts globally.
+    /// </summary>
+    public async Task<IEnumerable<Alert>> Handle(ListAllAlertsQuery query)
+    {
+        return await alertRepository.ListAsync();
+    }
+
+    /// <summary>
+    /// Handles the execution of the <see cref="GetAlertByIdQuery"/> to retrieve a specific alert.
+    /// </summary>
+    public async Task<Alert?> Handle(GetAlertByIdQuery query)
+    {
+        return await alertRepository.GetByIdAsync(query.AlertId);
+    }
 }

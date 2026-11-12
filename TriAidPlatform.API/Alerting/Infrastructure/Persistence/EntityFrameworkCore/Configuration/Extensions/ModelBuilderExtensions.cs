@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TriAidPlatform.API.Alerting.Domain.Model.Aggregates;
+using TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
 
 namespace TriAidPlatform.API.Alerting.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
@@ -23,23 +24,16 @@ public static class AlertingContextConfigurationExtensions
             alert.Property(a => a.Id).IsRequired().ValueGeneratedOnAdd();
             
             
-            alert.OwnsOne(a => a.ClinicId, c => 
-            {
-                c.Property(p => p.Value).HasColumnName("clinic_id").IsRequired();
-            });
+            alert.Property(a => a.ClinicId).HasConversion(
+                c => c.Value, v => new ClinicId(v)).HasColumnName("clinic_id").IsRequired();
 
-            
-            alert.OwnsOne(a => a.Status, s =>
-            {
-                s.Property(p => p.StatusValue).HasColumnName("status").IsRequired();
-            });
-            
-            alert.OwnsOne(a => a.Metric, m => 
-            {
-                m.Property(p => p.SignName).IsRequired();
-                m.Property(p => p.MeasuredValue).IsRequired();
-                m.Property(p => p.SafeRange).IsRequired();
-            });
+            alert.Property(a => a.Status).HasConversion(
+                s => s.StatusValue, v => new AlertStatus(v)).HasColumnName("status").IsRequired();
+
+            alert.Property(a => a.Metric).HasConversion(
+                m => System.Text.Json.JsonSerializer.Serialize(m, (System.Text.Json.JsonSerializerOptions?)null),
+                v => System.Text.Json.JsonSerializer.Deserialize<AlertMetric>(v, (System.Text.Json.JsonSerializerOptions?)null)!)
+                .HasColumnName("metric").IsRequired();
         });
 
         return builder;

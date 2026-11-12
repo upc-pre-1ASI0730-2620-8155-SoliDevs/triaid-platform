@@ -23,6 +23,13 @@ public class TriageEpisode : IAuditableEntity
     /// <summary>Current lifecycle state of the episode.</summary>
     public EEpisodeState State { get; private set; }
 
+    /// <summary>
+    ///     JSON payload with the confirmed vital sign readings of the
+    ///     episode (web client contract, ADR-010).
+    /// </summary>
+    public string? Vitals { get; private set; }
+
+
     /// <summary>Creation timestamp (auditable).</summary>
     public DateTimeOffset? CreatedAt { get; set; }
 
@@ -61,6 +68,20 @@ public class TriageEpisode : IAuditableEntity
         if (State != EEpisodeState.Waiting)
             throw new InvalidOperationException("Only a waiting episode can start triage.");
         State = EEpisodeState.InTriage;
+    }
+
+    /**
+     * <summary>
+     *     Stores the confirmed vital sign readings of the episode as a
+     *     JSON payload (web client contract, ADR-010)
+     * </summary>
+     * <param name="vitalsJson">Raw JSON of the confirmed readings.</param>
+     * <returns>The updated episode.</returns>
+     */
+    public TriageEpisode UpdateVitals(string vitalsJson)
+    {
+        Vitals = vitalsJson;
+        return this;
     }
 
     /// <summary>

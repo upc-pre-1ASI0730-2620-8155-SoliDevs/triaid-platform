@@ -26,4 +26,14 @@ public interface IAlertRepository : IBaseRepository <Alert>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>The <see cref="Alert"/> instance if found; otherwise, null.</returns>
     Task<Alert?> FindByReadingIdAsync(ClinicId clinicId, int readingId, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Retrieves all alerts from the database without clinic filters (used by the web frontend).
+    /// </summary>
+    Task<IEnumerable<Alert>> ListAsync();
+
+    /// <summary>
+    /// Retrieves a specific alert by its unique database ID.
+    /// </summary>
+    Task<Alert?> GetByIdAsync(int id);
 } 
