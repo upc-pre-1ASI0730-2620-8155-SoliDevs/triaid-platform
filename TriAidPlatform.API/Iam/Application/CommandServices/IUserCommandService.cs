@@ -61,6 +61,18 @@ public interface IUserCommandService
 
     /**
      * <summary>
+     *     Handle the create staff command without an authenticated
+     *     caller: the institution is resolved from the request (ADR-010)
+     * </summary>
+     * <param name="command">The create staff command</param>
+     * <param name="institution">The tenant the account belongs to</param>
+     * <param name="cancellationToken">The cancellation token</param>
+     * <returns>The created staff user</returns>
+     */
+    Task<Result<User>> Handle(CreateStaffCommand command, string institution, CancellationToken cancellationToken);
+
+    /**
+     * <summary>
      *     Handle the update user command: profile fields for everyone,
      *     assignment fields only for admins over staff accounts
      * </summary>
@@ -70,4 +82,15 @@ public interface IUserCommandService
      * <returns>The updated user</returns>
      */
     Task<Result<User>> Handle(int callerId, UpdateUserCommand command, CancellationToken cancellationToken);
+
+    /**
+     * <summary>
+     *     Handle the update user command without an authenticated
+     *     caller: fields apply directly to the target account (ADR-010)
+     * </summary>
+     * <param name="command">The update user command</param>
+     * <param name="cancellationToken">The cancellation token</param>
+     * <returns>The updated user</returns>
+     */
+    Task<Result<User>> Handle(UpdateUserCommand command, CancellationToken cancellationToken);
 }

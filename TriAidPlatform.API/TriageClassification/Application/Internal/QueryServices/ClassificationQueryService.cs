@@ -9,7 +9,7 @@ namespace TriAidPlatform.API.TriageClassification.Application.Internal.QueryServ
 public class ClassificationQueryService(IClassificationRepository classificationRepository)
 {
     /// <summary>Retrieves the classification of an episode.</summary>
-    public Task<Classification?> GetByEpisodeAsync(int episodeId, CancellationToken cancellationToken = default) =>
+    public Task<Classification?> GetByEpisodeAsync(string episodeId, CancellationToken cancellationToken = default) =>
         classificationRepository.FindByEpisodeIdAsync(episodeId, cancellationToken);
 
     /// <summary>Lists the classifications of a clinic.</summary>

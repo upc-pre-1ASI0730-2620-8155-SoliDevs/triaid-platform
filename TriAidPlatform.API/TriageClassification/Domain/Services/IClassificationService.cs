@@ -14,7 +14,7 @@ public interface IClassificationService
 {
     /// <summary>Records the NT-158 suggestion for an episode (US19).</summary>
     Task<Result<Classification, ClassificationError>> SuggestAsync(
-        int episodeId, VitalSignsSummary summary, CancellationToken cancellationToken = default);
+        string episodeId, VitalSignsSummary summary, CancellationToken cancellationToken = default);
 
     /// <summary>Approves the suggested level (US20).</summary>
     Task<Result<Classification, ClassificationError>> ConfirmAsync(
@@ -27,7 +27,7 @@ public interface IClassificationService
 
     /// <summary>Retrieves the classification of an episode.</summary>
     Task<Result<Classification, ClassificationError>> GetByEpisodeAsync(
-        int episodeId, CancellationToken cancellationToken = default);
+        string episodeId, CancellationToken cancellationToken = default);
 
     /// <summary>Lists the classifications of a clinic.</summary>
     Task<IEnumerable<Classification>> ListByClinicAsync(

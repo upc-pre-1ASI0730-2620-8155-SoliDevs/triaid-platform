@@ -16,19 +16,17 @@ namespace TriAidPlatform.API.TriageClassification.Application.Internal.CommandSe
 /// Classification aggregate.
 /// </summary>
 /// <param name="classificationRepository">Repository of the Classification aggregate.</param>
-/// <param name="episodeRepository">Repository of the TriageEpisode aggregate (cross-context read).</param>
 /// <param name="unitOfWork">Unit of work used to commit the changes.</param>
 public class ClassificationCommandService(
     IClassificationRepository classificationRepository,
-    ITriageEpisodeRepository episodeRepository,
     IUnitOfWork unitOfWork) : IClassificationService
 {
     /// <inheritdoc />
     public async Task<Result<Classification, ClassificationError>> SuggestAsync(
-        int episodeId, VitalSignsSummary summary, CancellationToken cancellationToken = default)
+        string episodeId, VitalSignsSummary summary, CancellationToken cancellationToken = default)
     {
-        if (await episodeRepository.FindByIdAsync(episodeId, cancellationToken) is null)
-            return Failure(EClassificationError.NotFound, $"Episode with id {episodeId} was not found.");
+        if (string.IsNullOrWhiteSpace(episodeId))
+            return Failure(EClassificationError.NotFound, "The episode identifier is required.");
 
         if (await classificationRepository.FindByEpisodeIdAsync(episodeId, cancellationToken) is not null)
             return Failure(EClassificationError.Conflict, $"Episode with id {episodeId} is already classified.");
@@ -86,7 +84,7 @@ public class ClassificationCommandService(
 
     /// <inheritdoc />
     public async Task<Result<Classification, ClassificationError>> GetByEpisodeAsync(
-        int episodeId, CancellationToken cancellationToken = default)
+        string episodeId, CancellationToken cancellationToken = default)
     {
         var classification = await classificationRepository.FindByEpisodeIdAsync(episodeId, cancellationToken);
         return classification is null

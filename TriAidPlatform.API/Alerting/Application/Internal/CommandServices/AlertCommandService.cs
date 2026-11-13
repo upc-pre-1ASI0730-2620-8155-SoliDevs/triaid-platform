@@ -73,4 +73,69 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
         
         return alert;
     }
+    /// <summary>
+    /// Handles the creation of a new alert originating from the frontend triage flow.
+    /// Uses the overloaded constructor to include patient context data.
+    /// </summary>
+    public async Task<Alert?> Handle(CreateAlertCommand command, CancellationToken cancellationToken = default)
+    {
+        var alert = new Alert(
+            new Domain.Model.ValueObjects.ClinicId(command.ClinicId),
+            command.EpisodeId,
+            command.Institution,
+            command.PatientName,
+            command.Dni,
+            command.Priority,
+            command.Level,
+            command.Metric
+        );
+        
+        try
+        {
+            await alertRepository.AddAsync(alert, cancellationToken);
+            await unitOfWork.CompleteAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"An error occurred while creating the alert: {e.Message}");
+        }
+        
+        return alert;
+    }
+
+    /// <summary>
+    /// Handles the state transition of an alert based on the severity requested by the frontend.
+    /// Acts as a state machine routing to Acknowledge() or Escalate().
+    /// </summary>
+    public async Task<Alert?> Handle(UpdateAlertCommand command, CancellationToken cancellationToken = default)
+    {
+        var alert = await alertRepository.GetByIdAsync(command.AlertId);
+        if (alert == null) return null;
+
+        try
+        {
+            
+            if (command.Severity == "resolved")
+            {
+                alert.Acknowledge();
+            }
+            else if (command.Severity == "escalated")
+            {
+                alert.Escalate(command.EscalatedTo ?? "Trauma Shock");
+            }
+            
+            alertRepository.Update(alert);
+            await unitOfWork.CompleteAsync(cancellationToken);
+            
+            return alert;
+        }
+        catch (InvalidOperationException) 
+        {
+            return alert; 
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"An error occurred while updating the alert state: {e.Message}");
+        }
+    }
 }

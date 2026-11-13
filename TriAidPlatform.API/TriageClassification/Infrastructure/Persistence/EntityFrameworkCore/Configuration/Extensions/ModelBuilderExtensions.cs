@@ -32,6 +32,8 @@ public static class TriageClassificationContextConfigurationExtensions
             classification.Property(c => c.ConfirmedAt).HasColumnName("confirmed_at");
             classification.Property(c => c.Justification).HasColumnName("justification");
             classification.Property(c => c.MissingMetrics).HasColumnName("missing_metrics");
+            classification.Property(c => c.OverriddenBy).HasColumnName("overridden_by");
+            classification.Property(c => c.Institution).HasColumnName("institution").IsRequired(false);
             classification.Property(c => c.CreatedAt).HasColumnName("created_at");
             classification.Property(c => c.UpdatedAt).HasColumnName("updated_at");
 

@@ -5,4 +5,4 @@ namespace TriAidPlatform.API.PatientRegistration.Interfaces.REST.Resources;
 /// <param name="PatientId">Identifier of the patient.</param>
 /// <param name="ArrivalTime">UTC arrival date and time.</param>
 /// <param name="State">Current state: Waiting, InTriage, Attended or Referred.</param>
-public record TriageEpisodeResource(int Id, int PatientId, DateTime ArrivalTime, string State);
+public record TriageEpisodeResource(int Id, int PatientId, DateTime ArrivalTime, string State, string? Vitals);

@@ -13,7 +13,7 @@ public interface IClassificationRepository : IBaseRepository<Classification>
     /// <param name="episodeId">Identifier of the episode.</param>
     /// <param name="cancellationToken">Token to observe for cancellation.</param>
     /// <returns>The classification, or null when the episode is not classified yet.</returns>
-    Task<Classification?> FindByEpisodeIdAsync(int episodeId, CancellationToken cancellationToken = default);
+    Task<Classification?> FindByEpisodeIdAsync(string episodeId, CancellationToken cancellationToken = default);
 
     /// <summary>Lists the classifications of a clinic, most recent first.</summary>
     /// <param name="clinicId">Identifier of the clinic (tenant).</param>

@@ -15,7 +15,7 @@ public class Referral : IAuditableEntity
     public int Id { get; private set; }
 
     /// <summary>Identifier of the referred triage episode.</summary>
-    public int EpisodeId { get; private set; }
+    public string EpisodeId { get; private set; } = string.Empty;
 
     /// <summary>Identifier of the destination specialty.</summary>
     public int SpecialtyId { get; private set; }
@@ -34,6 +34,12 @@ public class Referral : IAuditableEntity
 
     /// <summary>UTC timestamp when the patient was referred.</summary>
     public DateTime ReferredAt { get; private set; }
+
+    /// <summary>Main symptom registered with the referral (web client contract).</summary>
+    public string? Symptom { get; private set; }
+
+    /// <summary>Institution the referral belongs to (web client tenancy).</summary>
+    public string Institution { get; private set; } = string.Empty;
 
     /// <summary>Creation timestamp (auditable).</summary>
     public DateTimeOffset? CreatedAt { get; set; }
@@ -89,4 +95,56 @@ public class Referral : IAuditableEntity
 
     /// <summary>Whether the patient is still waiting in the queue.</summary>
     public bool IsWaiting() => State == "waiting";
+
+    /**
+     * <summary>
+     *     Attach the web client context of the referral: main symptom,
+     *     owning institution and the client-reported timestamps (ADR-010)
+     * </summary>
+     * <param name="symptom">Main symptom text.</param>
+     * <param name="institution">Institution the referral belongs to.</param>
+     * <param name="state">Lifecycle state reported by the client.</param>
+     * <param name="referredAt">Client-reported referral timestamp.</param>
+     * <returns>The updated referral.</returns>
+     */
+    public Referral AttachContext(string? symptom, string institution, string? state, DateTime? referredAt)
+    {
+        Symptom = symptom;
+        Institution = institution;
+        if (!string.IsNullOrWhiteSpace(state)) State = state;
+        if (referredAt.HasValue) ReferredAt = referredAt.Value;
+        return this;
+    }
+
+    /**
+     * <summary>
+     *     Apply a full-record update from the web client: specialty,
+     *     room, queue position, state and justification (ADR-010)
+     * </summary>
+     * <param name="specialtyId">Identifier of the destination specialty.</param>
+     * <param name="room">Consulting room of the specialty.</param>
+     * <param name="queuePosition">Position of the patient in the queue.</param>
+     * <param name="state">Lifecycle state reported by the client.</param>
+     * <param name="changeReason">Written justification when reassigned.</param>
+     * <returns>The updated referral.</returns>
+     */
+    public Referral ApplyRecordUpdate(int specialtyId, string room, int queuePosition,
+        string? state, string? changeReason)
+    {
+        if (specialtyId != SpecialtyId)
+        {
+            SpecialtyId = specialtyId;
+            Room = room;
+            QueuePosition = queuePosition;
+            ChangeReason = string.IsNullOrWhiteSpace(changeReason) ? ChangeReason : changeReason.Trim();
+        }
+        else
+        {
+            Room = string.IsNullOrWhiteSpace(room) ? Room : room;
+            QueuePosition = queuePosition;
+            ChangeReason = string.IsNullOrWhiteSpace(changeReason) ? ChangeReason : changeReason.Trim();
+        }
+        if (!string.IsNullOrWhiteSpace(state)) State = state;
+        return this;
+    }
 }

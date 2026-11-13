@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using TriAidPlatform.API.Iam.Application.Acl;
@@ -22,6 +24,8 @@ using TriAidPlatform.API.Alerting.Application.Internal.CommandServices;
 using TriAidPlatform.API.Alerting.Application.Internal.QueryServices;
 using TriAidPlatform.API.Alerting.Domain.Repositories;
 using TriAidPlatform.API.Alerting.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using TriAidPlatform.API.Devices.Domain.Repositories;
+using TriAidPlatform.API.Devices.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration.OpenApi;
@@ -66,6 +70,10 @@ builder.Services.AddScoped<IAlertRepository, AlertRepository>();
 builder.Services.AddScoped<AlertCommandService>();
 builder.Services.AddScoped<AlertQueryService>();
 
+// Devices bounded context (vital-signs-capture)
+builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
+builder.Services.AddScoped<IVitalSignsReadingRepository, VitalSignsReadingRepository>();
+
 // IAM bounded context
 builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("TokenSettings"));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -91,11 +99,19 @@ builder.Services.AddScoped<ClassificationQueryService>();
 // Specialty Assignment bounded context
 builder.Services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
 builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
+builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<ISpecialtyAssignmentService, SpecialtyAssignmentService>();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options =>
-    options.Conventions.Add(new KebabCaseRouteNamingConvention()));
+    {
+        options.Conventions.Insert(0, new RoutePrefixConvention("api/v1"));
+        options.Conventions.Add(new KebabCaseRouteNamingConvention());
+    })
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+    });
 
 // OpenAPI / Scalar documentation (no Swagger UI)
 builder.Services.AddOpenApi(options =>
@@ -113,17 +129,23 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// OpenAPI and Scalar documentation are exposed in every environment for public access
+app.MapOpenApi();
+app.MapScalarApiReference();
+
+// Create the database schema if it does not exist yet
+using (var scope = app.Services.CreateScope())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.EnsureCreated();
 }
 
-// Catalog seed (idempotent, runs after the host is ready)
+// Catalog seeds (idempotent, run after the host is ready)
 await CatalogSeed.SeedAsync(app.Services);
+await SpecialtySeed.SeedAsync(app.Services);
 
 app.UseHttpsRedirection();
-app.UseCors();
+app.UseCors("AllowAllPolicy");
 
 // IAM request authorization: resolves the Bearer token into the user
 app.UseRequestAuthorization();

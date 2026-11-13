@@ -19,7 +19,8 @@ public record UserResource(
     string Role,
     string Unit,
     string Shift,
-    string Institution);
+    string Institution,
+    string Password);
 
 /**
  * <summary>
