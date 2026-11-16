@@ -7,7 +7,7 @@ namespace TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
 /// <summary>
 /// Aggregate root that records the routing of a classified episode to a
 /// specialty and its consulting room, with the live queue position
-/// (US30-US33, US37) and the justified manual reassignment (US32).
+/// and the justified manual reassignment.
 /// </summary>
 public class Referral : IAuditableEntity
 {
@@ -23,13 +23,13 @@ public class Referral : IAuditableEntity
     /// <summary>Consulting room of the destination specialty at referral time.</summary>
     public string Room { get; private set; } = string.Empty;
 
-    /// <summary>Live position of the patient in the specialty queue (US37).</summary>
+    /// <summary>Live position of the patient in the specialty queue.</summary>
     public int QueuePosition { get; private set; }
 
     /// <summary>Lifecycle state of the referral (waiting/attended).</summary>
     public string State { get; private set; } = "waiting";
 
-    /// <summary>Written justification of a manual reassignment (US32).</summary>
+    /// <summary>Written justification of a manual reassignment.</summary>
     public string? ChangeReason { get; private set; }
 
     /// <summary>UTC timestamp when the patient was referred.</summary>
@@ -55,7 +55,7 @@ public class Referral : IAuditableEntity
 
     /// <summary>
     /// Creates the referral of an episode to a specialty with its queue
-    /// position (US31 - Escenario 1).
+    /// position.
     /// </summary>
     public Referral(ReferEpisodeCommand command, string room, int queuePosition)
     {
@@ -71,7 +71,7 @@ public class Referral : IAuditableEntity
 
     /// <summary>
     /// Reassigns the referral to another specialty with a mandatory
-    /// justification (US32 - Escenario 1).
+    /// justification.
     /// </summary>
     /// <param name="newSpecialtyId">Identifier of the new specialty.</param>
     /// <param name="room">Consulting room of the new specialty.</param>
@@ -90,7 +90,7 @@ public class Referral : IAuditableEntity
         DomainEvents.Add(new ReferralReassignedEvent(Id, EpisodeId, newSpecialtyId, Room, reason.Trim()));
     }
 
-    /// <summary>Marks the referral as attended in the specialty (US32 - Escenario 3).</summary>
+    /// <summary>Marks the referral as attended in the specialty.</summary>
     public void MarkAttended() => State = "attended";
 
     /// <summary>Whether the patient is still waiting in the queue.</summary>
@@ -99,7 +99,7 @@ public class Referral : IAuditableEntity
     /**
      * <summary>
      *     Attach the web client context of the referral: main symptom,
-     *     owning institution and the client-reported timestamps (ADR-010)
+     *     owning institution and the client-reported timestamps
      * </summary>
      * <param name="symptom">Main symptom text.</param>
      * <param name="institution">Institution the referral belongs to.</param>
@@ -119,7 +119,7 @@ public class Referral : IAuditableEntity
     /**
      * <summary>
      *     Apply a full-record update from the web client: specialty,
-     *     room, queue position, state and justification (ADR-010)
+     *     room, queue position, state and justification
      * </summary>
      * <param name="specialtyId">Identifier of the destination specialty.</param>
      * <param name="room">Consulting room of the specialty.</param>

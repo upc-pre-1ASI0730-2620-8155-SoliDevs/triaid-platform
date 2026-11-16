@@ -12,8 +12,8 @@ namespace TriAidPlatform.API.SpecialtyAssignment.Application.Internal.CommandSer
 
 /// <summary>
 /// Application service of the Specialty Assignment use cases: suggestion
-/// from symptom and triage level (US30), referral with queue position
-/// (US31, US37), justified reassignment (US32) and demographic rules.
+/// from symptom and triage level, referral with queue position
+///, justified reassignment and demographic rules.
 /// </summary>
 /// <param name="referralRepository">Repository of the Referral aggregate.</param>
 /// <param name="specialtyRepository">Repository of the Specialty catalog.</param>

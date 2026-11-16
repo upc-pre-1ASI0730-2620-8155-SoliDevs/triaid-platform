@@ -12,7 +12,7 @@ public interface IReferralRepository : IBaseRepository<Referral>
     /// <returns>The referral, or null when the episode is not referred yet.</returns>
     Task<Referral?> FindByEpisodeIdAsync(string episodeId, CancellationToken cancellationToken = default);
 
-    /// <summary>Counts the patients waiting in the queue of a specialty (US37).</summary>
+    /// <summary>Counts the patients waiting in the queue of a specialty.</summary>
     /// <param name="specialtyId">Identifier of the specialty.</param>
     /// <param name="cancellationToken">Token to observe for cancellation.</param>
     /// <returns>Number of waiting referrals ahead of a new patient.</returns>

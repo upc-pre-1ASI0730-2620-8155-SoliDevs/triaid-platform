@@ -4,7 +4,7 @@ namespace TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
 
 /// <summary>
 /// Catalog entity of a medical specialty of the institution with its
-/// consulting room and demographic admission rules (US30, US32).
+/// consulting room and demographic admission rules.
 /// </summary>
 public class Specialty : IAuditableEntity
 {
@@ -20,7 +20,7 @@ public class Specialty : IAuditableEntity
     /// <summary>Consulting room code assigned to the specialty.</summary>
     public string Room { get; private set; } = string.Empty;
 
-    /// <summary>Whether the specialty currently admits patients (US30 - Escenario 2).</summary>
+    /// <summary>Whether the specialty currently admits patients.</summary>
     public bool Active { get; private set; } = true;
 
     /// <summary>Minimum patient age admitted; null when the specialty is age-open.</summary>
@@ -56,7 +56,7 @@ public class Specialty : IAuditableEntity
         RequiredSex = requiredSex;
     }
 
-    /// <summary>Whether the specialty admits the given demographic profile (US32 - Escenario 2).</summary>
+    /// <summary>Whether the specialty admits the given demographic profile.</summary>
     /// <param name="age">Patient age in years.</param>
     /// <param name="sex">Patient sex code (F/M).</param>
     /// <returns>True when the patient fits the admission rules.</returns>

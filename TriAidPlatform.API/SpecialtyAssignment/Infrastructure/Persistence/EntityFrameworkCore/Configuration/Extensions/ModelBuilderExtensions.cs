@@ -63,6 +63,8 @@ public static class SpecialtyAssignmentContextConfigurationExtensions
             voucher.Property(v => v.Channel).HasColumnName("channel").IsRequired();
             voucher.Property(v => v.SentAt).HasColumnName("sent_at");
             voucher.Property(v => v.Institution).HasColumnName("institution").IsRequired();
+            voucher.Property(v => v.CreatedAt).HasColumnName("created_at");
+            voucher.Property(v => v.UpdatedAt).HasColumnName("updated_at");
         });
 
         return builder;

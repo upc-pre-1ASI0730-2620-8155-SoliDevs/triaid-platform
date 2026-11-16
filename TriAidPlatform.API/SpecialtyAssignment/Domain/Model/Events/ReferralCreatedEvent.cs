@@ -1,6 +1,6 @@
 namespace TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Events;
 
-/// <summary>Domain event raised when an episode is referred (US31).</summary>
+/// <summary>Domain event raised when an episode is referred.</summary>
 /// <param name="ReferralId">Identifier of the referral.</param>
 /// <param name="EpisodeId">Identifier of the episode.</param>
 /// <param name="SpecialtyId">Identifier of the destination specialty.</param>

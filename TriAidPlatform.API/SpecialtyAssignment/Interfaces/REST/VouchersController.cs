@@ -10,7 +10,7 @@ namespace TriAidPlatform.API.SpecialtyAssignment.Interfaces.REST;
  * <summary>
  *     Voucher REST facade. Vouchers are receipts of a referral sent to
  *     the patient portal or front desk; the web client keeps full CRUD
- *     ownership of the record (ADR-010 backend swap contract).
+ *     ownership of the record.
  * </summary>
  * <param name="voucherRepository">Repository of the Voucher entity.</param>
  * <param name="unitOfWork">Unit of work used to commit the changes.</param>
@@ -24,7 +24,7 @@ public class VouchersController(IVoucherRepository voucherRepository, IUnitOfWor
     /**
      * <summary>
      *     Lists every voucher across institutions; the web client
-     *     filters by institution client-side (ADR-010)
+     *     filters by institution client-side
      * </summary>
      * <param name="cancellationToken">Token to observe for cancellation.</param>
      * <returns>All vouchers.</returns>

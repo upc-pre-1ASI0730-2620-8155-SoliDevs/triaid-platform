@@ -23,7 +23,7 @@ public enum ESpecialtyError
 /// <param name="Message">Human readable explanation.</param>
 public sealed record SpecialtyError(ESpecialtyError Type, string Message);
 
-/// <summary>Suggestion outcome including the demographic admission verdict (US32 - Escenario 2).</summary>
+/// <summary>Suggestion outcome including the demographic admission verdict.</summary>
 /// <param name="SpecialtyKey">Suggested specialty key.</param>
 /// <param name="Rule">Strategy that produced the suggestion.</param>
 /// <param name="DemographicRestriction">True when the suggested specialty rejects the patient demographics.</param>
@@ -32,19 +32,19 @@ public sealed record SpecialtySuggestionResult(string SpecialtyKey, string Rule,
 /// <summary>Contract of the Specialty Assignment use cases.</summary>
 public interface ISpecialtyAssignmentService
 {
-    /// <summary>Computes the suggested specialty for an episode (US30).</summary>
+    /// <summary>Computes the suggested specialty for an episode.</summary>
     Task<Result<SpecialtySuggestionResult, SpecialtyError>> SuggestAsync(
         SuggestSpecialtyQuery query, CancellationToken cancellationToken = default);
 
-    /// <summary>Routes a classified episode to a specialty (US31).</summary>
+    /// <summary>Routes a classified episode to a specialty.</summary>
     Task<Result<Referral, SpecialtyError>> ReferAsync(
         ReferEpisodeCommand command, string symptom, CancellationToken cancellationToken = default);
 
-    /// <summary>Reassigns a referral with justification (US32).</summary>
+    /// <summary>Reassigns a referral with justification.</summary>
     Task<Result<Referral, SpecialtyError>> ReassignAsync(
         ReassignReferralCommand command, CancellationToken cancellationToken = default);
 
-    /// <summary>Retrieves the referral of an episode (US33, US37).</summary>
+    /// <summary>Retrieves the referral of an episode.</summary>
     Task<Result<Referral, SpecialtyError>> GetByEpisodeAsync(
         string episodeId, CancellationToken cancellationToken = default);
 

@@ -17,7 +17,7 @@ public record SymptomResource(string Id, string Es, string En, string Specialty)
 /**
  * <summary>
  *     Symptom catalog REST facade. The catalog is static and matches
- *     the seed data of the web client (ADR-010 backend swap contract).
+ *     the seed data of the web client.
  * </summary>
  */
 [ApiController]

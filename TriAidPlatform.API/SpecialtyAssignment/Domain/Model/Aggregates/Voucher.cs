@@ -1,13 +1,14 @@
+using TriAidPlatform.API.Shared.Domain.Model;
+
 namespace TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
 
 /**
  * <summary>
  *     Voucher of a referred patient: proof of the referral sent to the
- *     patient portal or front desk, with the QR code payload (ADR-010
- *     web client contract).
+ *     patient portal or front desk, with the QR code payload.
  * </summary>
  */
-public class Voucher
+public class Voucher : IAuditableEntity
 {
     /// <summary>Unique identifier of the voucher.</summary>
     public int Id { get; set; }
@@ -26,12 +27,18 @@ public class Voucher
 
     /// <summary>Institution the voucher belongs to.</summary>
     public string Institution { get; set; } = string.Empty;
+
+    /// <summary>UTC timestamp when the voucher record was created.</summary>
+    public DateTimeOffset? CreatedAt { get; set; }
+
+    /// <summary>UTC timestamp when the voucher record was last updated.</summary>
+    public DateTimeOffset? UpdatedAt { get; set; }
 }
 
 /**
  * <summary>
  *     Voucher body used by the web client save flows, tolerant of a
- *     null identifier on creation (ADR-010).
+ *     null identifier on creation.
  * </summary>
  * <param name="ReferralId">Identifier of the referral the voucher proves.</param>
  * <param name="QrCode">QR payload with the referral summary.</param>

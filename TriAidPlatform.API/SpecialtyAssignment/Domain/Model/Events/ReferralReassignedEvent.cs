@@ -1,6 +1,6 @@
 namespace TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Events;
 
-/// <summary>Domain event raised after a justified reassignment (US32).</summary>
+/// <summary>Domain event raised after a justified reassignment.</summary>
 /// <param name="ReferralId">Identifier of the referral.</param>
 /// <param name="EpisodeId">Identifier of the episode.</param>
 /// <param name="NewSpecialtyId">Identifier of the new specialty.</param>

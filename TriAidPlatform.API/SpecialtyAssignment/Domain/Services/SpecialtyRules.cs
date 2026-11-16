@@ -5,13 +5,13 @@ namespace TriAidPlatform.API.SpecialtyAssignment.Domain.Services;
 /// <param name="Rule">Strategy that produced the suggestion ('symptom' | 'priority').</param>
 public sealed record SpecialtySuggestion(string? SpecialtyKey, string Rule)
 {
-    /// <summary>Whether a specialty was proposed (US30 - Escenario 1).</summary>
+    /// <summary>Whether a specialty was proposed.</summary>
     public bool HasSuggestion => SpecialtyKey is not null;
 }
 
 /// <summary>
-/// Domain service with the clinical rules of specialty recommendation
-/// (US30): main-symptom keyword matching first, then the classified
+/// Domain service with the clinical rules of specialty recommendation:
+/// main-symptom keyword matching first, then the classified
 /// priority as fallback (levels I-II to General Surgery, the rest to
 /// Internal Medicine).
 /// </summary>
@@ -30,8 +30,8 @@ public static class SpecialtyRules
     ];
 
     /// <summary>
-    /// Resolves the suggested specialty (US30 - Escenario 1). An empty
-    /// symptom stops the suggestion and requires the main condition (US30 - Escenario 2).
+    /// Resolves the suggested specialty. An empty
+    /// symptom stops the suggestion and requires the main condition.
     /// </summary>
     /// <param name="symptom">Free-text main symptom.</param>
     /// <param name="triageLevel">Confirmed triage level (1-5), or null.</param>

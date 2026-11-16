@@ -13,11 +13,10 @@ using TriAidPlatform.API.SpecialtyAssignment.Interfaces.REST.Transform;
 namespace TriAidPlatform.API.SpecialtyAssignment.Interfaces.REST;
 
 /// <summary>
-/// REST facade of the Specialty Assignment bounded context
-/// (US30-US33, US37). Exposes the specialty catalog, the rule-based
+/// REST facade of the Specialty Assignment bounded context.
+/// Exposes the specialty catalog, the rule-based
 /// suggestion, the referral with queue position and the justified
-/// reassignment, plus the full-referral CRUD used by the web client
-/// (ADR-010 backend swap contract).
+/// reassignment, plus the full-referral CRUD used by the web client.
 /// </summary>
 /// <param name="assignmentService">Use cases of the bounded context.</param>
 /// <param name="referralRepository">Repository of the Referral aggregate.</param>
@@ -44,7 +43,7 @@ public class SpecialtyAssignmentController(
         return Ok(specialties.Select(SpecialtyResource.FromEntity));
     }
 
-    /// <summary>Computes the suggested specialty for an episode (US30).</summary>
+    /// <summary>Computes the suggested specialty for an episode.</summary>
     /// <param name="resource">Symptom and patient context of the episode.</param>
     /// <param name="cancellationToken">Token to observe for cancellation.</param>
     /// <returns>The suggested specialty with the strategy that produced it.</returns>
@@ -64,7 +63,7 @@ public class SpecialtyAssignmentController(
             });
     }
 
-    /// <summary>Routes a classified episode to a specialty (US31).</summary>
+    /// <summary>Routes a classified episode to a specialty.</summary>
     /// <param name="episodeId">Identifier of the classified episode.</param>
     /// <param name="resource">Destination specialty and symptom.</param>
     /// <param name="cancellationToken">Token to observe for cancellation.</param>
@@ -78,7 +77,7 @@ public class SpecialtyAssignmentController(
         return await ToReferralResultAsync(result, cancellationToken);
     }
 
-    /// <summary>Reassigns a referral with a written justification (US32).</summary>
+    /// <summary>Reassigns a referral with a written justification.</summary>
     /// <param name="referralId">Identifier of the referral.</param>
     /// <param name="resource">New specialty and justification.</param>
     /// <param name="cancellationToken">Token to observe for cancellation.</param>
@@ -92,7 +91,7 @@ public class SpecialtyAssignmentController(
         return await ToReferralResultAsync(result, cancellationToken);
     }
 
-    /// <summary>Retrieves the referral of an episode with its queue position (US33, US37).</summary>
+    /// <summary>Retrieves the referral of an episode with its queue position.</summary>
     /// <param name="episodeId">Identifier of the episode.</param>
     /// <param name="cancellationToken">Token to observe for cancellation.</param>
     /// <returns>The referral, or 404 when the episode is not referred.</returns>
@@ -107,7 +106,7 @@ public class SpecialtyAssignmentController(
     /**
      * <summary>
      *     Lists every referral across institutions. The web client
-     *     filters by institution client-side (ADR-010)
+     *     filters by institution client-side
      * </summary>
      * <param name="cancellationToken">Token to observe for cancellation.</param>
      * <returns>All referrals with their specialty names.</returns>
@@ -126,7 +125,7 @@ public class SpecialtyAssignmentController(
      * <summary>
      *     Creates a referral from the web client record. The specialty
      *     arrives by catalog name and the client reports the queue
-     *     position and timestamps (ADR-010)
+     *     position and timestamps
      * </summary>
      * <param name="resource">The referral record sent by the client.</param>
      * <param name="cancellationToken">Token to observe for cancellation.</param>
@@ -156,7 +155,7 @@ public class SpecialtyAssignmentController(
     /**
      * <summary>
      *     Applies a full-record referral update from the web client
-     *     (ADR-010)
+     *
      * </summary>
      * <param name="id">Identifier of the referral.</param>
      * <param name="resource">The referral record sent by the client.</param>

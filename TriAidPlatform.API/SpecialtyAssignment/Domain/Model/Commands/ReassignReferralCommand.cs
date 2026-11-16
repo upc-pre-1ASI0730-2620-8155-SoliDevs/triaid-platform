@@ -1,6 +1,6 @@
 namespace TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Commands;
 
-/// <summary>Command that reassigns a referral with justification (US32).</summary>
+/// <summary>Command that reassigns a referral with justification.</summary>
 /// <param name="ReferralId">Identifier of the referral.</param>
 /// <param name="NewSpecialtyId">Identifier of the new specialty.</param>
 /// <param name="Reason">Mandatory written justification.</param>

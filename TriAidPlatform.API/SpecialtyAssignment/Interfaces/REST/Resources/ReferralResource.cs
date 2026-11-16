@@ -17,7 +17,7 @@ public record ReferralResource(int Id, string EpisodeId, string Specialty, strin
 /**
  * <summary>
  *     Referral record body used by the web client save flows, tolerant
- *     of a null identifier on creation (ADR-010).
+ *     of a null identifier on creation.
  * </summary>
  * <param name="EpisodeId">Identifier of the episode.</param>
  * <param name="Specialty">Name of the destination specialty.</param>
