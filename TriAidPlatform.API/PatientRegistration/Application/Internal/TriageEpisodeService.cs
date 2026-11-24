@@ -5,6 +5,8 @@ using TriAidPlatform.API.PatientRegistration.Domain.Repositories;
 using TriAidPlatform.API.PatientRegistration.Domain.Services;
 using TriAidPlatform.API.Shared.Application.Patterns;
 using TriAidPlatform.API.Shared.Domain.Repositories;
+using TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
+using TriAidPlatform.API.SpecialtyAssignment.Domain.Repositories;
 
 namespace TriAidPlatform.API.PatientRegistration.Application.Internal;
 
@@ -19,6 +21,7 @@ namespace TriAidPlatform.API.PatientRegistration.Application.Internal;
 public class TriageEpisodeService(
     ITriageEpisodeRepository episodeRepository,
     IPatientRepository patientRepository,
+    IReferralRepository referralRepository,
     IUnitOfWork unitOfWork) : ITriageEpisodeService
 {
     /// <summary>
@@ -63,7 +66,7 @@ public class TriageEpisodeService(
     /// <returns>The updated episode, or a NotFound or Validation failure.</returns>
     public Task<Result<TriageEpisode, PatientRegistrationError>> MarkAttendedAsync(
         int episodeId, CancellationToken cancellationToken = default) =>
-        ChangeStateAsync(episodeId, episode => episode.MarkAttended(), cancellationToken);
+        ChangeStateAsync(episodeId, episode => episode.MarkAttended(), cancellationToken, closeReferral: true);
 
     /// <summary>
     /// Closes an episode in triage as referred to a specialty.
@@ -79,7 +82,7 @@ public class TriageEpisodeService(
     /// Loads the episode, applies the state transition and persists it.
     /// </summary>
     private async Task<Result<TriageEpisode, PatientRegistrationError>> ChangeStateAsync(
-        int episodeId, Action<TriageEpisode> transition, CancellationToken cancellationToken)
+        int episodeId, Action<TriageEpisode> transition, CancellationToken cancellationToken, bool closeReferral = false)
     {
         var episode = await episodeRepository.FindByIdAsync(episodeId, cancellationToken);
         if (episode is null)
@@ -95,6 +98,19 @@ public class TriageEpisodeService(
         }
 
         episodeRepository.Update(episode);
+
+        // When the patient is finally seen, the referral leaves the waiting queue so the
+        // patients behind move up one place (US37, scenario 2).
+        if (closeReferral)
+        {
+            var referral = await referralRepository.FindByEpisodeIdAsync(episodeId.ToString(), cancellationToken);
+            if (referral is { State: "waiting" })
+            {
+                referral.MarkAttended();
+                referralRepository.Update(referral);
+            }
+        }
+
         await unitOfWork.CompleteAsync(cancellationToken);
         return new Result<TriageEpisode, PatientRegistrationError>.Success(episode);
     }

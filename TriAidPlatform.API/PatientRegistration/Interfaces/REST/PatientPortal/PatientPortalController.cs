@@ -10,6 +10,7 @@ using TriAidPlatform.API.SpecialtyAssignment.Domain.Repositories;
 using TriAidPlatform.API.TriageClassification.Domain.Model.Aggregates;
 using TriAidPlatform.API.TriageClassification.Domain.Model.ValueObjects;
 using TriAidPlatform.API.TriageClassification.Domain.Repositories;
+using System.Text.Json;
 
 namespace TriAidPlatform.API.PatientRegistration.Interfaces.REST.PatientPortal;
 
@@ -63,10 +64,13 @@ public class PatientPortalController(
         Classification? classification = null;
         Referral? referral = null;
         QueuePositionResource? queue = null;
+        VitalsPortalResource? vitals = null;
         string? specialtyName = null;
 
         if (episode is not null)
         {
+            vitals = ParseVitals(episode.Vitals);
+
             var episodeId = episode.Id.ToString();
             classification = await classificationRepository.FindByEpisodeIdAsync(episodeId, cancellationToken);
             referral = await referralRepository.FindByEpisodeIdAsync(episodeId, cancellationToken);
@@ -90,7 +94,8 @@ public class PatientPortalController(
                 classification.ConfirmedAt),
             referral is null ? null : new ReferralPortalResource(
                 referral.Id, specialtyName ?? string.Empty, referral.Room, referral.ReferredAt, referral.State),
-            queue));
+            queue,
+            vitals));
     }
 
     /// <summary>
@@ -116,6 +121,30 @@ public class PatientPortalController(
 
         var classification = await classificationRepository.FindByEpisodeIdAsync(episodeId, cancellationToken);
         return Ok(await ComputeQueueAsync(episodeId, referral, classification, cancellationToken));
+    }
+
+    /// <summary>
+    /// Parses the vitals JSON the staff client stores on the episode
+    /// ({"pa":{"value","source","time"},"spo2":...,"fc":...,"temp":...}).
+    /// </summary>
+    private static VitalsPortalResource? ParseVitals(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            VitalEntry? Get(string key) =>
+                root.TryGetProperty(key, out var e) && e.TryGetProperty("value", out var v)
+                    ? new VitalEntry(v.GetString() ?? string.Empty,
+                        e.TryGetProperty("source", out var src) ? src.GetString() : null,
+                        e.TryGetProperty("time", out var tm) ? tm.GetString() : null)
+                    : null;
+            var result = new VitalsPortalResource(Get("pa"), Get("spo2"), Get("fc"), Get("temp"));
+            return result.BloodPressure is null && result.OxygenSaturation is null && result.HeartRate is null && result.Temperature is null
+                ? null : result;
+        }
+        catch (JsonException) { return null; }
     }
 
     /// <summary>
