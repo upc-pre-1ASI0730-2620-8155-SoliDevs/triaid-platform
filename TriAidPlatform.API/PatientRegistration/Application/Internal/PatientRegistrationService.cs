@@ -15,8 +15,10 @@ namespace TriAidPlatform.API.PatientRegistration.Application.Internal;
 /// </summary>
 /// <param name="patientRepository">Repository of the Patient aggregate.</param>
 /// <param name="unitOfWork">Unit of work used to commit the changes.</param>
-public class PatientRegistrationService(IPatientRepository patientRepository, IUnitOfWork unitOfWork)
-    : IPatientRegistrationService
+public class PatientRegistrationService(
+    IPatientRepository patientRepository,
+    IUnitOfWork unitOfWork,
+    IPortalCodeHasher portalCodeHasher) : IPatientRegistrationService
 {
     /// <summary>
     /// Searches a patient by its national identity document number (US06).
@@ -132,6 +134,31 @@ public class PatientRegistrationService(IPatientRepository patientRepository, IU
         patientRepository.Update(patient);
         await unitOfWork.CompleteAsync(cancellationToken);
         return new Result<Patient, PatientRegistrationError>.Success(patient);
+    }
+
+    /// <summary>
+    /// Generates a fresh 8-character access code, stores its hash and optional
+    /// e-mail, and returns the plain code for the admission desk. Calling it again
+    /// rotates the code, which is how a forgotten code is replaced.
+    /// </summary>
+    public async Task<Result<(Patient Patient, string AccessCode), PatientRegistrationError>> EnablePortalAsync(
+        int patientId, EnablePatientPortalCommand command, CancellationToken cancellationToken = default)
+    {
+        var patient = await patientRepository.FindByIdAsync(patientId, cancellationToken);
+        if (patient is null)
+            return new Result<(Patient, string), PatientRegistrationError>.Failure(
+                new PatientRegistrationError(EPatientRegistrationErrorType.NotFound,
+                    $"Patient with id {patientId} was not found."));
+
+        const string alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        var bytes = System.Security.Cryptography.RandomNumberGenerator.GetBytes(8);
+        var code = new string(bytes.Select(b => alphabet[b % alphabet.Length]).ToArray());
+
+        patient.EnablePortal(command.Email);
+        patient.SetPortalPasswordHash(portalCodeHasher.Hash(code));
+        patientRepository.Update(patient);
+        await unitOfWork.CompleteAsync(cancellationToken);
+        return new Result<(Patient, string), PatientRegistrationError>.Success((patient, code));
     }
 
     private static Result<Patient, PatientRegistrationError> NotFound(int patientId) =>

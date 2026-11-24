@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TriAidPlatform.API.PatientRegistration.Domain.Model.Aggregates;
+using TriAidPlatform.API.PatientRegistration.Domain.Model.Commands;
 using TriAidPlatform.API.PatientRegistration.Domain.Model.ValueObjects;
 using TriAidPlatform.API.PatientRegistration.Domain.Repositories;
 using TriAidPlatform.API.PatientRegistration.Domain.Services;
@@ -102,6 +103,26 @@ public class PatientsController(
         var command = PatientCommandFromResourceAssembler.ToCommandFromResource(resource);
         var result = await patientRegistrationService.UpdateContactDataAsync(patientId, command, cancellationToken);
         return ToOkResponse(result);
+    }
+
+    /// <summary>
+    /// Enables the patient portal. The returned access code is shown once so the
+    /// admission desk can hand it to the patient. Calling it again rotates the code.
+    /// </summary>
+    /// <param name="patientId">Patient identifier.</param>
+    /// <param name="resource">Optional contact e-mail.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    [HttpPost("{patientId:int}/portal")]
+    public async Task<ActionResult<PortalEnabledResource>> EnablePortal(
+        int patientId, [FromBody] EnablePortalResource resource, CancellationToken cancellationToken)
+    {
+        var result = await patientRegistrationService.EnablePortalAsync(
+            patientId, new EnablePatientPortalCommand(resource.Email), cancellationToken);
+        return result.Fold<ActionResult<PortalEnabledResource>>(
+            r => Ok(new PortalEnabledResource(r.Patient.Id, r.Patient.Email, r.AccessCode)),
+            error => error.Type == EPatientRegistrationErrorType.NotFound
+                ? NotFound(new { message = error.Message })
+                : BadRequest(new { message = error.Message }));
     }
 
     private ActionResult<PatientResource> ToCreatedResponse(Result<Patient, PatientRegistrationError> result) =>
