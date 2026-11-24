@@ -25,7 +25,11 @@ public interface IPatientRegistrationService
     /// <param name="command">The registration data.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>The registered patient or the failure.</returns>
-    Task<Result<Patient, PatientRegistrationError>> RegisterAsync(
+    /// <summary>
+    /// Registers a patient and enables the portal right away. The plain access code
+    /// is returned once so admission can hand it over.
+    /// </summary>
+    Task<Result<(Patient Patient, string AccessCode), PatientRegistrationError>> RegisterAsync(
         CreatePatientCommand command, CancellationToken cancellationToken = default);
 
     /// <summary>

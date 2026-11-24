@@ -38,11 +38,13 @@ public class PatientRegistrationService(
     /// <param name="command">The registration data.</param>
     /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
     /// <returns>The registered patient, or a Conflict or Validation failure.</returns>
-    public async Task<Result<Patient, PatientRegistrationError>> RegisterAsync(
+    public async Task<Result<(Patient Patient, string AccessCode), PatientRegistrationError>> RegisterAsync(
         CreatePatientCommand command, CancellationToken cancellationToken = default)
     {
         if (await patientRepository.GetByDniAsync(command.Dni, cancellationToken) is not null)
-            return Conflict($"A patient with DNI {command.Dni} is already registered.");
+            return new Result<(Patient, string), PatientRegistrationError>.Failure(
+                new PatientRegistrationError(EPatientRegistrationErrorType.Conflict,
+                    $"A patient with DNI {command.Dni} is already registered."));
 
         Patient patient;
         try
@@ -51,12 +53,19 @@ public class PatientRegistrationService(
         }
         catch (ArgumentException e)
         {
-            return Invalid(e.Message);
+            return new Result<(Patient, string), PatientRegistrationError>.Failure(
+                new PatientRegistrationError(EPatientRegistrationErrorType.Validation, e.Message));
         }
+
+        // Every registered patient gets portal access right away: the plan includes
+        // the portal for all patients, and admission hands the code over in the same step.
+        var code = GeneratePortalCode();
+        patient.EnablePortal(command.Email);
+        patient.SetPortalPasswordHash(portalCodeHasher.Hash(code));
 
         await patientRepository.AddAsync(patient, cancellationToken);
         await unitOfWork.CompleteAsync(cancellationToken);
-        return new Result<Patient, PatientRegistrationError>.Success(patient);
+        return new Result<(Patient, string), PatientRegistrationError>.Success((patient, code));
     }
 
     /// <summary>
@@ -136,6 +145,14 @@ public class PatientRegistrationService(
         return new Result<Patient, PatientRegistrationError>.Success(patient);
     }
 
+    /// <summary>Builds an 8-character access code made of unambiguous characters.</summary>
+    private static string GeneratePortalCode()
+    {
+        const string alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        var bytes = System.Security.Cryptography.RandomNumberGenerator.GetBytes(8);
+        return new string(bytes.Select(b => alphabet[b % alphabet.Length]).ToArray());
+    }
+
     /// <summary>
     /// Generates a fresh 8-character access code, stores its hash and optional
     /// e-mail, and returns the plain code for the admission desk. Calling it again
@@ -150,9 +167,7 @@ public class PatientRegistrationService(
                 new PatientRegistrationError(EPatientRegistrationErrorType.NotFound,
                     $"Patient with id {patientId} was not found."));
 
-        const string alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        var bytes = System.Security.Cryptography.RandomNumberGenerator.GetBytes(8);
-        var code = new string(bytes.Select(b => alphabet[b % alphabet.Length]).ToArray());
+        var code = GeneratePortalCode();
 
         patient.EnablePortal(command.Email);
         patient.SetPortalPasswordHash(portalCodeHasher.Hash(code));

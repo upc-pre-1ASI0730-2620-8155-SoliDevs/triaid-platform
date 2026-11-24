@@ -53,7 +53,7 @@ public class PatientsController(
 
     /// <summary>Registers a patient with identity document (US06, US08).</summary>
     [HttpPost]
-    public async Task<ActionResult<PatientResource>> CreateAsync(
+    public async Task<ActionResult> CreateAsync(
         [FromBody] CreatePatientResource resource, CancellationToken cancellationToken)
     {
         try
@@ -77,7 +77,13 @@ public class PatientsController(
         {
             var command = PatientCommandFromResourceAssembler.ToCommandFromResource(resource);
             var result = await patientRegistrationService.CreateTemporaryProfileAsync(command, cancellationToken);
-            return ToCreatedResponse(result);
+            return result.Fold<ActionResult>(
+                patient =>
+                {
+                    var created = PatientResourceFromEntityAssembler.ToResourceFromEntity(patient);
+                    return CreatedAtAction(nameof(GetById), new { patientId = created.Id }, created);
+                },
+                ToErrorResponse);
         }
         catch (ArgumentException e)
         {
@@ -125,21 +131,23 @@ public class PatientsController(
                 : BadRequest(new { message = error.Message }));
     }
 
-    private ActionResult<PatientResource> ToCreatedResponse(Result<Patient, PatientRegistrationError> result) =>
-        result.Fold<ActionResult<PatientResource>>(
-            patient =>
+    /// <summary>Patient just registered, with the one-time portal access code.</summary>
+    private ActionResult ToCreatedResponse(Result<(Patient Patient, string AccessCode), PatientRegistrationError> result) =>
+        result.Fold<ActionResult>(
+            r =>
             {
-                var created = PatientResourceFromEntityAssembler.ToResourceFromEntity(patient);
-                return CreatedAtAction(nameof(GetById), new { patientId = created.Id }, created);
+                var created = PatientResourceFromEntityAssembler.ToResourceFromEntity(r.Patient);
+                return CreatedAtAction(nameof(GetById), new { patientId = created.Id },
+                    new PatientCreatedResource(created, r.AccessCode));
             },
             ToErrorResponse);
 
     private ActionResult<PatientResource> ToOkResponse(Result<Patient, PatientRegistrationError> result) =>
         result.Fold<ActionResult<PatientResource>>(
             patient => Ok(PatientResourceFromEntityAssembler.ToResourceFromEntity(patient)),
-            ToErrorResponse);
+            error => ToErrorResponse(error));
 
-    private ActionResult<PatientResource> ToErrorResponse(PatientRegistrationError error) => error.Type switch
+    private ActionResult ToErrorResponse(PatientRegistrationError error) => error.Type switch
     {
         EPatientRegistrationErrorType.NotFound => NotFound(new { message = error.Message }),
         EPatientRegistrationErrorType.Conflict => Conflict(new { message = error.Message }),
