@@ -19,4 +19,5 @@ public record CreatePatientCommand(
     DateOnly BirthDate,
     Sex Sex,
     string? Phone,
-    string? Address);
+    string? Address,
+    string? Email = null);

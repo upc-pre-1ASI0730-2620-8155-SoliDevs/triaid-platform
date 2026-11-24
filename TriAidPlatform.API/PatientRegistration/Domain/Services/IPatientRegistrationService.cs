@@ -56,4 +56,14 @@ public interface IPatientRegistrationService
     /// <returns>The updated patient or the failure.</returns>
     Task<Result<Patient, PatientRegistrationError>> UpdateContactDataAsync(
         int patientId, UpdateContactCommand command, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Enables the patient portal and returns the patient together with the plain
+    /// access code the admission desk must hand over.
+    /// </summary>
+    /// <param name="patientId">Patient identifier.</param>
+    /// <param name="command">Portal data (optional e-mail).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task<Result<(Patient Patient, string AccessCode), PatientRegistrationError>> EnablePortalAsync(
+        int patientId, EnablePatientPortalCommand command, CancellationToken cancellationToken = default);
 }

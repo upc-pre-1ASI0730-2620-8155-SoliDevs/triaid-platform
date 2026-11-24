@@ -37,4 +37,11 @@ public class PatientRepository(AppDbContext context) : BaseRepository<Patient>(c
         return await Context.Set<Patient>()
             .FirstOrDefaultAsync(p => p.TemporaryCode == code, cancellationToken);
     }
+
+    public async Task<Patient?> GetByIdentifierAsync(string identifier, CancellationToken cancellationToken = default)
+    {
+        var value = identifier.Trim();
+        return await Context.Set<Patient>()
+            .FirstOrDefaultAsync(p => p.Dni == value || p.Email == value.ToLower(), cancellationToken);
+    }
 }

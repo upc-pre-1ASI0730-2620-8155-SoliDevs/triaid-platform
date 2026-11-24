@@ -11,6 +11,8 @@ namespace TriAidPlatform.API.PatientRegistration.Interfaces.REST.Resources;
 /// <param name="Address">Home address.</param>
 /// <param name="IsTemporary">Whether the profile is an emergency temporary profile.</param>
 /// <param name="TemporaryCode">Emergency identifier of temporary profiles.</param>
+/// <param name="Email">Contact e-mail, also accepted as portal identifier.</param>
+/// <param name="PortalEnabled">Whether the patient can sign in to the patient portal.</param>
 public record PatientResource(
     int Id,
     string? Dni,
@@ -21,4 +23,6 @@ public record PatientResource(
     string? Phone,
     string? Address,
     bool IsTemporary,
-    string? TemporaryCode);
+    string? TemporaryCode,
+    string? Email,
+    bool PortalEnabled);

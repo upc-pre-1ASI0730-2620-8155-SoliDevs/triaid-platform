@@ -24,4 +24,11 @@ public interface IPatientRepository : IBaseRepository<Patient>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>The <see cref="Patient"/> if found; otherwise, null.</returns>
     Task<Patient?> GetByTemporaryCodeAsync(string code, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Finds a patient by portal identifier: the DNI, or the contact e-mail when it looks like one.
+    /// </summary>
+    /// <param name="identifier">DNI or e-mail entered at the portal sign-in.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task<Patient?> GetByIdentifierAsync(string identifier, CancellationToken cancellationToken = default);
 }

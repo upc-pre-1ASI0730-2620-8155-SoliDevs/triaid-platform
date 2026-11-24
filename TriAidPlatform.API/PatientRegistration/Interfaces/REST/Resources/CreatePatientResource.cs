@@ -8,6 +8,7 @@ namespace TriAidPlatform.API.PatientRegistration.Interfaces.REST.Resources;
 /// <param name="Sex">Patient sex: Male or Female (required).</param>
 /// <param name="Phone">Contact phone (optional).</param>
 /// <param name="Address">Home address (optional).</param>
+/// <param name="Email">Contact e-mail (optional). When present, also works as portal identifier.</param>
 public record CreatePatientResource(
     string Dni,
     string FirstName,
@@ -15,4 +16,5 @@ public record CreatePatientResource(
     DateOnly BirthDate,
     string Sex,
     string? Phone,
-    string? Address);
+    string? Address,
+    string? Email = null);

@@ -9,5 +9,6 @@ public static class PatientResourceFromEntityAssembler
     /// <summary>Converts an entity into its REST representation.</summary>
     public static PatientResource ToResourceFromEntity(Patient entity) =>
         new(entity.Id, entity.Dni, entity.FirstName, entity.LastName, entity.BirthDate,
-            entity.Sex.ToString(), entity.Phone, entity.Address, entity.IsTemporary, entity.TemporaryCode);
+            entity.Sex.ToString(), entity.Phone, entity.Address, entity.IsTemporary, entity.TemporaryCode,
+            entity.Email, entity.PortalEnabled);
 }
