@@ -62,6 +62,9 @@ builder.Services.AddScoped<IInstitutionRepository, InstitutionRepository>();
 // Patient Registration bounded context
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPatientRegistrationService, PatientRegistrationService>();
+builder.Services.AddScoped<TriAidPlatform.API.PatientRegistration.Domain.Services.IPortalCodeHasher, TriAidPlatform.API.PatientRegistration.Infrastructure.Hashing.BCryptPortalCodeHasher>();
+builder.Services.AddScoped<TriAidPlatform.API.Iam.Application.Internal.OutboundServices.IPatientDirectory, TriAidPlatform.API.PatientRegistration.Application.Internal.OutboundServices.PatientDirectory>();
+builder.Services.AddScoped<TriAidPlatform.API.Iam.Application.Internal.CommandServices.IPatientSignInService, TriAidPlatform.API.Iam.Application.Internal.CommandServices.PatientSignInService>();
 builder.Services.AddScoped<ITriageEpisodeRepository, TriageEpisodeRepository>();
 builder.Services.AddScoped<ITriageEpisodeService, TriageEpisodeService>();
 
