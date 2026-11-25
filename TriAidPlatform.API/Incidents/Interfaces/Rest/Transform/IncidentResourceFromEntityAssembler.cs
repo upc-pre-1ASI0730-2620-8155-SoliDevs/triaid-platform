@@ -1,36 +1,36 @@
-﻿using TriAidPlatform.API.Alerting.Domain.Model.Aggregates;
-using TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
-using TriAidPlatform.API.Alerting.Interfaces.Rest.Resources;
+﻿using TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
+using TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
+using TriAidPlatform.API.Incidents.Interfaces.Rest.Resources;
 
-namespace TriAidPlatform.API.Alerting.Interfaces.Rest.Transform;
+namespace TriAidPlatform.API.Incidents.Interfaces.Rest.Transform;
 
 /// <summary>
-/// Assembler responsible for transforming the <see cref="Alert"/> aggregate into an <see cref="AlertResource"/>.
+/// Assembler responsible for transforming the <see cref="Incident"/> aggregate into an <see cref="IncidentResource"/>.
 /// Keeps the domain model separate from the REST contract by mapping alert, patient, triage, and metric data
 /// to the resource's flattened representation.
 /// </summary>
-public static class AlertResourceFromEntityAssembler
+public static class IncidentResourceFromEntityAssembler
 {
     /// <summary>
-    /// Projects an <see cref="Alert"/> aggregate into its REST resource representation.
+    /// Projects an <see cref="Incident"/> aggregate into its REST resource representation.
     /// Derives the resource severity from the alert status and level, formats the measurement time as
     /// <c>HH:mm</c>, and formats the acknowledgment, escalation, and creation timestamps using round-trip
     /// (<c>o</c>) format. Missing metric values are represented as empty strings.
     /// </summary>
     /// <param name="entity">The alert aggregate to map.</param>
-    /// <returns>A new <see cref="AlertResource"/> populated with the alert's mapped data.</returns>
-    public static AlertResource ToResourceFromEntity(Alert entity)
+    /// <returns>A new <see cref="IncidentResource"/> populated with the alert's mapped data.</returns>
+    public static IncidentResource ToResourceFromEntity(Incident entity)
     {
         string severityString = entity.Status.StatusValue switch
         {
-            EAlertStatus.Active when entity.Level == EAlertLevel.Critical => "critical",
-            EAlertStatus.Active when entity.Level == EAlertLevel.Warning => "warning",
-            EAlertStatus.Acknowledged => "resolved",
-            EAlertStatus.Resolved => "resolved",
-            EAlertStatus.Escalated => "escalated",
+            EIncidentStatus.Active when entity.Level == EIncidentLevel.Critical => "critical",
+            EIncidentStatus.Active when entity.Level == EIncidentLevel.Warning => "warning",
+            EIncidentStatus.Acknowledged => "resolved",
+            EIncidentStatus.Resolved => "resolved",
+            EIncidentStatus.Escalated => "escalated",
             _ => "warning"
         };
-        return new AlertResource(
+        return new IncidentResource(
             entity.Id,
             entity.Institution,
             entity.PatientName,
