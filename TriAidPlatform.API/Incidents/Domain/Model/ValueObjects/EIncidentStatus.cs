@@ -1,8 +1,8 @@
-﻿namespace TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
+﻿namespace TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
 /// <summary>
 /// Defines the specific states an alert can transition through during a triage episode.
 /// </summary>
-public enum EAlertStatus
+public enum EIncidentStatus
 {
     Active,
     Acknowledged,
