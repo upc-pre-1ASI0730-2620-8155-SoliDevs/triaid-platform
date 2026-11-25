@@ -1,4 +1,4 @@
-﻿namespace TriAidPlatform.API.Alerting.Interfaces.Rest.Resources;
+﻿namespace TriAidPlatform.API.Incidents.Interfaces.Rest.Resources;
 /// <summary>
 /// REST response resource containing alert details and associated patient and triage information.
 /// This data-transfer object exposes a flattened representation intended for API clients.
@@ -18,7 +18,7 @@
 /// <param name="EscalatedAt">The escalation timestamp, if the alert has been escalated.</param>
 /// <param name="EscalatedTo">The destination to which the alert was escalated, if applicable.</param>
 /// <param name="CreatedAt">The timestamp when the alert was created, represented as text.</param>
-public record AlertResource(
+public record IncidentResource(
     int Id,
     string Institution,
     string? PatientName,
