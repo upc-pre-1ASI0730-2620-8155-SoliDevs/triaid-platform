@@ -1,17 +1,23 @@
-﻿using TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
+﻿using TriAidPlatform.API.Incidents.Domain.Model.Commands;
+using TriAidPlatform.API.Incidents.Domain.Model.Events;
+using TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
+using TriAidPlatform.API.Shared.Domain.Model.Aggregates.Internal;
 
 namespace TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
 
 /// <summary>
 /// Aggregate root that represents a clinical alert raised after detecting an abnormal reading or a priority triage condition.
-/// This aggregate encapsulates the alert lifecycle, escalation flow, and the minimum information needed for patient follow-up.
 /// </summary>
-public class Incident
+/// <remarks>
+/// The incident encapsulates the clinical context, metric, lifecycle state, acknowledgment and escalation timestamps,
+/// and the patient follow-up information associated with the alert.
+/// </remarks>
+public partial class Incident : AggregateRoot
 {
     /// <summary>
     /// Gets the unique identifier assigned to the alert.
     /// </summary>
-    public int Id { get; private set; }
+    public IncidentId Id { get;}
 
     /// <summary>
     /// Gets the clinic identifier that owns the alert and ensures logical isolation between healthcare facilities.
@@ -87,7 +93,13 @@ public class Incident
     /// Initializes a new instance of the <see cref="Incident"/> class for ORM materialization.
     /// This constructor is protected because the aggregate is hydrated by the persistence layer.
     /// </summary>
-    protected Incident() { }
+    protected Incident()
+    {
+        ClinicId = new ClinicId(0);
+        Institution = string.Empty;
+        Metric = new IncidentMetric(string.Empty, string.Empty, string.Empty);
+        Status = new IncidentStatus(EIncidentStatus.Active);
+    }
 
     /// <summary>
     /// Initializes a new alert based on a single anomalous vital sign reading.
@@ -137,6 +149,24 @@ public class Incident
     }
 
     /// <summary>
+    /// Initializes an incident from a <see cref="CreateIncidentCommand"/>.
+    /// </summary>
+    /// <param name="command">The command containing the clinic, episode, patient and metric information.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="command"/> is null.</exception>
+    public Incident(CreateIncidentCommand command) : this(
+        new ClinicId((command ?? throw new ArgumentNullException(nameof(command))).ClinicId), 
+        command.EpisodeId, 
+        command.Institution, 
+        command.PatientName, 
+        command.Dni,
+        command.Priority, 
+        command.Level, 
+        command.Metric)
+    {
+        AddDomainEvent(new IncidentCreatedEvent(Id,EpisodeId,Level));
+    }
+
+    /// <summary>
     /// Marks the alert as acknowledged by a healthcare professional.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown when the alert is already in a final state or has already been escalated.</exception>
@@ -172,8 +202,12 @@ public class Incident
     }
 
     /// <summary>
-    /// Marks the alert as resolved after the patient condition has stabilized or the episode has concluded.
+    /// Marks the alert as resolved after the patient condition has stabilized or the clinical episode has concluded.
     /// </summary>
+    /// <remarks>
+    /// Resolution is the terminal state of the incident lifecycle. Calling this method is idempotent from the state perspective,
+    /// although it does not set a separate resolution timestamp.
+    /// </remarks>
     public void Resolve()
     {
         Status = new IncidentStatus(EIncidentStatus.Resolved);
