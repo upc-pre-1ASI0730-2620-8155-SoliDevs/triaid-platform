@@ -2,6 +2,9 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Repositories;
+using TriAidPlatform.API.SpecialtyAssignment.Interfaces.REST.Resources;
+using TriAidPlatform.API.PatientRegistration.Domain.Repositories;
+using System.Text.RegularExpressions;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 
 namespace TriAidPlatform.API.SpecialtyAssignment.Interfaces.REST;
@@ -19,7 +22,12 @@ namespace TriAidPlatform.API.SpecialtyAssignment.Interfaces.REST;
 [Route("vouchers")]
 [Produces(MediaTypeNames.Application.Json)]
 [Tags("Vouchers")]
-public class VouchersController(IVoucherRepository voucherRepository, IUnitOfWork unitOfWork) : ControllerBase
+public class VouchersController(
+    IVoucherRepository voucherRepository,
+    IReferralRepository referralRepository,
+    IPatientRepository patientRepository,
+    ITriageEpisodeRepository episodeRepository,
+    IUnitOfWork unitOfWork) : ControllerBase
 {
     /**
      * <summary>
@@ -29,6 +37,47 @@ public class VouchersController(IVoucherRepository voucherRepository, IUnitOfWor
      * <param name="cancellationToken">Token to observe for cancellation.</param>
      * <returns>All vouchers.</returns>
      */
+    /// <summary>
+    /// Resolves a voucher or episode code scanned at the admission desk into the
+    /// patient it belongs to, so the staff jumps straight to the patient file.
+    /// Accepts the structured QR payload ("TRI-AID|episode|specialty|room|#pos")
+    /// or the plain episode code ("EP-0014" / "14").
+    /// </summary>
+    /// <param name="code">Raw QR payload or episode code.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    [HttpGet("verify/{code}")]
+    [EndpointSummary("Resolve a scanned voucher code into its patient")]
+    [ProducesResponseType(typeof(ScannedVoucherResource), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Verify(string code, CancellationToken cancellationToken)
+    {
+        var episodeId = ParseEpisodeId(code);
+        if (episodeId is null) return NotFound(new { message = "The code does not identify an episode." });
+
+        var episode = await episodeRepository.FindByIdAsync(episodeId.Value, cancellationToken);
+        if (episode is null) return NotFound(new { message = $"Episode {episodeId} not found." });
+
+        var patient = await patientRepository.FindByIdAsync(episode.PatientId, cancellationToken);
+        var referral = await referralRepository.FindByEpisodeIdAsync(episode.Id.ToString(), cancellationToken);
+
+        return Ok(new ScannedVoucherResource(
+            episode.Id, episode.PatientId, episode.State.ToString(),
+            patient is null ? string.Empty : $"{patient.FirstName} {patient.LastName}".Trim(),
+            patient?.Dni, episode.ArrivalTime,
+            referral?.SpecialtyId, referral is null ? null : referral.Room, referral?.State));
+    }
+
+    /// <summary>Extracts the numeric episode id from a QR payload or a plain code.</summary>
+    private static int? ParseEpisodeId(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code)) return null;
+        var raw = Uri.UnescapeDataString(code).Trim();
+        if (raw.StartsWith("TRI-AID|", StringComparison.OrdinalIgnoreCase))
+            raw = raw.Split('|')[1];
+        raw = Regex.Replace(raw, @"^EP-0*", string.Empty, RegexOptions.IgnoreCase);
+        return int.TryParse(raw, out var id) ? id : null;
+    }
+
     [HttpGet]
     [EndpointSummary("List all vouchers")]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
