@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
@@ -82,6 +83,7 @@ builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("Toke
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IHashingService, HashingService>();
 builder.Services.AddSingleton<ITokenService, TokenService>();
+builder.Services.AddSingleton(sp => new TriAidPlatform.API.Shared.Infrastructure.Security.VoucherCodeCipher(sp.GetRequiredService<IOptions<TokenSettings>>().Value.Secret));
 builder.Services.AddScoped<IUserCommandService, UserCommandService>();
 builder.Services.AddScoped<IUserQueryService, UserQueryService>();
 builder.Services.AddScoped<IIamContextFacade, IamContextFacade>();

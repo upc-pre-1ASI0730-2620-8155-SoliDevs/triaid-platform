@@ -3,8 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Repositories;
 using TriAidPlatform.API.SpecialtyAssignment.Interfaces.REST.Resources;
+using TriAidPlatform.API.Iam.Infrastructure.Tokens.Jwt.Configuration;
+using TriAidPlatform.API.Iam.Infrastructure.Pipeline.Middleware.Attributes;
+using Microsoft.Extensions.Options;
 using TriAidPlatform.API.PatientRegistration.Domain.Repositories;
 using System.Text.RegularExpressions;
+using TriAidPlatform.API.Shared.Infrastructure.Security;
+using TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 
 namespace TriAidPlatform.API.SpecialtyAssignment.Interfaces.REST;
@@ -22,11 +27,14 @@ namespace TriAidPlatform.API.SpecialtyAssignment.Interfaces.REST;
 [Route("vouchers")]
 [Produces(MediaTypeNames.Application.Json)]
 [Tags("Vouchers")]
+// Voucher codes resolve into patient identity: staff session required.
+[Authorize]
 public class VouchersController(
     IVoucherRepository voucherRepository,
     IReferralRepository referralRepository,
     IPatientRepository patientRepository,
     ITriageEpisodeRepository episodeRepository,
+    VoucherCodeCipher cipher,
     IUnitOfWork unitOfWork) : ControllerBase
 {
     /**
@@ -37,6 +45,35 @@ public class VouchersController(
      * <param name="cancellationToken">Token to observe for cancellation.</param>
      * <returns>All vouchers.</returns>
      */
+    /// <summary>
+    /// Issues the voucher of a referral: builds the payload from the stored data,
+    /// seals it into an opaque token (nothing readable leaves the API) and
+    /// persists it as the voucher QR. Returns the token to render as QR.
+    /// </summary>
+    /// <param name="referralId">Referral identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    [HttpPost("referral/{referralId:int}/issue")]
+    [EndpointSummary("Issue the sealed voucher code of a referral")]
+    [ProducesResponseType(typeof(IssuedVoucherResource), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Issue(int referralId, CancellationToken cancellationToken)
+    {
+        var referral = await referralRepository.FindByIdAsync(referralId, cancellationToken);
+        if (referral is null) return NotFound(new { message = $"Referral {referralId} not found." });
+
+        var plain = $"TRI-AID|{referral.EpisodeId}|{referral.Room}|{referral.QueuePosition}";
+        var token = cipher.Seal(plain);
+
+        var existing = (await voucherRepository.ListAsync(cancellationToken))
+            .FirstOrDefault(v => v.ReferralId == referralId);
+        if (existing is null)
+            await voucherRepository.AddAsync(new Voucher { ReferralId = referralId, QrCode = token, Channel = "QrPortal", Institution = referral.Institution }, cancellationToken);
+        else { existing.QrCode = token; voucherRepository.Update(existing); }
+        await unitOfWork.CompleteAsync(cancellationToken);
+
+        return Ok(new IssuedVoucherResource(referralId, referral.EpisodeId, token));
+    }
+
     /// <summary>
     /// Resolves a voucher or episode code scanned at the admission desk into the
     /// patient it belongs to, so the staff jumps straight to the patient file.
@@ -68,10 +105,14 @@ public class VouchersController(
     }
 
     /// <summary>Extracts the numeric episode id from a QR payload or a plain code.</summary>
-    private static int? ParseEpisodeId(string code)
+    private int? ParseEpisodeId(string code)
     {
         if (string.IsNullOrWhiteSpace(code)) return null;
         var raw = Uri.UnescapeDataString(code).Trim();
+
+        // Sealed token first: the only form the API issues from now on.
+        var opened = cipher.Unseal(raw);
+        if (opened is not null) raw = opened;
         if (raw.StartsWith("TRI-AID|", StringComparison.OrdinalIgnoreCase))
             raw = raw.Split('|')[1];
         raw = Regex.Replace(raw, @"^EP-0*", string.Empty, RegexOptions.IgnoreCase);
