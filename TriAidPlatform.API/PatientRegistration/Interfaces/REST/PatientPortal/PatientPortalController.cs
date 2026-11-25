@@ -7,6 +7,7 @@ using TriAidPlatform.API.PatientRegistration.Domain.Repositories;
 using TriAidPlatform.API.PatientRegistration.Interfaces.REST.PatientPortal;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Repositories;
+using TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
 using TriAidPlatform.API.TriageClassification.Domain.Model.Aggregates;
 using TriAidPlatform.API.TriageClassification.Domain.Model.ValueObjects;
 using TriAidPlatform.API.TriageClassification.Domain.Repositories;
@@ -34,7 +35,8 @@ public class PatientPortalController(
     ITriageEpisodeRepository episodeRepository,
     IClassificationRepository classificationRepository,
     IReferralRepository referralRepository,
-    ISpecialtyRepository specialtyRepository) : ControllerBase
+    ISpecialtyRepository specialtyRepository,
+    IVoucherRepository voucherRepository) : ControllerBase
 {
     /// <summary>Average minutes per patient used to estimate the wait when there is no history.</summary>
     private const int MinutesPerPatient = 8;
@@ -66,6 +68,7 @@ public class PatientPortalController(
         QueuePositionResource? queue = null;
         VitalsPortalResource? vitals = null;
         string? specialtyName = null;
+        string? voucherToken = null;
 
         if (episode is not null)
         {
@@ -78,6 +81,8 @@ public class PatientPortalController(
             if (referral is not null)
             {
                 var specialty = await specialtyRepository.FindByIdAsync(referral.SpecialtyId, cancellationToken);
+                voucherToken = (await voucherRepository.ListAsync(cancellationToken))
+                    .FirstOrDefault(v => v.ReferralId == referral.Id)?.QrCode;
                 specialtyName = specialty?.Name ?? $"Specialty {referral.SpecialtyId}";
                 queue = await ComputeQueueAsync(episodeId, referral, classification, cancellationToken);
             }
@@ -93,7 +98,7 @@ public class PatientPortalController(
                 classification.State.ToString(),
                 classification.ConfirmedAt),
             referral is null ? null : new ReferralPortalResource(
-                referral.Id, specialtyName ?? string.Empty, referral.Room, referral.ReferredAt, referral.State),
+                referral.Id, specialtyName ?? string.Empty, referral.Room, referral.ReferredAt, referral.State, voucherToken),
             queue,
             vitals));
     }

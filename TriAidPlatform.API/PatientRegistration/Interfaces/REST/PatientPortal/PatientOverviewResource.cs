@@ -44,7 +44,7 @@ public record TriageEpisodeResource(int Id, DateTime ArrivalTime, string State);
 public record ClassificationPortalResource(string EpisodeId, int? Level, string State, DateTime? ConfirmedAt);
 
 /// <summary>Referral: specialty, room and time.</summary>
-public record ReferralPortalResource(int Id, string Specialty, string Room, DateTime ReferredAt, string State);
+public record ReferralPortalResource(int Id, string Specialty, string Room, DateTime ReferredAt, string State, string? VoucherToken = null);
 
 /// <summary>
 /// Live queue position computed on every call, never stored.
