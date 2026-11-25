@@ -1,24 +1,24 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TriAidPlatform.API.Alerting.Domain.Model.Aggregates;
-using TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
-using TriAidPlatform.API.Alerting.Domain.Repositories;
+using TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
+using TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
+using TriAidPlatform.API.Incidents.Domain.Repositories;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
-namespace TriAidPlatform.API.Alerting.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+namespace TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
 /// <summary>
-/// Infrastructure implementation of the <see cref="IAlertRepository"/> interface.
-/// Provides data access operations for the <see cref="Alert"/> aggregate using Entity Framework Core.
+/// Infrastructure implementation of the <see cref="IIncidentRepository"/> interface.
+/// Provides data access operations for the <see cref="Incident"/> aggregate using Entity Framework Core.
 /// Acts as a bridge between the domain rules of the Alerting bounded context and the relational database.
 /// </summary>
-public class AlertRepository : BaseRepository<Alert>, IAlertRepository
+public class IncidentRepository : BaseRepository<Incident>, IIncidentRepository
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="AlertRepository"/> class.
+    /// Initializes a new instance of the <see cref="IncidentRepository"/> class.
     /// </summary>
     /// <param name="context">The database context provided via dependency injection.</param>
-    public AlertRepository(AppDbContext context) : base(context) { }
+    public IncidentRepository(AppDbContext context) : base(context) { }
     
     /// <summary>
     /// Retrieves all active alerts from the database for a specific clinic.
@@ -26,12 +26,12 @@ public class AlertRepository : BaseRepository<Alert>, IAlertRepository
     /// </summary>
     /// <param name="clinicId">The unique identifier of the clinic to ensure data isolation.</param>
     /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
-    /// <returns>An asynchronous task returning a collection of active <see cref="Alert"/> instances belonging to the specified clinic.</returns>
-    public async Task<IEnumerable<Alert>> FindActiveAlertsAsync(ClinicId clinicId, CancellationToken cancellationToken = default)
+    /// <returns>An asynchronous task returning a collection of active <see cref="Incident"/> instances belonging to the specified clinic.</returns>
+    public async Task<IEnumerable<Incident>> FindActiveAlertsAsync(ClinicId clinicId, CancellationToken cancellationToken = default)
     {
-        var alerts = await Context.Set<Alert>()
+        var alerts = await Context.Set<Incident>()
             .ToListAsync(cancellationToken);
-        return alerts.Where(a => a.ClinicId == clinicId && a.Status.StatusValue != EAlertStatus.Resolved);
+        return alerts.Where(a => a.ClinicId == clinicId && a.Status.StatusValue != EIncidentStatus.Resolved);
     }
     
     /// <summary>
@@ -42,27 +42,27 @@ public class AlertRepository : BaseRepository<Alert>, IAlertRepository
     /// <param name="readingId">The unique identifier of the vital sign reading.</param>
     /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
     /// <returns>
-    /// An asynchronous task returning the <see cref="Alert"/> instance if found; 
+    /// An asynchronous task returning the <see cref="Incident"/> instance if found; 
     /// otherwise, null.
     /// </returns>
-    public async Task<Alert?> FindByReadingIdAsync(ClinicId clinicId, int readingId, CancellationToken cancellationToken = default)
+    public async Task<Incident?> FindByReadingIdAsync(ClinicId clinicId, int readingId, CancellationToken cancellationToken = default)
     {
-        return await Context.Set<Alert>()
+        return await Context.Set<Incident>()
             .FirstOrDefaultAsync(a => a.ClinicId == clinicId && a.ReadingId == readingId, cancellationToken);
     }
     /// <summary>
     /// Lists every alert in the system without clinic filters (used by the web client).
     /// </summary>
-    public async Task<IEnumerable<Alert>> ListAsync()
+    public async Task<IEnumerable<Incident>> ListAsync()
     {
-        return await Context.Set<Alert>().ToListAsync();
+        return await Context.Set<Incident>().ToListAsync();
     }
 
     /// <summary>
     /// Retrieves an alert directly by its database identifier.
     /// </summary>
-    public async Task<Alert?> GetByIdAsync(int id)
+    public async Task<Incident?> GetByIdAsync(int id)
     {
-        return await Context.Set<Alert>().FindAsync(id);
+        return await Context.Set<Incident>().FindAsync(id);
     }
 }
