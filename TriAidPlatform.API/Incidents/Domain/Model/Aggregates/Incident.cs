@@ -1,12 +1,12 @@
-﻿using TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
+﻿using TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
 
-namespace TriAidPlatform.API.Alerting.Domain.Model.Aggregates;
+namespace TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
 
 /// <summary>
 /// Aggregate root that represents a clinical alert raised after detecting an abnormal reading or a priority triage condition.
 /// This aggregate encapsulates the alert lifecycle, escalation flow, and the minimum information needed for patient follow-up.
 /// </summary>
-public class Alert
+public class Incident
 {
     /// <summary>
     /// Gets the unique identifier assigned to the alert.
@@ -21,7 +21,7 @@ public class Alert
     /// <summary>
     /// Gets the metric that triggered the alert, such as heart rate, oxygen saturation, or blood pressure.
     /// </summary>
-    public AlertMetric Metric { get; private set; }
+    public IncidentMetric Metric { get; private set; }
 
     /// <summary>
     /// Gets the identifier of the specific vital sign reading that caused the alert.
@@ -36,12 +36,12 @@ public class Alert
     /// <summary>
     /// Gets the alert severity level assigned by the triage or monitoring rules.
     /// </summary>
-    public EAlertLevel Level { get; private set; }
+    public EIncidentLevel Level { get; private set; }
 
     /// <summary>
     /// Gets the current state in the alert lifecycle.
     /// </summary>
-    public AlertStatus Status { get; private set; }
+    public IncidentStatus Status { get; private set; }
 
     /// <summary>
     /// Gets the exact UTC timestamp when the alert was raised.
@@ -84,10 +84,10 @@ public class Alert
     public DateTime? EscalatedAt { get; private set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Alert"/> class for ORM materialization.
+    /// Initializes a new instance of the <see cref="Incident"/> class for ORM materialization.
     /// This constructor is protected because the aggregate is hydrated by the persistence layer.
     /// </summary>
-    protected Alert() { }
+    protected Incident() { }
 
     /// <summary>
     /// Initializes a new alert based on a single anomalous vital sign reading.
@@ -97,13 +97,13 @@ public class Alert
     /// <param name="level">The severity assigned to the alert.</param>
     /// <param name="metric">The vital sign metric that exceeded the alert threshold.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="clinicId"/> or <paramref name="metric"/> is null.</exception>
-    public Alert(ClinicId clinicId, int readingId, EAlertLevel level, AlertMetric metric)
+    public Incident(ClinicId clinicId, int readingId, EIncidentLevel level, IncidentMetric metric)
     {
         ClinicId = clinicId ?? throw new ArgumentNullException(nameof(clinicId));
         Metric = metric ?? throw new ArgumentNullException(nameof(metric));
         ReadingId = readingId;
         Level = level;
-        Status = new AlertStatus(EAlertStatus.Active);
+        Status = new IncidentStatus(EIncidentStatus.Active);
         RaisedAt = DateTime.UtcNow;
         Institution = "Default Institution";
     }
@@ -120,7 +120,7 @@ public class Alert
     /// <param name="level">The alert severity category.</param>
     /// <param name="metric">The metric that caused the alert.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="clinicId"/> or <paramref name="metric"/> is null.</exception>
-    public Alert(ClinicId clinicId, int episodeId, string institution, string? patientName, string? dni, string? priority, EAlertLevel level, AlertMetric metric)
+    public Incident(ClinicId clinicId, int episodeId, string institution, string? patientName, string? dni, string? priority, EIncidentLevel level, IncidentMetric metric)
     {
         ClinicId = clinicId ?? throw new ArgumentNullException(nameof(clinicId));
         Metric = metric ?? throw new ArgumentNullException(nameof(metric));
@@ -132,7 +132,7 @@ public class Alert
         Dni = dni;
         Priority = priority;
         Level = level;
-        Status = new AlertStatus(EAlertStatus.Active);
+        Status = new IncidentStatus(EIncidentStatus.Active);
         RaisedAt = DateTime.UtcNow;
     }
 
@@ -145,10 +145,10 @@ public class Alert
         if (Status.isFinalState())
             throw new InvalidOperationException("Cannot acknowledge an already resolved alert.");
 
-        if (Status.StatusValue == EAlertStatus.Escalated)
+        if (Status.StatusValue == EIncidentStatus.Escalated)
             throw new InvalidOperationException("Cannot acknowledge an alert that has already been escalated.");
 
-        Status = new AlertStatus(EAlertStatus.Acknowledged);
+        Status = new IncidentStatus(EIncidentStatus.Acknowledged);
         AcknowledgedAt = DateTime.UtcNow;
     }
 
@@ -166,7 +166,7 @@ public class Alert
         if (Status.isFinalState())
             throw new InvalidOperationException("Cannot escalate an alert that is already resolved.");
 
-        Status = new AlertStatus(EAlertStatus.Escalated);
+        Status = new IncidentStatus(EIncidentStatus.Escalated);
         EscalatedTo = destination;
         EscalatedAt = DateTime.UtcNow;
     }
@@ -176,6 +176,6 @@ public class Alert
     /// </summary>
     public void Resolve()
     {
-        Status = new AlertStatus(EAlertStatus.Resolved);
+        Status = new IncidentStatus(EIncidentStatus.Resolved);
     }
 }
