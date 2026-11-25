@@ -1,31 +1,31 @@
-﻿using TriAidPlatform.API.Alerting.Domain.Model.Aggregates;
-using TriAidPlatform.API.Alerting.Domain.Model.Commands;
-using TriAidPlatform.API.Alerting.Domain.Repositories;
+﻿using TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
+using TriAidPlatform.API.Incidents.Domain.Model.Commands;
+using TriAidPlatform.API.Incidents.Domain.Repositories;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 
-namespace TriAidPlatform.API.Alerting.Application.Internal.CommandServices;
+namespace TriAidPlatform.API.Incidents.Application.Internal.CommandServices;
 
 /// <summary>
 /// Service responsible for handling commands that mutate the Alert Aggregate Root.
 /// Uses Primary Constructors for Dependency Injection.
 /// </summary>
-/// <param name="alertRepository">The repository interface for Alert data access.</param>
+/// <param name="incidentRepository">The repository interface for Alert data access.</param>
 /// <param name="unitOfWork">The unit of work interface to commit database transactions.</param>
-public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork unitOfWork)
+public class IncidentCommandService(IIncidentRepository incidentRepository, IUnitOfWork unitOfWork)
 {
     /// <summary>
-    /// Handles the execution of the <see cref="AcknowledgeAlertCommand"/>.
+    /// Handles the execution of the <see cref="AcknowledgeIncidentCommand"/>.
     /// Enforces multi-tenant data isolation by verifying the ClinicId, mutates the aggregate, and commits the transaction.
     /// </summary>
     /// <param name="command">The command object containing the AlertId and ClinicId.</param>
     /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
-    /// <returns>An asynchronous task returning the acknowledged <see cref="Alert"/> instance.</returns>
+    /// <returns>An asynchronous task returning the acknowledged <see cref="Incident"/> instance.</returns>
     /// <exception cref="UnauthorizedAccessException">Thrown when the alert does not belong to the requested clinic.</exception>
     /// <exception cref="Exception">Thrown when a database error occurs during the commit phase.</exception>
-    public async Task <Alert?> Handle(AcknowledgeAlertCommand command, CancellationToken cancellationToken = default)
+    public async Task <Incident?> Handle(AcknowledgeIncidentCommand command, CancellationToken cancellationToken = default)
     {
        
-        var alert = await alertRepository.FindByIdAsync(command.AlertId, cancellationToken);
+        var alert = await incidentRepository.FindByIdAsync(command.AlertId, cancellationToken);
         
         if (alert == null || alert.ClinicId.Value != command.ClinicId.Value)
         {
@@ -36,7 +36,7 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
 
         try
         {
-            alertRepository.Update(alert);
+            incidentRepository.Update(alert);
             await unitOfWork.CompleteAsync(cancellationToken);
         }
         catch (Exception e)
@@ -47,12 +47,12 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
         return alert;
     }
     /// <summary>
-    /// Handles the execution of the <see cref="EscalateAlertCommand"/>.
+    /// Handles the execution of the <see cref="EscalateIncidentCommand"/>.
     /// Validates clinic ownership and escalates the alert to the requested destination.
     /// </summary>
-    public async Task<Alert?> Handle(EscalateAlertCommand command, CancellationToken cancellationToken = default)
+    public async Task<Incident?> Handle(EscalateIncidentCommand command, CancellationToken cancellationToken = default)
     {
-        var alert = await alertRepository.FindByIdAsync(command.AlertId, cancellationToken);
+        var alert = await incidentRepository.FindByIdAsync(command.AlertId, cancellationToken);
         
         if (alert == null || alert.ClinicId.Value != command.ClinicId.Value)
         {
@@ -63,7 +63,7 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
         
         try
         {
-            alertRepository.Update(alert);
+            incidentRepository.Update(alert);
             await unitOfWork.CompleteAsync(cancellationToken);
         }
         catch (Exception e)
@@ -77,9 +77,9 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
     /// Handles the creation of a new alert originating from the frontend triage flow.
     /// Uses the overloaded constructor to include patient context data.
     /// </summary>
-    public async Task<Alert?> Handle(CreateAlertCommand command, CancellationToken cancellationToken = default)
+    public async Task<Incident?> Handle(CreateIncidentCommand command, CancellationToken cancellationToken = default)
     {
-        var alert = new Alert(
+        var alert = new Incident(
             new Domain.Model.ValueObjects.ClinicId(command.ClinicId),
             command.EpisodeId,
             command.Institution,
@@ -92,7 +92,7 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
         
         try
         {
-            await alertRepository.AddAsync(alert, cancellationToken);
+            await incidentRepository.AddAsync(alert, cancellationToken);
             await unitOfWork.CompleteAsync(cancellationToken);
         }
         catch (Exception e)
@@ -107,9 +107,9 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
     /// Handles the state transition of an alert based on the severity requested by the frontend.
     /// Acts as a state machine routing to Acknowledge() or Escalate().
     /// </summary>
-    public async Task<Alert?> Handle(UpdateAlertCommand command, CancellationToken cancellationToken = default)
+    public async Task<Incident?> Handle(UpdateIncidentCommand command, CancellationToken cancellationToken = default)
     {
-        var alert = await alertRepository.GetByIdAsync(command.AlertId);
+        var alert = await incidentRepository.GetByIdAsync(command.AlertId);
         if (alert == null) return null;
 
         try
@@ -124,7 +124,7 @@ public class AlertCommandService(IAlertRepository alertRepository, IUnitOfWork u
                 alert.Escalate(command.EscalatedTo ?? "Trauma Shock");
             }
             
-            alertRepository.Update(alert);
+            incidentRepository.Update(alert);
             await unitOfWork.CompleteAsync(cancellationToken);
             
             return alert;
