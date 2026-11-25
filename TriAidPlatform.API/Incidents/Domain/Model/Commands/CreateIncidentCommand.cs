@@ -1,7 +1,6 @@
-﻿using TriAidPlatform.API.Alerting.Domain.Model.Aggregates;
-using TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
+﻿using TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
 
-namespace TriAidPlatform.API.Alerting.Domain.Model.Commands;
+namespace TriAidPlatform.API.Incidents.Domain.Model.Commands;
 
 /// <summary>
 /// Command containing the information required to create a clinical alert for an episode.
@@ -14,13 +13,13 @@ namespace TriAidPlatform.API.Alerting.Domain.Model.Commands;
 /// <param name="Priority">The triage or urgency priority associated with the alert, if available.</param>
 /// <param name="Level">The severity level assigned to the alert.</param>
 /// <param name="Metric">The vital sign metric that triggered the alert.</param>
-public record CreateAlertCommand(
+public record CreateIncidentCommand(
     int ClinicId, 
     int EpisodeId,
     string Institution,
     string? PatientName,
     string? Dni,
     string? Priority,
-    EAlertLevel Level, 
-    AlertMetric Metric
+    EIncidentLevel Level, 
+    IncidentMetric Metric
 );
