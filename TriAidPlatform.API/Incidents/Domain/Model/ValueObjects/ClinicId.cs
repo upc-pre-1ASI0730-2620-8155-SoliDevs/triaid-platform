@@ -1,4 +1,4 @@
-﻿namespace TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
+﻿namespace TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
 
 /// <summary>
 /// Value Object that represents the unique identifier of a Clinic.
