@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using TriAidPlatform.API.Alerting.Application.Internal.CommandServices;
-using TriAidPlatform.API.Alerting.Application.Internal.QueryServices;
-using TriAidPlatform.API.Alerting.Domain.Model.Commands;
-using TriAidPlatform.API.Alerting.Domain.Model.Queries;
-using TriAidPlatform.API.Alerting.Interfaces.Rest.Resources;
-using TriAidPlatform.API.Alerting.Interfaces.Rest.Transform;
+using TriAidPlatform.API.Incidents.Application.Internal.CommandServices;
+using TriAidPlatform.API.Incidents.Application.Internal.QueryServices;
+using TriAidPlatform.API.Incidents.Domain.Model.Queries;
+using TriAidPlatform.API.Incidents.Interfaces.Rest.Resources;
+using TriAidPlatform.API.Incidents.Interfaces.Rest.Transform;
 
-namespace TriAidPlatform.API.Alerting.Interfaces.Rest;
+namespace TriAidPlatform.API.Incidents.Interfaces.Rest;
 
 /// <summary>
 ///     REST facade of the Alerting bounded context. Exposes the full
@@ -20,7 +19,7 @@ namespace TriAidPlatform.API.Alerting.Interfaces.Rest;
 [Route("[controller]")]
 [Produces("application/json")]
 [Tags("Alerts")]
-public class AlertsController(AlertQueryService queryService, AlertCommandService commandService) : ControllerBase
+public class IncidentController(IncidentQueryService queryService, IncidentCommandService commandService) : ControllerBase
 {
     /// <summary>Lists every alert across institutions; the web client filters client-side.</summary>
     /// <param name="cancellationToken">Token to observe for cancellation.</param>
@@ -29,8 +28,8 @@ public class AlertsController(AlertQueryService queryService, AlertCommandServic
     [EndpointSummary("List all alerts")]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var alerts = await queryService.Handle(new ListAllAlertsQuery());
-        return Ok(alerts.Select(AlertResourceFromEntityAssembler.ToResourceFromEntity));
+        var alerts = await queryService.Handle(new ListAllIncidentsQuery());
+        return Ok(alerts.Select(IncidentResourceFromEntityAssembler.ToResourceFromEntity));
     }
 
     /// <summary>Retrieves a single alert by identifier.</summary>
@@ -41,10 +40,10 @@ public class AlertsController(AlertQueryService queryService, AlertCommandServic
     [EndpointSummary("Get an alert by id")]
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
-        var alert = await queryService.Handle(new GetAlertByIdQuery(id));
+        var alert = await queryService.Handle(new GetIncidentByIdQuery(id));
         return alert is null
             ? NotFound(new { error = "alert-not-found" })
-            : Ok(AlertResourceFromEntityAssembler.ToResourceFromEntity(alert));
+            : Ok(IncidentResourceFromEntityAssembler.ToResourceFromEntity(alert));
     }
 
     /// <summary>
@@ -58,14 +57,14 @@ public class AlertsController(AlertQueryService queryService, AlertCommandServic
     /// <response code="400">Invalid payload.</response>
     [HttpPost]
     [EndpointSummary("Create an alert")]
-    public async Task<IActionResult> Create([FromBody] CreateAlertResource resource,
+    public async Task<IActionResult> Create([FromBody] CreateIncidentResource resource,
         CancellationToken cancellationToken)
     {
-        var command = AlertCommandFromResourceAssemblers.ToCommandFromResource(resource);
+        var command = IncidentCommandFromResourceAssemblers.ToCommandFromResource(resource);
         try
         {
             var alert = await commandService.Handle(command, cancellationToken);
-            return Ok(AlertResourceFromEntityAssembler.ToResourceFromEntity(alert!));
+            return Ok(IncidentResourceFromEntityAssembler.ToResourceFromEntity(alert!));
         }
         catch (Exception exception)
         {
@@ -87,10 +86,10 @@ public class AlertsController(AlertQueryService queryService, AlertCommandServic
     public async Task<IActionResult> Update(int id, [FromBody] UpdateAlertResource resource,
         CancellationToken cancellationToken)
     {
-        var command = AlertCommandFromResourceAssemblers.ToCommandFromResource(id, resource);
+        var command = IncidentCommandFromResourceAssemblers.ToCommandFromResource(id, resource);
         var alert = await commandService.Handle(command, cancellationToken);
         return alert is null
             ? NotFound(new { error = "alert-not-found" })
-            : Ok(AlertResourceFromEntityAssembler.ToResourceFromEntity(alert));
+            : Ok(IncidentResourceFromEntityAssembler.ToResourceFromEntity(alert));
     }
 }
