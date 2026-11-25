@@ -1,23 +1,22 @@
-using TriAidPlatform.API.Alerting.Domain.Model.Commands;
-using TriAidPlatform.API.Alerting.Domain.Model.Aggregates;
-using TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
-using TriAidPlatform.API.Alerting.Interfaces.Rest.Resources;
+using TriAidPlatform.API.Incidents.Domain.Model.Commands;
+using TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
+using TriAidPlatform.API.Incidents.Interfaces.Rest.Resources;
 
-namespace TriAidPlatform.API.Alerting.Interfaces.Rest.Transform;
+namespace TriAidPlatform.API.Incidents.Interfaces.Rest.Transform;
 
 /// <summary>
 ///     Transforms the web client alert records into the bounded context
 ///     commands (ADR-010 backend swap contract).
 /// </summary>
-public static class AlertCommandFromResourceAssemblers
+public static class IncidentCommandFromResourceAssemblers
 {
     /// <summary>Maps the client severity key to the internal alert level.</summary>
     /// <param name="severity">Client severity key.</param>
     /// <returns>The internal alert level.</returns>
-    private static EAlertLevel ToLevel(string? severity) =>
+    private static EIncidentLevel ToLevel(string? severity) =>
         string.Equals(severity, "critical", StringComparison.OrdinalIgnoreCase)
-            ? EAlertLevel.Critical
-            : EAlertLevel.Warning;
+            ? EIncidentLevel.Critical
+            : EIncidentLevel.Warning;
 
     /**
      * <summary>
@@ -28,13 +27,13 @@ public static class AlertCommandFromResourceAssemblers
      * <param name="resource">The creation record.</param>
      * <returns>The create alert command.</returns>
      */
-    public static CreateAlertCommand ToCommandFromResource(CreateAlertResource resource)
+    public static CreateIncidentCommand ToCommandFromResource(CreateIncidentResource resource)
     {
-        var metric = new AlertMetric(
+        var metric = new IncidentMetric(
             resource.VitalSign,
             resource.Value,
             resource.SafeRange);
-        return new CreateAlertCommand(
+        return new CreateIncidentCommand(
             1,
             int.TryParse(resource.Episode, out var episodeId) ? episodeId : 0,
             resource.Institution,
@@ -54,6 +53,6 @@ public static class AlertCommandFromResourceAssemblers
      * <param name="resource">The update record.</param>
      * <returns>The update alert command.</returns>
      */
-    public static UpdateAlertCommand ToCommandFromResource(int id, UpdateAlertResource resource) =>
+    public static UpdateIncidentCommand ToCommandFromResource(int id, UpdateAlertResource resource) =>
         new(id, resource.Severity, resource.EscalatedTo);
 }
