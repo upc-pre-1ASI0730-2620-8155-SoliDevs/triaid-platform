@@ -1,10 +1,10 @@
-﻿namespace TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
+﻿namespace TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
 
 /// <summary>
 /// Value object representing an anomalous vital sign reading within the Alert bounded context.
 /// Encapsulates the immutable clinical data to describe the exact metric that triggered the alert.
 /// </summary>
-public sealed record AlertMetric
+public sealed record IncidentMetric
 {
     /// <summary>
     /// Human-readable name of the altered vital sign.
@@ -24,17 +24,17 @@ public sealed record AlertMetric
     /// <summary>
     /// Private parameterless constructor for materialization
     /// </summary>
-    private AlertMetric() {}
+    private IncidentMetric() {}
 
     
     /// <summary>
-    /// Initializes a new instance of the <see cref="AlertMetric"/> value object.
+    /// Initializes a new instance of the <see cref="IncidentMetric"/> value object.
     /// </summary>
     /// <param name="signName">Name of the vital sign.</param>
     /// <param name="measuredValue">Exact value captured.</param>
     /// <param name="safeRange">Safe reference range.</param>
     /// <exception cref="ArgumentException">Thrown when signName or measuredValue are null or empty.</exception>
-    public AlertMetric(string signName, string measuredValue, string safeRange)
+    public IncidentMetric(string signName, string measuredValue, string safeRange)
     {
         if (string.IsNullOrWhiteSpace(signName)) throw new ArgumentException("The vital sign's name is required.");
         if (string.IsNullOrWhiteSpace(measuredValue)) throw new ArgumentException("The vital measured value is required.");
