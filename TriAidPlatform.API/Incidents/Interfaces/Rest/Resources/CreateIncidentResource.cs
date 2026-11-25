@@ -1,4 +1,4 @@
-namespace TriAidPlatform.API.Alerting.Interfaces.Rest.Resources;
+namespace TriAidPlatform.API.Incidents.Interfaces.Rest.Resources;
 
 /**
  * <summary>
@@ -16,7 +16,7 @@ namespace TriAidPlatform.API.Alerting.Interfaces.Rest.Resources;
  * <param name="Severity">Severity key (critical or warning).</param>
  * <param name="CreatedAt">Client-reported creation timestamp.</param>
  */
-public record CreateAlertResource(
+public record CreateIncidentResource(
     string? Episode,
     string Institution,
     string? PatientName,
