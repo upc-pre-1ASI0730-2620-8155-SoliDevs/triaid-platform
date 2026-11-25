@@ -1,22 +1,22 @@
-﻿using TriAidPlatform.API.Alerting.Domain.Model.Aggregates;
-using TriAidPlatform.API.Alerting.Domain.Model.ValueObjects;
+﻿using TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
+using TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 
-namespace TriAidPlatform.API.Alerting.Domain.Repositories;
+namespace TriAidPlatform.API.Incidents.Domain.Repositories;
 
 /// <summary>
 /// Repository interface for the Alert aggregate root.
 /// Inherits basic CRUD operations from IBaseRepository and defines specific data access methods for alerts.
 /// </summary>
-public interface IAlertRepository : IBaseRepository <Alert>
+public interface IIncidentRepository : IBaseRepository <Incident>
 {
     /// <summary>
     /// Retrieves all active alerts (not resolved) from the database for a specific clinic.
     /// </summary>
     /// <param name="clinicId">The unique identifier of the clinic to ensure data isolation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-    /// <returns>A collection of active <see cref="Alert"/> instances.</returns>
-    Task<IEnumerable<Alert>> FindActiveAlertsAsync(ClinicId clinicId, CancellationToken cancellationToken = default);
+    /// <returns>A collection of active <see cref="Incident"/> instances.</returns>
+    Task<IEnumerable<Incident>> FindActiveAlertsAsync(ClinicId clinicId, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Retrieves a specific alert based on its associated reading ID.
@@ -24,16 +24,16 @@ public interface IAlertRepository : IBaseRepository <Alert>
     /// <param name="clinicId">The unique identifier of the clinic where the alert was generated.</param>
     /// <param name="readingId">The ID of the vital sign reading.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-    /// <returns>The <see cref="Alert"/> instance if found; otherwise, null.</returns>
-    Task<Alert?> FindByReadingIdAsync(ClinicId clinicId, int readingId, CancellationToken cancellationToken = default);
+    /// <returns>The <see cref="Incident"/> instance if found; otherwise, null.</returns>
+    Task<Incident?> FindByReadingIdAsync(ClinicId clinicId, int readingId, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Retrieves all alerts from the database without clinic filters (used by the web frontend).
     /// </summary>
-    Task<IEnumerable<Alert>> ListAsync();
+    Task<IEnumerable<Incident>> ListAsync();
 
     /// <summary>
     /// Retrieves a specific alert by its unique database ID.
     /// </summary>
-    Task<Alert?> GetByIdAsync(int id);
+    Task<Incident?> GetByIdAsync(int id);
 } 
