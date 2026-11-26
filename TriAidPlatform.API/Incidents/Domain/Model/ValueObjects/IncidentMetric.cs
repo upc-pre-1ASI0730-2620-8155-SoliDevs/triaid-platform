@@ -1,8 +1,8 @@
 ﻿namespace TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
 
 /// <summary>
-/// Value object representing an anomalous vital sign reading within the Alert bounded context.
-/// Encapsulates the immutable clinical data to describe the exact metric that triggered the alert.
+/// Value object representing an anomalous vital sign reading within the Incidents bounded context.
+/// Encapsulates the immutable clinical data to describe the exact metric that triggered the incident.
 /// </summary>
 public sealed record IncidentMetric
 {
