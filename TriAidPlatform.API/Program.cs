@@ -21,12 +21,15 @@ using TriAidPlatform.API.PatientRegistration.Domain.Repositories;
 using TriAidPlatform.API.PatientRegistration.Domain.Services;
 using TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using TriAidPlatform.API.Shared.Application.Internal.SeedService;
-using TriAidPlatform.API.Alerting.Application.Internal.CommandServices;
-using TriAidPlatform.API.Alerting.Application.Internal.QueryServices;
-using TriAidPlatform.API.Alerting.Domain.Repositories;
-using TriAidPlatform.API.Alerting.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using TriAidPlatform.API.Devices.Domain.Repositories;
 using TriAidPlatform.API.Devices.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using TriAidPlatform.API.Incidents.Application.CommandServices;
+using TriAidPlatform.API.Incidents.Application.Internal.CommandServices;
+using TriAidPlatform.API.Incidents.Application.Internal.QueryServices;
+using TriAidPlatform.API.Incidents.Application.QueryServices;
+using TriAidPlatform.API.Incidents.Domain.Repositories;
+using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Schema;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration.OpenApi;
@@ -69,10 +72,10 @@ builder.Services.AddScoped<TriAidPlatform.API.Iam.Application.Internal.CommandSe
 builder.Services.AddScoped<ITriageEpisodeRepository, TriageEpisodeRepository>();
 builder.Services.AddScoped<ITriageEpisodeService, TriageEpisodeService>();
 
-// Alerting bounded context
-builder.Services.AddScoped<IAlertRepository, AlertRepository>();
-builder.Services.AddScoped<AlertCommandService>();
-builder.Services.AddScoped<AlertQueryService>();
+// Incident bounded context
+builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
+builder.Services.AddScoped<IIncidentCommandService, IncidentCommandService>();
+builder.Services.AddScoped<IIncidentQueryService, IncidentQueryService>();
 
 // Devices bounded context (vital-signs-capture)
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
@@ -138,9 +141,10 @@ var app = builder.Build();
 app.MapOpenApi();
 app.MapScalarApiReference();
 
-// Create the database schema if it does not exist yet
+// Upgrade legacy tables, then create the database schema if it does not exist yet
 using (var scope = app.Services.CreateScope())
 {
+    await IncidentsSchema.UpgradeAsync(scope.ServiceProvider);
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
 }

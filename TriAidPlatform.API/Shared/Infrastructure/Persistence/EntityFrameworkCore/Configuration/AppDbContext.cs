@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TriAidPlatform.API.Devices.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.Iam.Domain.Model.Aggregates;
 using TriAidPlatform.API.Iam.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.SpecialtyAssignment.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.TriageClassification.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
-using TriAidPlatform.API.Alerting.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
 using TriAidPlatform.API.Subscription.Domain.Model;
@@ -42,7 +42,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     {
         base.OnModelCreating(builder);
         builder.ApplyPatientRegistrationConfiguration();
-        builder.ApplyAlertingConfiguration();
+        builder.ApplyIncidentsConfiguration();
         builder.ApplyTriageClassificationConfiguration();
         builder.ApplySpecialtyAssignmentConfiguration();
         builder.ApplyDevicesConfiguration();
