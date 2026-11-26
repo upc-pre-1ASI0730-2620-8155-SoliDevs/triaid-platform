@@ -1,41 +1,46 @@
-﻿using TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
+﻿using TriAidPlatform.API.Incidents.Application.QueryServices;
+using TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
 using TriAidPlatform.API.Incidents.Domain.Model.Queries;
 using TriAidPlatform.API.Incidents.Domain.Repositories;
 
 namespace TriAidPlatform.API.Incidents.Application.Internal.QueryServices;
 
 /// <summary>
-/// Service responsible for handling read-only queries related to the Alert aggregate.
-/// Utilizes a primary constructor to inject the required data access dependencies.
+/// Handles read-only queries for <see cref="Incident"/> aggregates.
 /// </summary>
-/// <param name="incidentRepository">The repository interface used to query alert data from the database.</param>
-public class IncidentQueryService(IIncidentRepository incidentRepository)
+/// <param name="incidentRepository">The repository used to retrieve incident data.</param>
+public class IncidentQueryService(IIncidentRepository incidentRepository) : IIncidentQueryService
 {
     /// <summary>
-    /// Handles the execution of the <see cref="GetActiveIncidentsQuery"/> to retrieve active alerts.
-    /// Enforces multi-tenant data isolation by filtering alerts strictly based on the provided ClinicId.
+    /// Retrieves the active incidents belonging to the clinic specified by the query.
     /// </summary>
-    /// <param name="query">The query object containing the ClinicId constraint.</param>
-    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
-    /// <returns>An asynchronous task returning a collection of active <see cref="Incident"/> instances for the specified clinic.</returns>
+    /// <param name="query">The clinic used to filter active incidents.</param>
+    /// <param name="cancellationToken">The token used to cancel the repository operation.</param>
+    /// <returns>The matching active incidents.</returns>
     public async Task<IEnumerable<Incident>> Handle(GetActiveIncidentsQuery query, CancellationToken cancellationToken = default)
     {
-        
-        return await incidentRepository.FindActiveAlertsAsync(query.ClinicId, cancellationToken);
+        return await incidentRepository.FindActiveIncidentsAsync(query.ClinicId, cancellationToken);
     }
+
     /// <summary>
-    /// Handles the execution of the <see cref="ListAllIncidentsQuery"/> to retrieve all alerts globally.
+    /// Retrieves every persisted incident.
     /// </summary>
-    public async Task<IEnumerable<Incident>> Handle(ListAllIncidentsQuery query)
+    /// <param name="query">The query requesting the complete incident list.</param>
+    /// <param name="cancellationToken">The token used to cancel the repository operation.</param>
+    /// <returns>All persisted incidents.</returns>
+    public async Task<IEnumerable<Incident>> Handle(ListAllIncidentsQuery query, CancellationToken cancellationToken = default)
     {
         return await incidentRepository.ListAsync();
     }
 
     /// <summary>
-    /// Handles the execution of the <see cref="GetIncidentByIdQuery"/> to retrieve a specific alert.
+    /// Retrieves an incident by its identifier.
     /// </summary>
-    public async Task<Incident?> Handle(GetIncidentByIdQuery query)
+    /// <param name="query">The query containing the incident identifier.</param>
+    /// <param name="cancellationToken">The token used to cancel the repository operation.</param>
+    /// <returns>The matching incident, or <see langword="null"/> when it does not exist.</returns>
+    public async Task<Incident?> Handle(GetIncidentByIdQuery query, CancellationToken cancellationToken = default)
     {
-        return await incidentRepository.GetByIdAsync(query.AlertId);
+        return await incidentRepository.GetByIdAsync(query.IncidentId, cancellationToken);
     }
 }
