@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+---
+
+## [1.1.0] - 2026-11-26
+
+### Added
+- **Incidents bounded context (renamed from Alerting):** `IncidentsController` manages the clinical lifecycle of incidents under `/api/v1/incidents`, with `IncidentId` as a strongly typed identifier, `IncidentsError` for failure reporting, audit timestamps on the aggregate and command services returning `Result<T>`.
+- **Schema upgrade on startup:** `IncidentsSchema` renames the legacy `alert` table to `incidents`, adds the audit columns and backfills them, so existing deployments keep their rows without manual steps.
+
+### Changed
+- **REST path:** alerts are now served from `/api/v1/incidents`; `/api/v1/alerts` no longer exists. The web client was updated to the new path in the same release.
+- Invalid state transitions (resolving an escalated incident) answer `409` instead of `500`.
+
+### Fixed
+- Restored the value-conversion persistence of value objects (JSON metric, `clinic_id` and `status` columns) that the refactor had swapped for owned types, and the ORM constructor that built value objects during row hydration.
+
 ## [1.0.0] - 2026-11-12
 
 ### Added
