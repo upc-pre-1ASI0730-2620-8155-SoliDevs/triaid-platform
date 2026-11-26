@@ -5,13 +5,13 @@ using TriAidPlatform.API.Shared.Domain.Repositories;
 namespace TriAidPlatform.API.Incidents.Domain.Repositories;
 
 /// <summary>
-/// Repository interface for the Alert aggregate root.
-/// Inherits basic CRUD operations from IBaseRepository and defines specific data access methods for alerts.
+/// Repository interface for the Incident aggregate root.
+/// Inherits basic CRUD operations from IBaseRepository and defines incident-specific data access methods.
 /// </summary>
 public interface IIncidentRepository : IBaseRepository <Incident>
 {
     /// <summary>
-    /// Retrieves all active alerts (not resolved) from the database for a specific clinic.
+    /// Retrieves all active incidents (not resolved) from the database for a specific clinic.
     /// </summary>
     /// <param name="clinicId">The unique identifier of the clinic to ensure data isolation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
@@ -19,21 +19,21 @@ public interface IIncidentRepository : IBaseRepository <Incident>
     Task<IEnumerable<Incident>> FindActiveIncidentsAsync(ClinicId clinicId, CancellationToken cancellationToken = default);
     
     /// <summary>
-    /// Retrieves a specific alert based on its associated reading ID.
+    /// Retrieves a specific incident based on its associated reading ID.
     /// </summary>
-    /// <param name="clinicId">The unique identifier of the clinic where the alert was generated.</param>
+    /// <param name="clinicId">The unique identifier of the clinic where the incident was generated.</param>
     /// <param name="readingId">The ID of the vital sign reading.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>The <see cref="Incident"/> instance if found; otherwise, null.</returns>
     Task<Incident?> FindByReadingIdAsync(ClinicId clinicId, int readingId, CancellationToken cancellationToken = default);
     
     /// <summary>
-    /// Retrieves all alerts from the database without clinic filters (used by the web frontend).
+    /// Retrieves all incidents from the database without clinic filters (used by the web frontend).
     /// </summary>
     Task<IEnumerable<Incident>> ListAsync();
 
     /// <summary>
-    /// Retrieves a specific alert by its unique database ID.
+    /// Retrieves a specific incident by its unique database ID.
     /// </summary>
     Task<Incident?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 } 
