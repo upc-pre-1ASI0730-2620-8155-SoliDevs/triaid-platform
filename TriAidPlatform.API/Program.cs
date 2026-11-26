@@ -22,8 +22,10 @@ using TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.EntityFr
 using TriAidPlatform.API.Shared.Application.Internal.SeedService;
 using TriAidPlatform.API.Devices.Domain.Repositories;
 using TriAidPlatform.API.Devices.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using TriAidPlatform.API.Incidents.Application.CommandServices;
 using TriAidPlatform.API.Incidents.Application.Internal.CommandServices;
 using TriAidPlatform.API.Incidents.Application.Internal.QueryServices;
+using TriAidPlatform.API.Incidents.Application.QueryServices;
 using TriAidPlatform.API.Incidents.Domain.Repositories;
 using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using TriAidPlatform.API.Shared.Domain.Repositories;
@@ -65,10 +67,10 @@ builder.Services.AddScoped<IPatientRegistrationService, PatientRegistrationServi
 builder.Services.AddScoped<ITriageEpisodeRepository, TriageEpisodeRepository>();
 builder.Services.AddScoped<ITriageEpisodeService, TriageEpisodeService>();
 
-// Alerting bounded context
+// Incident bounded context
 builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
-builder.Services.AddScoped<IncidentCommandService>();
-builder.Services.AddScoped<IncidentQueryService>();
+builder.Services.AddScoped<IIncidentCommandService, IncidentCommandService>();
+builder.Services.AddScoped<IIncidentQueryService, IncidentQueryService>();
 
 // Devices bounded context (vital-signs-capture)
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
