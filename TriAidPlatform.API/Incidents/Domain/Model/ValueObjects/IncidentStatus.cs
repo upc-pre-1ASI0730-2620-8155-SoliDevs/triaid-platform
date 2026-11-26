@@ -1,13 +1,13 @@
 ﻿namespace TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
 
 /// <summary>
-/// Value object representing the lifecycle state of a medical alert.
+/// Value object representing the lifecycle state of an incident.
 /// Encapsulates the state value and provides business rules for state transitions.
 /// </summary>
 public sealed record IncidentStatus
 {
     /// <summary>
-    /// Gets the current state of the alert.
+    /// Gets the current state of the incident.
     /// </summary>
     public EIncidentStatus StatusValue { get; init; }
     
@@ -27,11 +27,10 @@ public sealed record IncidentStatus
     }
     
     /// <summary>
-    /// Determines whether the current alert state represents the end of its lifecycle.
+    /// Determines whether the current incident state represents the end of its lifecycle.
     /// </summary>
-    /// <returns>True if the alert is resolved; otherwise, false.</returns>
+    /// <returns><see langword="true"/> if the incident is resolved; otherwise, <see langword="false"/>.</returns>
     public bool isFinalState() => StatusValue == EIncidentStatus.Resolved;
     
 }
-
 
