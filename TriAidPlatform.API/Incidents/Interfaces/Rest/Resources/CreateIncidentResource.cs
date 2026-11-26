@@ -2,11 +2,11 @@ namespace TriAidPlatform.API.Incidents.Interfaces.Rest.Resources;
 
 /**
  * <summary>
- *     Alert body used by the web client triage flow, tolerant of a null
+ *     Incident body used by the web client triage flow, tolerant of a null
  *     identifier on creation (ADR-010).
  * </summary>
  * <param name="Episode">Identifier of the episode as reported by the client.</param>
- * <param name="Institution">Institution the alert belongs to.</param>
+ * <param name="Institution">Institution associated with the incident.</param>
  * <param name="PatientName">Patient display name.</param>
  * <param name="Dni">Patient national identifier.</param>
  * <param name="Priority">Triage priority code (I to V).</param>
@@ -30,11 +30,11 @@ public record CreateIncidentResource(
 
 /**
  * <summary>
- *     Alert body used by the web client acknowledge and escalate flows
+ *     Incident body used by the web client acknowledge and escalate flows
  *     (ADR-010).
  * </summary>
  * <param name="Severity">Target severity (resolved or escalated).</param>
  * <param name="EscalatedTo">Destination of the escalation, when escalating.</param>
- * <param name="Institution">Institution the alert belongs to.</param>
+ * <param name="Institution">Institution associated with the incident.</param>
  */
-public record UpdateAlertResource(string Severity, string? EscalatedTo, string? Institution);
+public record UpdateIncidentResource(string Severity, string? EscalatedTo, string? Institution);
