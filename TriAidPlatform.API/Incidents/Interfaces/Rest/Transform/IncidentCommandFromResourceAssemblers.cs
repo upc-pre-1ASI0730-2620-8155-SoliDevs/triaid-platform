@@ -5,14 +5,14 @@ using TriAidPlatform.API.Incidents.Interfaces.Rest.Resources;
 namespace TriAidPlatform.API.Incidents.Interfaces.Rest.Transform;
 
 /// <summary>
-///     Transforms the web client alert records into the bounded context
+///     Transforms the web client incident records into the bounded context
 ///     commands (ADR-010 backend swap contract).
 /// </summary>
 public static class IncidentCommandFromResourceAssemblers
 {
-    /// <summary>Maps the client severity key to the internal alert level.</summary>
+    /// <summary>Maps the client severity key to the internal incident level.</summary>
     /// <param name="severity">Client severity key.</param>
-    /// <returns>The internal alert level.</returns>
+    /// <returns>The internal incident level.</returns>
     private static EIncidentLevel ToLevel(string? severity) =>
         string.Equals(severity, "critical", StringComparison.OrdinalIgnoreCase)
             ? EIncidentLevel.Critical
@@ -25,7 +25,7 @@ public static class IncidentCommandFromResourceAssemblers
      *     identifier keeps the client string form when numeric (ADR-010)
      * </summary>
      * <param name="resource">The creation record.</param>
-     * <returns>The create alert command.</returns>
+     * <returns>The create incident command.</returns>
      */
     public static CreateIncidentCommand ToCommandFromResource(CreateIncidentResource resource)
     {
@@ -49,10 +49,10 @@ public static class IncidentCommandFromResourceAssemblers
      *     Transforms an update record into its command: the severity
      *     drives the internal state machine
      * </summary>
-     * <param name="id">Identifier of the alert.</param>
+     * <param name="id">Identifier of the incident.</param>
      * <param name="resource">The update record.</param>
-     * <returns>The update alert command.</returns>
+     * <returns>The update incident command.</returns>
      */
-    public static UpdateIncidentCommand ToCommandFromResource(int id, UpdateAlertResource resource) =>
+    public static UpdateIncidentCommand ToCommandFromResource(int id, UpdateIncidentResource resource) =>
         new(id, resource.Severity, resource.EscalatedTo);
 }
