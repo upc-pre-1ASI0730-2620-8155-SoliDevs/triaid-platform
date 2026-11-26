@@ -42,7 +42,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     {
         base.OnModelCreating(builder);
         builder.ApplyPatientRegistrationConfiguration();
-        builder.ApplyAlertingConfiguration();
+        builder.ApplyIncidentsConfiguration();
         builder.ApplyTriageClassificationConfiguration();
         builder.ApplySpecialtyAssignmentConfiguration();
         builder.ApplyDevicesConfiguration();
