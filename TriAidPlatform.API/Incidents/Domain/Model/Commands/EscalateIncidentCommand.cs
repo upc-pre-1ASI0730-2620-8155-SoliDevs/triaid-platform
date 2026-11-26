@@ -3,9 +3,12 @@
 namespace TriAidPlatform.API.Incidents.Domain.Model.Commands;
 
 /// <summary>
-/// Command to escalate a critical medical alert, routing the patient to a specific specialized unit.
+/// Contains the information required to escalate an incident to a clinical destination.
 /// </summary>
-/// <param name="ClinicId">The unique tenant identifier to ensure data isolation.</param>
-/// <param name="AlertId">The unique identifier of the alert being escalated.</param>
-/// <param name="Destination">The target unit for the escalation (e.g., "Trauma Shock").</param>
-public record EscalateIncidentCommand(ClinicId ClinicId, int AlertId, string Destination);
+/// <remarks>
+/// The clinic identifier is used to enforce tenant isolation when the incident is retrieved.
+/// </remarks>
+/// <param name="ClinicId">The identifier of the clinic that owns the incident.</param>
+/// <param name="IncidentId">The identifier of the incident to escalate.</param>
+/// <param name="Destination">The target unit or department for the escalation.</param>
+public record EscalateIncidentCommand(ClinicId ClinicId, int IncidentId, string Destination);
