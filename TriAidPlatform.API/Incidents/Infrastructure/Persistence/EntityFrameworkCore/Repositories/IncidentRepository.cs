@@ -12,57 +12,27 @@ namespace TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFramewor
 /// Provides data access operations for the <see cref="Incident"/> aggregate using Entity Framework Core.
 /// Acts as a bridge between the domain rules of the Alerting bounded context and the relational database.
 /// </summary>
-public class IncidentRepository : BaseRepository<Incident>, IIncidentRepository
+public class IncidentRepository(AppDbContext context) : BaseRepository<Incident>(context), IIncidentRepository
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="IncidentRepository"/> class.
-    /// </summary>
-    /// <param name="context">The database context provided via dependency injection.</param>
-    public IncidentRepository(AppDbContext context) : base(context) { }
-    
-    /// <summary>
-    /// Retrieves all active alerts from the database for a specific clinic.
-    /// An active alert is any alert that has not yet reached the 'Resolved' state.
-    /// </summary>
-    /// <param name="clinicId">The unique identifier of the clinic to ensure data isolation.</param>
-    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
-    /// <returns>An asynchronous task returning a collection of active <see cref="Incident"/> instances belonging to the specified clinic.</returns>
-    public async Task<IEnumerable<Incident>> FindActiveAlertsAsync(ClinicId clinicId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Incident>> FindActiveIncidentsAsync(ClinicId clinicId, CancellationToken cancellationToken = default)
     {
-        var alerts = await Context.Set<Incident>()
-            .ToListAsync(cancellationToken);
-        return alerts.Where(a => a.ClinicId == clinicId && a.Status.StatusValue != EIncidentStatus.Resolved);
+        var incidents = await Context.Set<Incident>().ToListAsync(cancellationToken);
+        return incidents.Where(i => i.ClinicId.Value == clinicId.Value && i.Status.StatusValue != EIncidentStatus.Resolved);
     }
-    
-    /// <summary>
-    /// Retrieves a specific alert based on its associated reading ID and clinic ID.
-    /// This method is crucial to prevent duplicate alerts for the same vital sign anomaly within a specific clinic.
-    /// </summary>
-    /// <param name="clinicId">The unique identifier of the clinic where the alert was generated.</param>
-    /// <param name="readingId">The unique identifier of the vital sign reading.</param>
-    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
-    /// <returns>
-    /// An asynchronous task returning the <see cref="Incident"/> instance if found; 
-    /// otherwise, null.
-    /// </returns>
+
     public async Task<Incident?> FindByReadingIdAsync(ClinicId clinicId, int readingId, CancellationToken cancellationToken = default)
     {
-        return await Context.Set<Incident>()
-            .FirstOrDefaultAsync(a => a.ClinicId == clinicId && a.ReadingId == readingId, cancellationToken);
+        var incidents = await Context.Set<Incident>().ToListAsync(cancellationToken);
+        return incidents.FirstOrDefault(i => i.ClinicId.Value == clinicId.Value && i.ReadingId == readingId);
     }
-    /// <summary>
-    /// Lists every alert in the system without clinic filters (used by the web client).
-    /// </summary>
+
     public async Task<IEnumerable<Incident>> ListAsync()
     {
         return await Context.Set<Incident>().ToListAsync();
     }
 
-    /// <summary>
-    /// Retrieves an alert directly by its database identifier.
-    /// </summary>
-    public async Task<Incident?> GetByIdAsync(int id)
+    public async Task<Incident?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await Context.Set<Incident>().FindAsync(id);
+        return await Context.Set<Incident>().FindAsync([new IncidentId(id)], cancellationToken);
     }
 }
