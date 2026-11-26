@@ -16,7 +16,7 @@ public interface IIncidentRepository : IBaseRepository <Incident>
     /// <param name="clinicId">The unique identifier of the clinic to ensure data isolation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>A collection of active <see cref="Incident"/> instances.</returns>
-    Task<IEnumerable<Incident>> FindActiveAlertsAsync(ClinicId clinicId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Incident>> FindActiveIncidentsAsync(ClinicId clinicId, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Retrieves a specific alert based on its associated reading ID.
@@ -35,5 +35,5 @@ public interface IIncidentRepository : IBaseRepository <Incident>
     /// <summary>
     /// Retrieves a specific alert by its unique database ID.
     /// </summary>
-    Task<Incident?> GetByIdAsync(int id);
+    Task<Incident?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 } 
