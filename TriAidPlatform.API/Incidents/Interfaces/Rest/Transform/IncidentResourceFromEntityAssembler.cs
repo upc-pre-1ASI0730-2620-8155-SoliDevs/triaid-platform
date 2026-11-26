@@ -6,19 +6,19 @@ namespace TriAidPlatform.API.Incidents.Interfaces.Rest.Transform;
 
 /// <summary>
 /// Assembler responsible for transforming the <see cref="Incident"/> aggregate into an <see cref="IncidentResource"/>.
-/// Keeps the domain model separate from the REST contract by mapping alert, patient, triage, and metric data
+/// Keeps the domain model separate from the REST contract by mapping incident, patient, triage, and metric data
 /// to the resource's flattened representation.
 /// </summary>
 public static class IncidentResourceFromEntityAssembler
 {
     /// <summary>
     /// Projects an <see cref="Incident"/> aggregate into its REST resource representation.
-    /// Derives the resource severity from the alert status and level, formats the measurement time as
+    /// Derives the resource severity from the incident status and level, formats the measurement time as
     /// <c>HH:mm</c>, and formats the acknowledgment, escalation, and creation timestamps using round-trip
     /// (<c>o</c>) format. Missing metric values are represented as empty strings.
     /// </summary>
-    /// <param name="entity">The alert aggregate to map.</param>
-    /// <returns>A new <see cref="IncidentResource"/> populated with the alert's mapped data.</returns>
+    /// <param name="entity">The incident aggregate to map.</param>
+    /// <returns>A new <see cref="IncidentResource"/> populated with the incident's mapped data.</returns>
     public static IncidentResource ToResourceFromEntity(Incident entity)
     {
         string severityString = entity.Status.StatusValue switch
