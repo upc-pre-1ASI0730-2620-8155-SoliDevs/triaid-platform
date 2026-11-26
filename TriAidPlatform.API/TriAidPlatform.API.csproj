@@ -5,7 +5,7 @@
         <LangVersion>14.0</LangVersion>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Version>1.0.0</Version>
+        <Version>1.1.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,7 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Alerting\Application\Errors\" />
+      <Folder Include="Incidents\Application\Errors\" />
       <Folder Include="Devices\Application\Internal\" />
       <Folder Include="Devices\Domain\Model\Commands\" />
       <Folder Include="Devices\Domain\Model\Events\" />
