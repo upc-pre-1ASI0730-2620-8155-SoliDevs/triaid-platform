@@ -3,8 +3,11 @@
 namespace TriAidPlatform.API.Incidents.Domain.Model.Commands;
 
 /// <summary>
-/// Command to acknowledge an active medical alert.
+/// Contains the information required to acknowledge an active incident.
 /// </summary>
-/// <param name="ClinicId">The unique tenant identifier (Value Object) to ensure data isolation.</param>
-/// <param name="AlertId">The unique identifier of the alert to be acknowledged.</param>
-public record AcknowledgeIncidentCommand(ClinicId ClinicId, int AlertId);
+/// <remarks>
+/// The clinic identifier is used to enforce tenant isolation when the incident is retrieved.
+/// </remarks>
+/// <param name="ClinicId">The identifier of the clinic that owns the incident.</param>
+/// <param name="IncidentId">The identifier of the incident to acknowledge.</param>
+public record AcknowledgeIncidentCommand(ClinicId ClinicId, int IncidentId);
