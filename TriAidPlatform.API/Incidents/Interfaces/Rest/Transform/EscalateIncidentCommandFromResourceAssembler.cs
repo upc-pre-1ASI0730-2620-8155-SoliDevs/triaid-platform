@@ -9,8 +9,8 @@ namespace TriAidPlatform.API.Incidents.Interfaces.Rest.Transform;
 /// </summary>
 public static class EscalateIncidentCommandFromResourceAssembler
 {
-    public static EscalateIncidentCommand ToCommandFromResource(int clinicId, int alertId, EscalateIncidentResource resource)
+    public static EscalateIncidentCommand ToCommandFromResource(int clinicId, int incidentId, EscalateIncidentResource resource)
     {
-        return new EscalateIncidentCommand(new ClinicId(clinicId), alertId, resource.Destination);
+        return new EscalateIncidentCommand(new ClinicId(clinicId), incidentId, resource.Destination);
     }
 }
