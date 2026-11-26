@@ -1,141 +1,133 @@
-﻿using TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
+﻿using TriAidPlatform.API.Incidents.Application.CommandServices;
+using TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
 using TriAidPlatform.API.Incidents.Domain.Model.Commands;
+using TriAidPlatform.API.Incidents.Domain.Model.Errors;
 using TriAidPlatform.API.Incidents.Domain.Repositories;
+using TriAidPlatform.API.Shared.Application.Model;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 
 namespace TriAidPlatform.API.Incidents.Application.Internal.CommandServices;
 
 /// <summary>
-/// Service responsible for handling commands that mutate the Alert Aggregate Root.
-/// Uses Primary Constructors for Dependency Injection.
+/// Handles commands that create or update <see cref="Incident"/> aggregates.
 /// </summary>
-/// <param name="incidentRepository">The repository interface for Alert data access.</param>
-/// <param name="unitOfWork">The unit of work interface to commit database transactions.</param>
-public class IncidentCommandService(IIncidentRepository incidentRepository, IUnitOfWork unitOfWork)
+/// <param name="incidentRepository">The repository used to access and persist incidents.</param>
+/// <param name="unitOfWork">The unit of work used to commit persistence changes.</param>
+public class IncidentCommandService(
+    IIncidentRepository incidentRepository,
+    IUnitOfWork unitOfWork)
+    : IIncidentCommandService
 {
     /// <summary>
-    /// Handles the execution of the <see cref="AcknowledgeIncidentCommand"/>.
-    /// Enforces multi-tenant data isolation by verifying the ClinicId, mutates the aggregate, and commits the transaction.
+    /// Creates an incident from the supplied command and commits it to the database.
     /// </summary>
-    /// <param name="command">The command object containing the AlertId and ClinicId.</param>
-    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
-    /// <returns>An asynchronous task returning the acknowledged <see cref="Incident"/> instance.</returns>
-    /// <exception cref="UnauthorizedAccessException">Thrown when the alert does not belong to the requested clinic.</exception>
-    /// <exception cref="Exception">Thrown when a database error occurs during the commit phase.</exception>
-    public async Task <Incident?> Handle(AcknowledgeIncidentCommand command, CancellationToken cancellationToken = default)
+    /// <param name="command">The data used to create the incident.</param>
+    /// <param name="cancellationToken">The token used to cancel persistence operations.</param>
+    /// <returns>The created incident, or a database error.</returns>
+    public async Task<Result<Incident>> Handle(CreateIncidentCommand command, CancellationToken cancellationToken = default)
     {
-       
-        var alert = await incidentRepository.FindByIdAsync(command.AlertId, cancellationToken);
-        
-        if (alert == null || alert.ClinicId.Value != command.ClinicId.Value)
-        {
-            throw new UnauthorizedAccessException("Alert not found or does not belong to your clinic.");
-        }
-        
-        alert.Acknowledge();
+        var incident = new Incident(command);
 
         try
         {
-            incidentRepository.Update(alert);
+            await incidentRepository.AddAsync(incident, cancellationToken);
             await unitOfWork.CompleteAsync(cancellationToken);
+            return Result<Incident>.Success(incident);
         }
         catch (Exception e)
         {
-            throw new Exception($"An error occurred while acknowledging the alert: {e.Message}");
+            return Result<Incident>.Failure(IncidentsError.DatabaseError, $"Error creating incident: {e.Message}");
         }
-
-        return alert;
-    }
-    /// <summary>
-    /// Handles the execution of the <see cref="EscalateIncidentCommand"/>.
-    /// Validates clinic ownership and escalates the alert to the requested destination.
-    /// </summary>
-    public async Task<Incident?> Handle(EscalateIncidentCommand command, CancellationToken cancellationToken = default)
-    {
-        var alert = await incidentRepository.FindByIdAsync(command.AlertId, cancellationToken);
-        
-        if (alert == null || alert.ClinicId.Value != command.ClinicId.Value)
-        {
-            throw new UnauthorizedAccessException("Alert not found or does not belong to your clinic.");
-        }
-
-        alert.Escalate(command.Destination);
-        
-        try
-        {
-            incidentRepository.Update(alert);
-            await unitOfWork.CompleteAsync(cancellationToken);
-        }
-        catch (Exception e)
-        {
-            throw new Exception($"An error occurred while escalating the alert: {e.Message}");
-        }
-        
-        return alert;
-    }
-    /// <summary>
-    /// Handles the creation of a new alert originating from the frontend triage flow.
-    /// Uses the overloaded constructor to include patient context data.
-    /// </summary>
-    public async Task<Incident?> Handle(CreateIncidentCommand command, CancellationToken cancellationToken = default)
-    {
-        var alert = new Incident(
-            new Domain.Model.ValueObjects.ClinicId(command.ClinicId),
-            command.EpisodeId,
-            command.Institution,
-            command.PatientName,
-            command.Dni,
-            command.Priority,
-            command.Level,
-            command.Metric
-        );
-        
-        try
-        {
-            await incidentRepository.AddAsync(alert, cancellationToken);
-            await unitOfWork.CompleteAsync(cancellationToken);
-        }
-        catch (Exception e)
-        {
-            throw new Exception($"An error occurred while creating the alert: {e.Message}");
-        }
-        
-        return alert;
     }
 
     /// <summary>
-    /// Handles the state transition of an alert based on the severity requested by the frontend.
-    /// Acts as a state machine routing to Acknowledge() or Escalate().
+    /// Updates an incident state according to the severity supplied by the command.
     /// </summary>
-    public async Task<Incident?> Handle(UpdateIncidentCommand command, CancellationToken cancellationToken = default)
+    /// <param name="command">The incident identifier and requested severity update.</param>
+    /// <param name="cancellationToken">The token used to cancel persistence operations.</param>
+    /// <returns>The updated incident, or an incident-not-found, state-transition or database error.</returns>
+    public async Task<Result<Incident>> Handle(UpdateIncidentCommand command, CancellationToken cancellationToken = default)
     {
-        var alert = await incidentRepository.GetByIdAsync(command.AlertId);
-        if (alert == null) return null;
+        var incident = await incidentRepository.GetByIdAsync(command.IncidentId, cancellationToken);
+        if (incident is null)
+            return Result<Incident>.Failure(IncidentsError.IncidentNotFound, "Incident not found.");
 
         try
         {
-            
             if (command.Severity == "resolved")
-            {
-                alert.Acknowledge();
-            }
+                incident.Acknowledge();
             else if (command.Severity == "escalated")
-            {
-                alert.Escalate(command.EscalatedTo ?? "Trauma Shock");
-            }
-            
-            incidentRepository.Update(alert);
+                incident.Escalate(command.EscalatedTo ?? "Trauma Shock");
+
+            incidentRepository.Update(incident);
             await unitOfWork.CompleteAsync(cancellationToken);
-            
-            return alert;
+            return Result<Incident>.Success(incident);
         }
-        catch (InvalidOperationException) 
+        catch (InvalidOperationException e)
         {
-            return alert; 
+            return Result<Incident>.Failure(IncidentsError.InvalidStateTransition, e.Message);
         }
         catch (Exception e)
         {
-            throw new Exception($"An error occurred while updating the alert state: {e.Message}");
+            return Result<Incident>.Failure(IncidentsError.DatabaseError, $"Error updating incident: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Acknowledges an incident after validating that it belongs to the specified clinic.
+    /// </summary>
+    /// <param name="command">The incident identifier and owning clinic.</param>
+    /// <param name="cancellationToken">The token used to cancel persistence operations.</param>
+    /// <returns>The acknowledged incident, or an access, state-transition or database error.</returns>
+    public async Task<Result<Incident>> Handle(AcknowledgeIncidentCommand command, CancellationToken cancellationToken = default)
+    {
+        var incident = await incidentRepository.GetByIdAsync(command.IncidentId, cancellationToken);
+        if (incident is null || incident.ClinicId.Value != command.ClinicId.Value)
+            return Result<Incident>.Failure(IncidentsError.UnauthorizedClinicAccess, "Incident not found or does not belong to your clinic.");
+
+        try
+        {
+            incident.Acknowledge();
+            incidentRepository.Update(incident);
+            await unitOfWork.CompleteAsync(cancellationToken);
+            return Result<Incident>.Success(incident);
+        }
+        catch (InvalidOperationException e)
+        {
+            return Result<Incident>.Failure(IncidentsError.InvalidStateTransition, e.Message);
+        }
+        catch (Exception e)
+        {
+            return Result<Incident>.Failure(IncidentsError.DatabaseError, $"Error acknowledging incident: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Escalates an incident after validating that it belongs to the specified clinic.
+    /// </summary>
+    /// <param name="command">The incident, clinic and destination escalation data.</param>
+    /// <param name="cancellationToken">The token used to cancel persistence operations.</param>
+    /// <returns>The escalated incident, or an access, state-transition or database error.</returns>
+    public async Task<Result<Incident>> Handle(EscalateIncidentCommand command, CancellationToken cancellationToken = default)
+    {
+        var incident = await incidentRepository.GetByIdAsync(command.IncidentId, cancellationToken);
+        if (incident is null || incident.ClinicId.Value != command.ClinicId.Value)
+            return Result<Incident>.Failure(IncidentsError.UnauthorizedClinicAccess, "Incident not found or does not belong to your clinic.");
+
+        try
+        {
+            incident.Escalate(command.Destination);
+            incidentRepository.Update(incident);
+            await unitOfWork.CompleteAsync(cancellationToken);
+            return Result<Incident>.Success(incident);
+        }
+        catch (InvalidOperationException e)
+        {
+            return Result<Incident>.Failure(IncidentsError.InvalidStateTransition, e.Message);
+        }
+        catch (Exception e)
+        {
+            return Result<Incident>.Failure(IncidentsError.DatabaseError, $"Error escalating incident: {e.Message}");
         }
     }
 }
