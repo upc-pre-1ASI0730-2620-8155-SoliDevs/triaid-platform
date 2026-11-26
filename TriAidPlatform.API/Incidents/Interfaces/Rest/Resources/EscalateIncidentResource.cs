@@ -1,6 +1,6 @@
 ﻿namespace TriAidPlatform.API.Incidents.Interfaces.Rest.Resources;
 /// <summary>
-/// Resource payload containing the details required to escalate an alert.
+/// Resource payload containing the details required to escalate an incident.
 /// </summary>
 /// <param name="Destination">The target department or care area for the escalation (e.g., "Trauma Shock").</param>
 
