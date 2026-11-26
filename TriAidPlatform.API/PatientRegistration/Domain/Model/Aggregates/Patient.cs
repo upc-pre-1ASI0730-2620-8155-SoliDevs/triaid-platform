@@ -45,6 +45,15 @@ public partial class Patient : IAuditableEntity
     /// <summary>Emergency identifier assigned to temporary profiles.</summary>
     public string? TemporaryCode { get; private set; }
 
+    /// <summary>Contact e-mail. Optional; when present it also works as portal identifier.</summary>
+    public string? Email { get; private set; }
+
+    /// <summary>BCrypt hash of the portal access code. Null until the portal is enabled for the patient.</summary>
+    public string? PortalPasswordHash { get; private set; }
+
+    /// <summary>Whether the patient can sign in to the patient portal.</summary>
+    public bool PortalEnabled => PortalPasswordHash is not null;
+
     /// <summary>Creation timestamp (auditable).</summary>
     public DateTimeOffset? CreatedAt { get; set; }
 
@@ -68,6 +77,7 @@ public partial class Patient : IAuditableEntity
         Dni = command.Dni;
         Phone = command.Phone;
         Address = command.Address;
+        Email = NormalizeEmail(command.Email);
         IsTemporary = false;
     }
 
@@ -101,6 +111,31 @@ public partial class Patient : IAuditableEntity
         IsTemporary = false;
         TemporaryCode = null;
     }
+
+    /// <summary>
+    /// Enables the patient portal with the given e-mail (optional, also accepted
+    /// to sign in). The application service generates the access code, hashes it
+    /// and stores it through <see cref="SetPortalPasswordHash"/>.
+    /// </summary>
+    public void EnablePortal(string? email) => Email = NormalizeEmail(email);
+
+    /// <summary>
+    /// Stores the BCrypt hash of the portal access code handed over at admission.
+    /// </summary>
+    /// <param name="passwordHash">BCrypt hash of the plain access code.</param>
+    public void SetPortalPasswordHash(string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new ArgumentException("The portal password hash is required.");
+        PortalPasswordHash = passwordHash;
+    }
+
+    /// <summary>Updates or clears the contact e-mail.</summary>
+    public void UpdateEmail(string? email) => Email = NormalizeEmail(email);
+
+    /// <summary>Normalizes an e-mail to lower-case trimmed form, or null when empty.</summary>
+    private static string? NormalizeEmail(string? email) =>
+        string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
 
     /// <summary>
     /// Updates the patient contact data.

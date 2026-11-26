@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+---
+
+## [1.2.0] - 2026-11-26
+
+### Added
+- **Patient portal access:** patients sign in from admission with a one-time access code (or an optional email) through `POST /api/v1/auth/patient/login`, receiving a 12-hour token scoped to their own record and isolated from the staff session.
+- **Portal read endpoints:** `GET /api/v1/portal/overview` returns the patient, episode, classification, referral, vitals and sealed voucher token; `GET /api/v1/portal/queue` computes the live queue position for the same priority and specialty.
+- **Sealed voucher QR:** voucher codes are sealed with AES-GCM before being shown or printed, so no patient data travels in clear; verification opens the sealed token and still accepts legacy codes.
+- **Scanned admission:** a scanned voucher or episode code resolves to the patient for the admission desk.
+- `POST /api/v1/patients/{id}/portal` regenerates the access code; `POST /api/v1/patients` returns it on registration.
+
+### Changed
+- Attending an episode closes its open referral, so the queue position reflected in the portal advances on its own.
+- `VouchersController` now requires a staff session; anonymous and patient tokens are rejected.
+
+### Security
+- Voucher verification answers a uniform `404` for tampered codes and `401` for missing or invalid sessions.
+
 ## [1.1.0] - 2026-11-26
 
 ### Added

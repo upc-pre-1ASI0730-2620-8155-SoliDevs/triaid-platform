@@ -39,6 +39,17 @@ public class RequestAuthorizationMiddleware(RequestDelegate next)
 
         if (!string.IsNullOrEmpty(token))
         {
+            // Patient portal tokens carry role=Patient and must never be resolved as staff:
+            // their sid is a patient id, so looking up a User with it would leak another identity.
+            var patient = tokenService.ValidatePatientToken(token);
+            if (patient is not null)
+            {
+                context.Items["Patient"] = patient;
+                await next(context);
+                return;
+            }
+
+            // staff token
             // validate token
             var userId = tokenService.ValidateToken(token);
 

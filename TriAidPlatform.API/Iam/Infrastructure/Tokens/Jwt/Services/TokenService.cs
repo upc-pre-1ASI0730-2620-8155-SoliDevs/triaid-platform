@@ -53,6 +53,71 @@ public class TokenService(IOptions<TokenSettings> tokenSettings) : ITokenService
 
     /**
      * <summary>
+     *     Generates a 12-hour token bound to one patient. The sid claim carries the
+     *     patient id and the role is always Patient, so staff policies reject it.
+     * </summary>
+     * <param name="session">The patient session identity</param>
+     * <returns>The generated token</returns>
+     */
+    public string GeneratePatientToken(PatientSession session)
+    {
+        var key = Encoding.ASCII.GetBytes(_tokenSettings.Secret);
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Sid, session.PatientId.ToString()),
+                new Claim(ClaimTypes.Name, session.Identifier),
+                new Claim("patient_id", session.PatientId.ToString()),
+                new Claim("role", PatientSession.Role)
+            }),
+            Expires = DateTime.UtcNow.AddHours(12),
+            SigningCredentials =
+                new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        };
+        var tokenHandler = new JwtSecurityTokenHandler();
+        return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
+    }
+
+    /**
+     * <summary>
+     *     Validates a patient portal token and returns its session, or null when the
+     *     token is missing, invalid, expired or does not carry role=Patient.
+     * </summary>
+     * <param name="token">The bearer token</param>
+     * <returns>The patient session when valid, null otherwise</returns>
+     */
+    public PatientSession? ValidatePatientToken(string token)
+    {
+        if (string.IsNullOrEmpty(token)) return null;
+
+        var key = Encoding.ASCII.GetBytes(_tokenSettings.Secret);
+        try
+        {
+            new JwtSecurityTokenHandler().ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
+            }, out var validatedToken);
+
+            var jwt = (JwtSecurityToken)validatedToken;
+            if (jwt.Claims.FirstOrDefault(c => c.Type == "role")?.Value != PatientSession.Role) return null;
+
+            var patientId = int.Parse(jwt.Claims.First(c => c.Type == "patient_id").Value);
+            var identifier = jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value ?? string.Empty;
+            return new PatientSession(patientId, string.Empty, identifier);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /**
+     * <summary>
      *     Validate token
      * </summary>
      * <param name="token">The token to validate</param>

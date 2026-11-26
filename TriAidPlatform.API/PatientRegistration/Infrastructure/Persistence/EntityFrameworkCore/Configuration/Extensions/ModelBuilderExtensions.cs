@@ -29,6 +29,9 @@ public static class ModelBuilderExtensions
         builder.Entity<Patient>().Property(p => p.IsTemporary).IsRequired();
         builder.Entity<Patient>().Property(p => p.TemporaryCode).HasMaxLength(12);
         builder.Entity<Patient>().HasIndex(p => p.TemporaryCode).IsUnique();
+        builder.Entity<Patient>().Property(p => p.Email).HasMaxLength(160);
+        builder.Entity<Patient>().HasIndex(p => p.Email).IsUnique().HasFilter("[Email] IS NOT NULL");
+        builder.Entity<Patient>().Property(p => p.PortalPasswordHash).HasMaxLength(100);
 
         builder.Entity<TriageEpisode>().ToTable("triage_episodes");
         builder.Entity<TriageEpisode>().HasKey(e => e.Id);

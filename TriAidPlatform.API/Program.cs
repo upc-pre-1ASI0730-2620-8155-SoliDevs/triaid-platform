@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
@@ -65,6 +66,9 @@ builder.Services.AddScoped<IInstitutionRepository, InstitutionRepository>();
 // Patient Registration bounded context
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPatientRegistrationService, PatientRegistrationService>();
+builder.Services.AddScoped<TriAidPlatform.API.PatientRegistration.Domain.Services.IPortalCodeHasher, TriAidPlatform.API.PatientRegistration.Infrastructure.Hashing.BCryptPortalCodeHasher>();
+builder.Services.AddScoped<TriAidPlatform.API.Iam.Application.Internal.OutboundServices.IPatientDirectory, TriAidPlatform.API.PatientRegistration.Application.Internal.OutboundServices.PatientDirectory>();
+builder.Services.AddScoped<TriAidPlatform.API.Iam.Application.Internal.CommandServices.IPatientSignInService, TriAidPlatform.API.Iam.Application.Internal.CommandServices.PatientSignInService>();
 builder.Services.AddScoped<ITriageEpisodeRepository, TriageEpisodeRepository>();
 builder.Services.AddScoped<ITriageEpisodeService, TriageEpisodeService>();
 
@@ -82,6 +86,7 @@ builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("Toke
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IHashingService, HashingService>();
 builder.Services.AddSingleton<ITokenService, TokenService>();
+builder.Services.AddSingleton(sp => new TriAidPlatform.API.Shared.Infrastructure.Security.VoucherCodeCipher(sp.GetRequiredService<IOptions<TokenSettings>>().Value.Secret));
 builder.Services.AddScoped<IUserCommandService, UserCommandService>();
 builder.Services.AddScoped<IUserQueryService, UserQueryService>();
 builder.Services.AddScoped<IIamContextFacade, IamContextFacade>();
