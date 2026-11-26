@@ -1,41 +1,66 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
 using TriAidPlatform.API.Incidents.Domain.Model.ValueObjects;
+using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.ValueConverters;
 
 namespace TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
 /// <summary>
-/// Provides extension methods for the <see cref="ModelBuilder"/> to configure Entity Framework Core 
-/// mappings for the Alerting bounded context.
+/// Provides Entity Framework Core mapping extensions for the Incidents bounded context.
 /// </summary>
-public static class AlertingContextConfigurationExtensions
+/// <remarks>
+/// This class defines the database mapping of the <see cref="Incident"/> aggregate,
+/// including scalar properties and its owned value objects.
+/// </remarks>
+public static class ModelBuilderExtensions
 {
     /// <summary>
-    /// Applies the database configuration mappings for the <see cref="Incident"/> aggregate root 
-    /// and its associated Value Objects to ensure correct persistence.
+    /// Applies the relational configuration for the <see cref="Incident"/> aggregate.
     /// </summary>
-    /// <param name="builder">The builder being used to construct the model for this context.</param>
-    /// <returns>The same builder instance so that multiple calls can be chained.</returns>
-    public static ModelBuilder ApplyAlertingConfiguration(this ModelBuilder builder)
+    /// <remarks>
+    /// Configures the strongly typed incident identifier, required and optional scalar properties,
+    /// and the owned value objects for clinic, metric and incident status.
+    /// </remarks>
+    /// <param name="builder">The model builder for the shared application database context.</param>
+    public static void ApplyIncidentsConfiguration(this ModelBuilder builder)
     {
-        builder.Entity<Incident>(alert =>
+        builder.Entity<Incident>().HasKey(i => i.Id);
+        builder.Entity<Incident>().Property(i => i.Id)
+            .HasConversion(new StronglyTypedIdConverter<IncidentId, int>(id => id.Value, value => new IncidentId(value)))
+            .IsRequired()
+            .ValueGeneratedOnAdd();
+
+        builder.Entity<Incident>().Property(i => i.ReadingId).IsRequired();
+        builder.Entity<Incident>().Property(i => i.EpisodeId).IsRequired();
+        builder.Entity<Incident>().Property(i => i.Institution).IsRequired().HasMaxLength(150);
+        builder.Entity<Incident>().Property(i => i.PatientName).HasMaxLength(150);
+        builder.Entity<Incident>().Property(i => i.Dni).HasMaxLength(20);
+        builder.Entity<Incident>().Property(i => i.Priority).HasMaxLength(20);
+        builder.Entity<Incident>().Property(i => i.Level).IsRequired();
+        builder.Entity<Incident>().Property(i => i.RaisedAt).IsRequired();
+        builder.Entity<Incident>().Property(i => i.EscalatedTo).HasMaxLength(100);
+
+        // Value Object: ClinicId
+        builder.Entity<Incident>().OwnsOne(i => i.ClinicId, c =>
         {
-            alert.HasKey(a => a.Id);
-            alert.Property(a => a.Id).IsRequired().ValueGeneratedOnAdd();
-            
-            
-            alert.Property(a => a.ClinicId).HasConversion(
-                c => c.Value, v => new ClinicId(v)).HasColumnName("clinic_id").IsRequired();
-
-            alert.Property(a => a.Status).HasConversion(
-                s => s.StatusValue, v => new IncidentStatus(v)).HasColumnName("status").IsRequired();
-
-            alert.Property(a => a.Metric).HasConversion(
-                m => System.Text.Json.JsonSerializer.Serialize(m, (System.Text.Json.JsonSerializerOptions?)null),
-                v => System.Text.Json.JsonSerializer.Deserialize<IncidentMetric>(v, (System.Text.Json.JsonSerializerOptions?)null)!)
-                .HasColumnName("metric").IsRequired();
+            c.WithOwner().HasForeignKey("Id");
+            c.Property(p => p.Value).HasColumnName("ClinicId").IsRequired();
         });
 
-        return builder;
+        // Value Object: IncidentMetric
+        builder.Entity<Incident>().OwnsOne(i => i.Metric, m =>
+        {
+            m.WithOwner().HasForeignKey("Id");
+            m.Property(p => p.SignName).HasColumnName("MetricSignName").IsRequired();
+            m.Property(p => p.MeasuredValue).HasColumnName("MetricMeasuredValue").IsRequired();
+            m.Property(p => p.SafeRange).HasColumnName("MetricSafeRange").IsRequired();
+        });
+
+        // Value Object: IncidentStatus
+        builder.Entity<Incident>().OwnsOne(i => i.Status, s =>
+        {
+            s.WithOwner().HasForeignKey("Id");
+            s.Property(p => p.StatusValue).HasColumnName("Status").IsRequired();
+        });
     }
 }
