@@ -8,8 +8,8 @@ namespace TriAidPlatform.API.Incidents.Interfaces.Rest.Transform;
 /// </summary>
 public static class AcknowledgeIncidentCommandFromResourceAssembler
 {
-    public static AcknowledgeIncidentCommand ToCommandFromResource(int clinicId, int alertId)
+    public static AcknowledgeIncidentCommand ToCommandFromResource(int clinicId, int incidentId)
     {
-        return new AcknowledgeIncidentCommand(new ClinicId(clinicId), alertId);
+        return new AcknowledgeIncidentCommand(new ClinicId(clinicId), incidentId);
     }
 }
