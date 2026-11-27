@@ -95,10 +95,12 @@ public partial class Incident : AggregateRoot
     /// </summary>
     protected Incident()
     {
-        ClinicId = new ClinicId(0);
+        // The persistence layer overwrites every member from its column; no value object is
+        // built here because their constructors validate domain rules that hydration bypasses.
+        ClinicId = null!;
         Institution = string.Empty;
-        Metric = new IncidentMetric(string.Empty, string.Empty, string.Empty);
-        Status = new IncidentStatus(EIncidentStatus.Active);
+        Metric = null!;
+        Status = null!;
     }
 
     /// <summary>

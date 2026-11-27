@@ -28,6 +28,7 @@ using TriAidPlatform.API.Incidents.Application.Internal.QueryServices;
 using TriAidPlatform.API.Incidents.Application.QueryServices;
 using TriAidPlatform.API.Incidents.Domain.Repositories;
 using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Schema;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration.OpenApi;
@@ -135,9 +136,10 @@ var app = builder.Build();
 app.MapOpenApi();
 app.MapScalarApiReference();
 
-// Create the database schema if it does not exist yet
+// Upgrade legacy tables, then create the database schema if it does not exist yet
 using (var scope = app.Services.CreateScope())
 {
+    await IncidentsSchema.UpgradeAsync(scope.ServiceProvider);
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
 }
