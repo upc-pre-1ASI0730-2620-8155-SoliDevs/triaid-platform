@@ -23,7 +23,8 @@ public static class SpecialtySeed
             new Specialty("Cardiologia", "Cardiología", "CA-2", minAge: 0),
             new Specialty("Ginecologia", "Ginecología", "GI-1", requiredSex: "F"),
             new Specialty("Pediatria", "Pediatría", "PD-1", maxAge: 14),
-            new Specialty("Neurologia", "Neurología", "NE-1", active: false, minAge: 0));
+            new Specialty("Neurologia", "Neurología", "NE-1", active: false, minAge: 0),
+            new Specialty("TraumaShock", "Trauma Shock", "TS-1", minAge: 0));
         await context.SaveChangesAsync();
     }
 }
