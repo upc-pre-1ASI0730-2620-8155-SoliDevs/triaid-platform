@@ -33,6 +33,35 @@
       <Folder Include="Devices\Domain\Model\Commands\" />
       <Folder Include="Devices\Domain\Model\Events\" />
       <Folder Include="Devices\Domain\Services\" />
+      <Folder Include="PatientRegistration\Application\Internal\OutboundServices\" />
+      <Folder Include="PatientRegistration\Infrastructure\Hashing\" />
+      <Folder Include="PatientRegistration\Infrastructure\Persistence\EntityFrameworkCore\Schema\" />
+      <Folder Include="PatientRegistration\Interfaces\REST\PatientPortal\" />
+      <Folder Include="Shared\Infrastructure\Email\" />
+      <Folder Include="Shared\Infrastructure\Security\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="SpecialtyAssignment\Interfaces\REST\Resources\ScannedVoucherResource.cs" />
+      <Compile Remove="SpecialtyAssignment\Interfaces\REST\Resources\IssuedVoucherResource.cs" />
+      <Compile Remove="SpecialtyAssignment\Interfaces\REST\Resources\EmailVoucherResource.cs" />
+      <Compile Remove="PatientRegistration\Interfaces\REST\PatientPortal\PatientPortalController.cs" />
+      <Compile Remove="PatientRegistration\Interfaces\REST\Resources\PatientCreatedResource.cs" />
+      <Compile Remove="PatientRegistration\Interfaces\REST\Resources\EnablePortalResource.cs" />
+      <Compile Remove="PatientRegistration\Domain\Services\IPortalCodeHasher.cs" />
+      <Compile Remove="PatientRegistration\Domain\Model\Commands\EnablePatientPortalCommand.cs" />
+      <Compile Remove="Shared\Infrastructure\Interfaces\Asp\TenantHttpContext.cs" />
+      <Compile Remove="Shared\Infrastructure\Security\VoucherCodeCipher.cs" />
+      <Compile Remove="Shared\Infrastructure\Email\ResendEmailSender.cs" />
+      <Compile Remove="Iam\Infrastructure\Pipeline\Middleware\Attributes\AuthorizePatientAttribute.cs" />
+      <Compile Remove="Iam\Application\Internal\OutboundServices\IPatientDirectory.cs" />
+      <Compile Remove="Iam\Application\Internal\CommandServices\IPatientSignInService.cs" />
+      <Compile Remove="Iam\Application\Internal\CommandServices\PatientSignInService.cs" />
+      <Compile Remove="Iam\Interfaces\REST\PatientAuthenticationController.cs" />
+      <Compile Remove="Iam\Interfaces\REST\Transform\PatientSignInCommandFromResourceAssembler.cs" />
+      <Compile Remove="Iam\Interfaces\REST\Resources\PatientSignInResource.cs" />
+      <Compile Remove="Iam\Domain\Model\Aggregates\PatientSession.cs" />
+      <Compile Remove="Iam\Domain\Model\Commands\PatientSignInCommand.cs" />
     </ItemGroup>
 
 </Project>
