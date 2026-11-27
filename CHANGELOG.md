@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+---
+
+## [1.3.0] - 2026-11-27
+
+### Fixed
+- The specialty seed now includes Trauma Shock (TS-1), so a fresh database supports the critical-care escalation instead of relying on a manual insert.
+
 ## [1.2.0] - 2026-11-26
 
 ### Added
