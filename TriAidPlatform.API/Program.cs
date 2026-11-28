@@ -32,6 +32,7 @@ using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCor
 using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Schema;
 using TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.EntityFrameworkCore.Schema;
 using TriAidPlatform.API.Shared.Domain.Repositories;
+using TriAidPlatform.API.Shared.Infrastructure.Email;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration.OpenApi;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
@@ -72,6 +73,9 @@ builder.Services.AddScoped<TriAidPlatform.API.Iam.Application.Internal.OutboundS
 builder.Services.AddScoped<TriAidPlatform.API.Iam.Application.Internal.CommandServices.IPatientSignInService, TriAidPlatform.API.Iam.Application.Internal.CommandServices.PatientSignInService>();
 builder.Services.AddScoped<ITriageEpisodeRepository, TriageEpisodeRepository>();
 builder.Services.AddScoped<ITriageEpisodeService, TriageEpisodeService>();
+
+// Transactional e-mail (Resend)
+builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>();
 
 // Incident bounded context
 builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
