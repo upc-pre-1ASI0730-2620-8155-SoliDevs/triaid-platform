@@ -51,11 +51,53 @@ public static class RegistrationSchema
 
                 logger.LogInformation("Added the institution column to {Table}", table);
             }
+
+            await MakeDniUniquePerInstitutionAsync(connection, logger);
         }
         finally
         {
             if (!wasOpen) await connection.CloseAsync();
         }
+    }
+
+    /// <summary>
+    /// Replaces the system-wide unique index on <c>dni</c> with one on <c>(institution, dni)</c>:
+    /// a person may hold a record at more than one institution.
+    /// </summary>
+    private static async Task MakeDniUniquePerInstitutionAsync(DbConnection connection, ILogger logger)
+    {
+        // (institution, dni) and (institution, e-mail): a person may exist at several institutions.
+        await SwapIndexAsync(connection, "i_x_patients_dni", "i_x_patients_institution_dni", "`institution`, `dni`");
+        await SwapIndexAsync(connection, "UX_patients_email", "UX_patients_institution_email", "`institution`, `email`");
+
+        logger.LogInformation("The DNI is now unique per institution instead of system-wide");
+    }
+
+    private static async Task SwapIndexAsync(DbConnection connection, string legacy, string composite, string columns)
+    {
+        if (await IndexExistsAsync(connection, composite)) return;
+
+        if (await IndexExistsAsync(connection, legacy))
+        {
+            await using var drop = connection.CreateCommand();
+            drop.CommandText = $"DROP INDEX `{legacy}` ON `patients`";
+            await drop.ExecuteNonQueryAsync();
+        }
+
+        await using (var create = connection.CreateCommand())
+        {
+            create.CommandText = $"CREATE UNIQUE INDEX `{composite}` ON `patients` ({columns})";
+            await create.ExecuteNonQueryAsync();
+        }
+    }
+
+    private static async Task<bool> IndexExistsAsync(DbConnection connection, string name)
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'patients' AND index_name = @name";
+        command.Parameters.Add(Parameter(command, "@name", name));
+        var result = await command.ExecuteScalarAsync();
+        return result is not null && Convert.ToInt64(result) > 0;
     }
 
     private static async Task<bool> ColumnExistsAsync(DbConnection connection, string table, string column)

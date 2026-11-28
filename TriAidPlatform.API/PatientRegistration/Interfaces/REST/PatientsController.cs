@@ -48,7 +48,7 @@ public class PatientsController(
     [HttpGet("dni/{dni}")]
     public async Task<ActionResult<PatientResource>> GetByDniAsync(string dni, CancellationToken cancellationToken)
     {
-        var patient = await patientRegistrationService.FindByDniAsync(dni, cancellationToken);
+        var patient = await patientRegistrationService.FindByDniAsync(dni, HttpContext.StaffInstitution() ?? string.Empty, cancellationToken);
         return patient is null
             ? NotFound(new { message = $"No patient registered with DNI {dni}." })
             : Ok(PatientResourceFromEntityAssembler.ToResourceFromEntity(patient));

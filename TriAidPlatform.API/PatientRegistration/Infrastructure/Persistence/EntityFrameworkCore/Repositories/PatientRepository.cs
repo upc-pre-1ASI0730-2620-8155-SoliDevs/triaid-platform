@@ -20,10 +20,11 @@ public class PatientRepository(AppDbContext context) : BaseRepository<Patient>(c
     /// <param name="dni">The DNI to search.</param>
     /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
     /// <returns>An asynchronous task returning the <see cref="Patient"/> if found; otherwise, null.</returns>
-    public async Task<Patient?> GetByDniAsync(string dni, CancellationToken cancellationToken = default)
+    public async Task<Patient?> GetByDniAsync(string dni, string institution, CancellationToken cancellationToken = default)
     {
+        // The DNI is unique per institution, not across the whole system.
         return await Context.Set<Patient>()
-            .FirstOrDefaultAsync(p => p.Dni == dni, cancellationToken);
+            .FirstOrDefaultAsync(p => p.Dni == dni && p.Institution == institution, cancellationToken);
     }
 
     /// <summary>
@@ -38,10 +39,13 @@ public class PatientRepository(AppDbContext context) : BaseRepository<Patient>(c
             .FirstOrDefaultAsync(p => p.TemporaryCode == code, cancellationToken);
     }
 
-    public async Task<Patient?> GetByIdentifierAsync(string identifier, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Patient>> ListByIdentifierAsync(string identifier, CancellationToken cancellationToken = default)
     {
+        // The same person may hold a record at more than one institution; the access
+        // code decides which record the patient is signing in to.
         var value = identifier.Trim();
         return await Context.Set<Patient>()
-            .FirstOrDefaultAsync(p => p.Dni == value || p.Email == value.ToLower(), cancellationToken);
+            .Where(p => p.Dni == value || p.Email == value.ToLower())
+            .ToListAsync(cancellationToken);
     }
 }

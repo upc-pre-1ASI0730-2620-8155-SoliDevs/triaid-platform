@@ -15,7 +15,7 @@ public interface IPatientRepository : IBaseRepository<Patient>
     /// <param name="dni">The DNI to search.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>The <see cref="Patient"/> if found; otherwise, null.</returns>
-    Task<Patient?> GetByDniAsync(string dni, CancellationToken cancellationToken = default);
+    Task<Patient?> GetByDniAsync(string dni, string institution, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a temporary patient by its emergency code.
@@ -30,5 +30,5 @@ public interface IPatientRepository : IBaseRepository<Patient>
     /// </summary>
     /// <param name="identifier">DNI or e-mail entered at the portal sign-in.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task<Patient?> GetByIdentifierAsync(string identifier, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Patient>> ListByIdentifierAsync(string identifier, CancellationToken cancellationToken = default);
 }
