@@ -61,6 +61,7 @@ public class Referral : IAuditableEntity
     {
         EpisodeId = command.EpisodeId;
         SpecialtyId = command.SpecialtyId;
+        Institution = command.Institution ?? string.Empty;
         Room = room;
         QueuePosition = queuePosition;
         ReferredAt = DateTime.UtcNow;
