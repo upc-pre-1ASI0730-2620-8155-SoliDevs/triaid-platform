@@ -7,6 +7,7 @@ using TriAidPlatform.API.PatientRegistration.Domain.Services;
 using TriAidPlatform.API.PatientRegistration.Interfaces.REST.Resources;
 using TriAidPlatform.API.PatientRegistration.Interfaces.REST.Transform;
 using TriAidPlatform.API.Shared.Application.Patterns;
+using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp;
 
 namespace TriAidPlatform.API.PatientRegistration.Interfaces.REST;
 
@@ -28,8 +29,10 @@ public class TriageEpisodesController(
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TriageEpisodeResource>>> GetAllAsync(CancellationToken cancellationToken)
     {
+        var tenant = HttpContext.StaffInstitution();
         var episodes = await episodeRepository.ListAsync(cancellationToken);
-        return Ok(episodes.Select(TriageEpisodeResourceFromEntityAssembler.ToResourceFromEntity));
+        // Staff only see the episodes of their own institution.
+        return Ok(episodes.Where(e => tenant is null || e.Institution == tenant).Select(TriageEpisodeResourceFromEntityAssembler.ToResourceFromEntity));
     }
 
     /// <summary>Gets a single triage episode by its identifier.</summary>

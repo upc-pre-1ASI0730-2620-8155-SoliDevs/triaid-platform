@@ -9,4 +9,5 @@ public record CreateTemporaryProfileResource(
     string FirstName,
     string LastName,
     DateOnly BirthDate,
-    string Sex);
+    string Sex,
+    string? Institution = null);

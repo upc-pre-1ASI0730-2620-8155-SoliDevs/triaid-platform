@@ -14,4 +14,5 @@ public record CreateTemporaryProfileCommand(
     string FirstName,
     string LastName,
     DateOnly BirthDate,
-    Sex Sex);
+    Sex Sex,
+    string? Institution = null);

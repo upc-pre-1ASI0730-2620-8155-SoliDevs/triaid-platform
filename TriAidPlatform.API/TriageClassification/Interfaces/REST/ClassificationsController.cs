@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 using TriAidPlatform.API.TriageClassification.Application.Internal.CommandServices;
 using TriAidPlatform.API.TriageClassification.Application.Internal.QueryServices;
@@ -114,8 +115,9 @@ public class ClassificationsController(
     {
         if (string.IsNullOrWhiteSpace(episodeId))
         {
+            var tenant = HttpContext.StaffInstitution();
             var all = await classificationRepository.ListAsync(cancellationToken);
-            return Ok(all.Select(ClassificationResourceFromEntityAssembler.ToResourceFromEntity));
+            return Ok(all.Where(c => tenant is null || c.Institution == tenant).Select(ClassificationResourceFromEntityAssembler.ToResourceFromEntity));
         }
         var single = await GetByEpisode(episodeId, cancellationToken);
         if (single.Result is not null) return new ActionResult<IEnumerable<ClassificationResource>>(single.Result);

@@ -18,6 +18,7 @@ public static class ModelBuilderExtensions
         builder.Entity<Patient>().ToTable("patients");
         builder.Entity<Patient>().HasKey(p => p.Id);
         builder.Entity<Patient>().Property(p => p.Id).IsRequired().ValueGeneratedOnAdd();
+        builder.Entity<Patient>().Property(p => p.Institution).HasMaxLength(150);
         builder.Entity<Patient>().Property(p => p.Dni).HasMaxLength(12);
         builder.Entity<Patient>().HasIndex(p => p.Dni).IsUnique();
         builder.Entity<Patient>().Property(p => p.FirstName).IsRequired().HasMaxLength(80);
@@ -35,6 +36,7 @@ public static class ModelBuilderExtensions
 
         builder.Entity<TriageEpisode>().ToTable("triage_episodes");
         builder.Entity<TriageEpisode>().HasKey(e => e.Id);
+        builder.Entity<TriageEpisode>().Property(e => e.Institution).HasMaxLength(150);
         builder.Entity<TriageEpisode>().Property(e => e.Id).IsRequired().ValueGeneratedOnAdd();
         builder.Entity<TriageEpisode>().Property(e => e.PatientId).IsRequired();
         builder.Entity<TriageEpisode>().Property(e => e.ArrivalTime).IsRequired();

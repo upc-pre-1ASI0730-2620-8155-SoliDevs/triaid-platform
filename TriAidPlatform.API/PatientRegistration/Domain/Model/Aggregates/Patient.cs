@@ -48,6 +48,15 @@ public partial class Patient : IAuditableEntity
     /// <summary>Contact e-mail. Optional; when present it also works as portal identifier.</summary>
     public string? Email { get; private set; }
 
+    /// <summary>Institution that registered the patient (web client tenancy).</summary>
+    public string Institution { get; private set; } = string.Empty;
+
+    /// <summary>Tags the patient with its institution once; later calls never overwrite it.</summary>
+    public void AssignInstitution(string? institution)
+    {
+        if (string.IsNullOrWhiteSpace(Institution) && !string.IsNullOrWhiteSpace(institution)) Institution = institution.Trim();
+    }
+
     /// <summary>BCrypt hash of the portal access code. Null until the portal is enabled for the patient.</summary>
     public string? PortalPasswordHash { get; private set; }
 

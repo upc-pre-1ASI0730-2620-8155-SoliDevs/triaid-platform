@@ -11,12 +11,12 @@ public static class PatientCommandFromResourceAssembler
     /// <exception cref="ArgumentException">Thrown when the sex value is not Male or Female.</exception>
     public static CreatePatientCommand ToCommandFromResource(CreatePatientResource resource) =>
         new(resource.Dni?.Trim() ?? string.Empty, resource.FirstName, resource.LastName, resource.BirthDate,
-            ParseSex(resource.Sex), resource.Phone, resource.Address, resource.Email);
+            ParseSex(resource.Sex), resource.Phone, resource.Address, resource.Email, resource.Institution);
 
     /// <summary>Converts a temporary profile payload into a command.</summary>
     /// <exception cref="ArgumentException">Thrown when the sex value is not Male or Female.</exception>
     public static CreateTemporaryProfileCommand ToCommandFromResource(CreateTemporaryProfileResource resource) =>
-        new(resource.FirstName, resource.LastName, resource.BirthDate, ParseSex(resource.Sex));
+        new(resource.FirstName, resource.LastName, resource.BirthDate, ParseSex(resource.Sex), resource.Institution);
 
     /// <summary>Converts a regularization payload into a command.</summary>
     public static RegularizeIdentityCommand ToCommandFromResource(RegularizeIdentityResource resource) =>

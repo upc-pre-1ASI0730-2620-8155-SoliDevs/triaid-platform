@@ -16,7 +16,7 @@ public class ReferralRepository(AppDbContext context) : BaseRepository<Referral>
             .FirstOrDefaultAsync(r => r.EpisodeId == episodeId, cancellationToken);
 
     /// <inheritdoc />
-    public async Task<int> CountWaitingBySpecialtyAsync(int specialtyId, CancellationToken cancellationToken = default) =>
+    public async Task<int> CountWaitingBySpecialtyAsync(int specialtyId, string? institution = null, CancellationToken cancellationToken = default) =>
         await Context.Set<Referral>()
-            .CountAsync(r => r.SpecialtyId == specialtyId && r.State == "waiting", cancellationToken);
+            .CountAsync(r => r.SpecialtyId == specialtyId && r.State == "waiting" && (institution == null || r.Institution == institution), cancellationToken);
 }

@@ -29,6 +29,15 @@ public class TriageEpisode : IAuditableEntity
     /// </summary>
     public string? Vitals { get; private set; }
 
+    /// <summary>Institution that opened the episode (web client tenancy).</summary>
+    public string Institution { get; private set; } = string.Empty;
+
+    /// <summary>Tags the episode with its institution once; later calls never overwrite it.</summary>
+    public void AssignInstitution(string? institution)
+    {
+        if (string.IsNullOrWhiteSpace(Institution) && !string.IsNullOrWhiteSpace(institution)) Institution = institution.Trim();
+    }
+
 
     /// <summary>Creation timestamp (auditable).</summary>
     public DateTimeOffset? CreatedAt { get; set; }

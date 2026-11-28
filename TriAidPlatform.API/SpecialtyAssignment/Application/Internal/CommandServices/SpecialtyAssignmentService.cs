@@ -72,7 +72,7 @@ public class SpecialtyAssignmentService(
             return Failure(ESpecialtyError.Conflict,
                 $"The clinical rules suggest {suggestion.SpecialtyKey} for the registered symptom.");
 
-        var waiting = await referralRepository.CountWaitingBySpecialtyAsync(command.SpecialtyId, cancellationToken);
+        var waiting = await referralRepository.CountWaitingBySpecialtyAsync(command.SpecialtyId, command.Institution, cancellationToken);
         var referral = new Referral(command, specialty.Room, waiting + 1);
         await referralRepository.AddAsync(referral, cancellationToken);
         await unitOfWork.CompleteAsync(cancellationToken);
@@ -96,7 +96,7 @@ public class SpecialtyAssignmentService(
             return Failure(ESpecialtyError.Conflict,
                 $"Specialty {specialty.Name} is inactive and cannot receive patients.");
 
-        var waiting = await referralRepository.CountWaitingBySpecialtyAsync(command.NewSpecialtyId, cancellationToken);
+        var waiting = await referralRepository.CountWaitingBySpecialtyAsync(command.NewSpecialtyId, referral.Institution, cancellationToken);
         try
         {
             referral.Reassign(command.NewSpecialtyId, specialty.Room, waiting + 1, command.Reason);

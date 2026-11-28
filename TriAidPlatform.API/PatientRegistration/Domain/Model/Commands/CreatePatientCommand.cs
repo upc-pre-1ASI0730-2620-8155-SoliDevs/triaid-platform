@@ -20,4 +20,5 @@ public record CreatePatientCommand(
     Sex Sex,
     string? Phone,
     string? Address,
-    string? Email = null);
+    string? Email = null,
+    string? Institution = null);
