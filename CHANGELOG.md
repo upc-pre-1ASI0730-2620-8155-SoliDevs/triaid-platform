@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+---
+
+## [1.4.0] - 2026-11-27
+
+### Added
+- Classification state `Assigned`: the staff can accept the system suggestion before confirming it. Before, the state was collapsed into `Suggested`, so an approved suggestion came back as pending on the next read.
+
 ## [1.3.0] - 2026-11-27
 
 ### Fixed

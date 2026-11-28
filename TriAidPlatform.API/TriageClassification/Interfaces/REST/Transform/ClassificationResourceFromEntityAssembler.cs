@@ -41,6 +41,7 @@ public static class ClassificationResourceFromEntityAssembler
     public static string ToStateKey(EClassificationState state) => state switch
     {
         EClassificationState.Suggested => "PendingConfirmation",
+        EClassificationState.Assigned => "Assigned",
         EClassificationState.Confirmed => "Confirmed",
         _ => "Overridden"
     };
@@ -50,7 +51,7 @@ public static class ClassificationResourceFromEntityAssembler
     /// <returns>The internal classification state.</returns>
     public static EClassificationState FromStateKey(string? stateKey) => stateKey switch
     {
-        "Assigned" => EClassificationState.Suggested,
+        "Assigned" => EClassificationState.Assigned,
         "Confirmed" => EClassificationState.Confirmed,
         _ => EClassificationState.Suggested
     };
