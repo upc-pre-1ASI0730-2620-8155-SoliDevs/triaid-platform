@@ -14,5 +14,7 @@ public enum EClassificationState
     Confirmed = 2,
 
     /// <summary>The nurse changed the level with justification (US21/US22).</summary>
-    Modified = 3
+    Modified = 3,
+    /// <summary>The staff accepted the system suggestion; it still awaits confirmation.</summary>
+    Assigned = 4
 }
