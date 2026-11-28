@@ -1,5 +1,6 @@
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
+using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp;
 using TriAidPlatform.API.Incidents.Application.CommandServices;
 using TriAidPlatform.API.Incidents.Application.QueryServices;
 using TriAidPlatform.API.Incidents.Domain.Model.Commands;
@@ -26,8 +27,9 @@ public class IncidentsController(
     [ProducesResponseType(typeof(IEnumerable<IncidentResource>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ListAllIncidents(CancellationToken cancellationToken)
     {
+        var tenant = HttpContext.StaffInstitution();
         var incidents = await incidentQueryService.Handle(new ListAllIncidentsQuery(), cancellationToken);
-        var resources = incidents.Select(IncidentResourceFromEntityAssembler.ToResourceFromEntity);
+        var resources = incidents.Where(i => tenant is null || i.Institution == tenant).Select(IncidentResourceFromEntityAssembler.ToResourceFromEntity);
         return Ok(resources);
     }
 

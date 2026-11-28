@@ -50,6 +50,7 @@ public class PatientRegistrationService(
         try
         {
             patient = new Patient(command);
+            patient.AssignInstitution(command.Institution);
         }
         catch (ArgumentException e)
         {
@@ -82,6 +83,7 @@ public class PatientRegistrationService(
         try
         {
             patient = new Patient(command);
+            patient.AssignInstitution(command.Institution);
         }
         catch (ArgumentException e)
         {

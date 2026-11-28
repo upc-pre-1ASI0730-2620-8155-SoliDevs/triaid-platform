@@ -17,4 +17,5 @@ public record CreatePatientResource(
     string Sex,
     string? Phone,
     string? Address,
-    string? Email = null);
+    string? Email = null,
+    string? Institution = null);

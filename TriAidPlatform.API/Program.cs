@@ -30,6 +30,7 @@ using TriAidPlatform.API.Incidents.Application.QueryServices;
 using TriAidPlatform.API.Incidents.Domain.Repositories;
 using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Schema;
+using TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.EntityFrameworkCore.Schema;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration.OpenApi;
@@ -145,6 +146,7 @@ app.MapScalarApiReference();
 using (var scope = app.Services.CreateScope())
 {
     await IncidentsSchema.UpgradeAsync(scope.ServiceProvider);
+    await RegistrationSchema.UpgradeAsync(scope.ServiceProvider);
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
 }

@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+---
+
+## [1.6.0] - 2026-11-28
+
+### Added
+- Patients and triage episodes now carry the institution of the staff member that registered them; the schema upgrade adds the column on startup.
+
+### Changed
+- **Tenant isolation:** patients, episodes, classifications, referrals and incidents lists only return the records of the signed-in staff member's institution, and waiting queues and portal queue positions are counted within the institution. Records created before this version must be tagged with their institution.
+
 ## [1.5.0] - 2026-11-27
 
 ### Fixed

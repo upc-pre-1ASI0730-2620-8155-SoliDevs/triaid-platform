@@ -7,6 +7,7 @@ using TriAidPlatform.API.PatientRegistration.Domain.Services;
 using TriAidPlatform.API.PatientRegistration.Interfaces.REST.Resources;
 using TriAidPlatform.API.PatientRegistration.Interfaces.REST.Transform;
 using TriAidPlatform.API.Shared.Application.Patterns;
+using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp;
 
 namespace TriAidPlatform.API.PatientRegistration.Interfaces.REST;
 
@@ -27,8 +28,10 @@ public class PatientsController(
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PatientResource>>> GetAllAsync(CancellationToken cancellationToken)
     {
+        var tenant = HttpContext.StaffInstitution();
         var patients = await patientRepository.ListAsync(cancellationToken);
-        return Ok(patients.Select(PatientResourceFromEntityAssembler.ToResourceFromEntity));
+        // Staff only see the patients of their own institution.
+        return Ok(patients.Where(p => tenant is null || p.Institution == tenant).Select(PatientResourceFromEntityAssembler.ToResourceFromEntity));
     }
 
     /// <summary>Gets a single patient by its identifier.</summary>
@@ -58,6 +61,7 @@ public class PatientsController(
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(resource.Institution)) resource = resource with { Institution = HttpContext.StaffInstitution() };
             var command = PatientCommandFromResourceAssembler.ToCommandFromResource(resource);
             var result = await patientRegistrationService.RegisterAsync(command, cancellationToken);
             return ToCreatedResponse(result);
@@ -75,6 +79,7 @@ public class PatientsController(
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(resource.Institution)) resource = resource with { Institution = HttpContext.StaffInstitution() };
             var command = PatientCommandFromResourceAssembler.ToCommandFromResource(resource);
             var result = await patientRegistrationService.CreateTemporaryProfileAsync(command, cancellationToken);
             return result.Fold<ActionResult>(

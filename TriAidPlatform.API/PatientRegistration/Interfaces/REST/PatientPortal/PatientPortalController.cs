@@ -164,7 +164,7 @@ public class PatientPortalController(
 
         var level = classification is null ? (int?)null : (int)classification.FinalLevel;
         var waiting = (await referralRepository.ListAsync(cancellationToken))
-            .Where(r => r.SpecialtyId == referral.SpecialtyId && r.State == "waiting")
+            .Where(r => r.SpecialtyId == referral.SpecialtyId && r.State == "waiting" && r.Institution == referral.Institution)
             .ToList();
 
         // Priority of each waiting referral, resolved through its classification.

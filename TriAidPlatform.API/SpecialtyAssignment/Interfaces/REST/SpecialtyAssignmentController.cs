@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp;
 using TriAidPlatform.API.Shared.Application.Patterns;
 using TriAidPlatform.API.SpecialtyAssignment.Application.Internal.CommandServices;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
@@ -116,7 +117,8 @@ public class SpecialtyAssignmentController(
     public async Task<ActionResult<IEnumerable<ReferralResource>>> GetReferrals(
         CancellationToken cancellationToken)
     {
-        var referrals = await referralRepository.ListAsync(cancellationToken);
+        var tenant = HttpContext.StaffInstitution();
+        var referrals = (await referralRepository.ListAsync(cancellationToken)).Where(r => tenant is null || r.Institution == tenant).ToList();
         var names = await SpecialtyNamesAsync(cancellationToken);
         return Ok(referrals.Select(r => ReferralResourceFromEntityAssembler.ToResourceFromEntity(
             r, names.GetValueOrDefault(r.SpecialtyId, r.SpecialtyId.ToString()))));

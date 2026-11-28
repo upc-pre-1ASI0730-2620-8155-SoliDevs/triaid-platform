@@ -34,7 +34,8 @@ public class TriageEpisodeService(
     public async Task<Result<TriageEpisode, PatientRegistrationError>> OpenAsync(
         OpenTriageEpisodeCommand command, CancellationToken cancellationToken = default)
     {
-        if (await patientRepository.FindByIdAsync(command.PatientId, cancellationToken) is null)
+        var patient = await patientRepository.FindByIdAsync(command.PatientId, cancellationToken);
+        if (patient is null)
             return Failure(EPatientRegistrationErrorType.NotFound,
                 $"Patient with id {command.PatientId} was not found.");
 
@@ -43,6 +44,7 @@ public class TriageEpisodeService(
                 $"Patient with id {command.PatientId} already has an episode in progress.");
 
         var episode = new TriageEpisode(command);
+        episode.AssignInstitution(patient.Institution);   // the episode belongs to the patient's institution
         await episodeRepository.AddAsync(episode, cancellationToken);
         await unitOfWork.CompleteAsync(cancellationToken);
         return new Result<TriageEpisode, PatientRegistrationError>.Success(episode);

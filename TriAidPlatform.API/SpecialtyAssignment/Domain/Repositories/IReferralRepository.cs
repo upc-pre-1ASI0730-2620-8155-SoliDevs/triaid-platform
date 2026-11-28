@@ -16,5 +16,5 @@ public interface IReferralRepository : IBaseRepository<Referral>
     /// <param name="specialtyId">Identifier of the specialty.</param>
     /// <param name="cancellationToken">Token to observe for cancellation.</param>
     /// <returns>Number of waiting referrals ahead of a new patient.</returns>
-    Task<int> CountWaitingBySpecialtyAsync(int specialtyId, CancellationToken cancellationToken = default);
+    Task<int> CountWaitingBySpecialtyAsync(int specialtyId, string? institution = null, CancellationToken cancellationToken = default);
 }
