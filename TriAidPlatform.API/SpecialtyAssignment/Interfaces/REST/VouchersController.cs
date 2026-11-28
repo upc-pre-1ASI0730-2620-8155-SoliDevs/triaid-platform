@@ -1,5 +1,6 @@
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
+using QRCoder;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Model.Aggregates;
 using TriAidPlatform.API.SpecialtyAssignment.Domain.Repositories;
 using TriAidPlatform.API.SpecialtyAssignment.Interfaces.REST.Resources;
@@ -34,8 +35,10 @@ public class VouchersController(
     IReferralRepository referralRepository,
     IPatientRepository patientRepository,
     ITriageEpisodeRepository episodeRepository,
+    ISpecialtyRepository specialtyRepository,
     VoucherCodeCipher cipher,
-    IUnitOfWork unitOfWork) : ControllerBase
+    IUnitOfWork unitOfWork,
+    Shared.Infrastructure.Email.IEmailSender emailSender) : ControllerBase
 {
     /**
      * <summary>
@@ -180,4 +183,71 @@ public class VouchersController(
         await unitOfWork.CompleteAsync(cancellationToken);
         return Ok(target);
     }
+
+    /// <summary>E-mails the voucher of a referral; optionally stores the address as the patient's e-mail.</summary>
+    /// <param name="referralId">Identifier of the referral.</param>
+    /// <param name="resource">Recipient address and whether to attach it to the patient.</param>
+    /// <param name="cancellationToken">Token to observe for cancellation.</param>
+    [HttpPost("referral/{referralId:int}/email")]
+    [EndpointSummary("E-mail the voucher of a referral")]
+    [ProducesResponseType(typeof(EmailVoucherSentResource), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> Email(int referralId, [FromBody] EmailVoucherResource resource, CancellationToken cancellationToken)
+    {
+        var email = resource.Email?.Trim().ToLowerInvariant() ?? string.Empty;
+        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            return BadRequest(new { message = "A valid e-mail address is required." });
+        if (!emailSender.IsConfigured)
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "E-mail delivery is not configured on this deployment." });
+
+        var referral = await referralRepository.FindByIdAsync(referralId, cancellationToken);
+        if (referral is null) return NotFound(new { message = $"Referral {referralId} not found." });
+        var episode = await episodeRepository.FindByIdAsync(int.Parse(referral.EpisodeId), cancellationToken);
+        var patient = episode is null ? null : await patientRepository.FindByIdAsync(episode.PatientId, cancellationToken);
+        var specialty = (await specialtyRepository.ListAsync(cancellationToken)).FirstOrDefault(s => s.Id == referral.SpecialtyId);
+
+        if (resource.AttachToPatient && patient is not null)
+        {
+            patient.UpdateEmail(email);
+            patientRepository.Update(patient);
+            await unitOfWork.CompleteAsync(cancellationToken);
+        }
+
+        var token = cipher.Seal($"TRI-AID|{referral.EpisodeId}|{referral.Room}|{referral.QueuePosition}");
+        using var qr = new QRCodeGenerator().CreateQrCode(token, QRCodeGenerator.ECCLevel.Q);
+        var qrImage = Convert.ToBase64String(new PngByteQRCode(qr).GetGraphic(12));
+        var name = patient is null ? string.Empty : $"{patient.FirstName} {patient.LastName}".Trim();
+        var html = VoucherEmailHtml(name, specialty?.Name ?? "Especialidad", referral.Room, referral.QueuePosition, referral.EpisodeId, qrImage);
+
+        var sent = await emailSender.SendAsync(new Shared.Infrastructure.Email.EmailMessage(email, $"Tu comprobante de derivación · Tri-Aid · EP-{referral.EpisodeId}", html), cancellationToken);
+        if (!sent) return StatusCode(StatusCodes.Status502BadGateway, new { message = "The e-mail provider rejected the message." });
+
+        return Ok(new EmailVoucherSentResource(email, resource.AttachToPatient && patient is not null));
+    }
+
+    private static string VoucherEmailHtml(string patientName, string specialty, string room, int position, string episodeId, string qrPngBase64) => """
+                <div style="font-family:Inter,Arial,sans-serif;max-width:520px;margin:0 auto;border:1px solid #e3e8e5;border-radius:18px;overflow:hidden">
+          <div style="background:#0a2118;color:#fff;padding:18px 24px;font-weight:700">Tri-Aid · Comprobante de derivación</div>
+          <div style="padding:24px">
+            <p style="margin:0 0 14px;color:#15291f;font-size:15px">Hola {{name}}, tu derivación quedó registrada:</p>
+            <table style="width:100%;border-collapse:collapse;font-size:14px;color:#15291f">
+              <tr><td style="padding:6px 0;color:#5f6b66">Especialidad</td><td style="padding:6px 0;text-align:right;font-weight:600">{{spec}}</td></tr>
+              <tr><td style="padding:6px 0;color:#5f6b66">Consultorio</td><td style="padding:6px 0;text-align:right;font-weight:600">{{room}}</td></tr>
+              <tr><td style="padding:6px 0;color:#5f6b66">Posición en cola</td><td style="padding:6px 0;text-align:right;font-weight:600">#{{pos}}</td></tr>
+              <tr><td style="padding:6px 0;color:#5f6b66">Episodio</td><td style="padding:6px 0;text-align:right;font-weight:600">EP-{{ep}}</td></tr>
+            </table>
+            <div style="margin:18px 0 8px;text-align:center"><img src="data:image/png;base64,{{qr}}" width="220" height="220" alt="QR del comprobante" style="border-radius:12px"/></div>
+            <p style="margin:0;color:#5f6b66;font-size:13px;text-align:center">Muestra este QR al ingresar al consultorio. También puedes verlo en el portal del paciente: <a href="https://triaid-solidevs.web.app/portal" style="color:#0f6b45">triaid-solidevs.web.app/portal</a></p>
+          </div>
+        </div>
+        """
+        .Replace("{{name}}", System.Net.WebUtility.HtmlEncode(patientName))
+        .Replace("{{spec}}", System.Net.WebUtility.HtmlEncode(specialty))
+        .Replace("{{room}}", System.Net.WebUtility.HtmlEncode(room))
+        .Replace("{{pos}}", position.ToString())
+        .Replace("{{ep}}", System.Net.WebUtility.HtmlEncode(episodeId.PadLeft(4, '0')))
+        .Replace("{{qr}}", qrPngBase64);
+
 }
