@@ -11,17 +11,15 @@ namespace TriAidPlatform.API.PatientRegistration.Application.Internal.OutboundSe
 public class PatientDirectory(IPatientRepository patientRepository) : IPatientDirectory
 {
     /// <inheritdoc />
-    public async Task<PatientCredentials?> FindAsync(string identifier, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PatientCredentials>> FindAllAsync(string identifier, CancellationToken cancellationToken = default)
     {
-        var patient = await patientRepository.GetByIdentifierAsync(identifier, cancellationToken);
-        if (patient is null) return null;
-
-        return new PatientCredentials(
+        var patients = await patientRepository.ListByIdentifierAsync(identifier, cancellationToken);
+        return patients.Select(patient => new PatientCredentials(
             patient.Id,
             $"{patient.FirstName} {patient.LastName}".Trim(),
             patient.Email is not null && identifier.Trim().Equals(patient.Email, StringComparison.OrdinalIgnoreCase)
                 ? patient.Email
                 : patient.Dni ?? identifier.Trim(),
-            patient.PortalPasswordHash);
+            patient.PortalPasswordHash)).ToList();
     }
 }

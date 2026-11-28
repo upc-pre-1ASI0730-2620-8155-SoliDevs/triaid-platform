@@ -11,7 +11,8 @@ public interface IPatientDirectory
     /// </summary>
     /// <param name="identifier">Identifier typed at the portal sign-in.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task<PatientCredentials?> FindAsync(string identifier, CancellationToken cancellationToken = default);
+    /// <summary>Every patient record matching the identifier (DNI or e-mail), across institutions.</summary>
+    Task<IReadOnlyList<PatientCredentials>> FindAllAsync(string identifier, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

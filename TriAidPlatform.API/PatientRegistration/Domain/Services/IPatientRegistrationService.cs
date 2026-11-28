@@ -17,7 +17,7 @@ public interface IPatientRegistrationService
     /// <param name="dni">The DNI to search.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>The <see cref="Patient"/> if found; otherwise, null.</returns>
-    Task<Patient?> FindByDniAsync(string dni, CancellationToken cancellationToken = default);
+    Task<Patient?> FindByDniAsync(string dni, string institution, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Registers a patient with identity document (US06, US08).

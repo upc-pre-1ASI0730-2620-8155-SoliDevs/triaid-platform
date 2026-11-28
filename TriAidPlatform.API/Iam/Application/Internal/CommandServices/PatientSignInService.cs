@@ -27,16 +27,17 @@ public class PatientSignInService(
     public async Task<Result<(PatientSession Session, string Token)>> Handle(
         PatientSignInCommand command, CancellationToken cancellationToken = default)
     {
-        var credentials = await patientDirectory.FindAsync(command.Identifier, cancellationToken);
-        // Same answer for unknown patient and wrong code: do not reveal which one failed.
+        // One person may hold records at several institutions; the access code picks the record.
+        var candidates = await patientDirectory.FindAllAsync(command.Identifier, cancellationToken);
+        if (candidates.Count == 0)
+            return Result<(PatientSession, string)>.Failure(IamErrors.InvalidCredentials, IamError.InvalidCredentials);
+        var credentials = candidates.FirstOrDefault(c => c.PasswordHash is not null && hashingService.VerifyPassword(command.Password, c.PasswordHash));
         if (credentials is null)
+        {
+            if (candidates.All(c => c.PasswordHash is null))
+                return Result<(PatientSession, string)>.Failure(PortalNotEnabled, IamError.NotEnoughPermissions);
             return Result<(PatientSession, string)>.Failure(IamErrors.InvalidCredentials, IamError.InvalidCredentials);
-
-        if (credentials.PasswordHash is null)
-            return Result<(PatientSession, string)>.Failure(PortalNotEnabled, IamError.NotEnoughPermissions);
-
-        if (!hashingService.VerifyPassword(command.Password, credentials.PasswordHash))
-            return Result<(PatientSession, string)>.Failure(IamErrors.InvalidCredentials, IamError.InvalidCredentials);
+        }
 
         var session = new PatientSession(credentials.PatientId, credentials.FullName, credentials.Identifier);
         var token = tokenService.GeneratePatientToken(session);

@@ -26,9 +26,9 @@ public class PatientRegistrationService(
     /// <param name="dni">The DNI to search.</param>
     /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
     /// <returns>The <see cref="Patient"/> if found; otherwise, null.</returns>
-    public async Task<Patient?> FindByDniAsync(string dni, CancellationToken cancellationToken = default)
+    public async Task<Patient?> FindByDniAsync(string dni, string institution, CancellationToken cancellationToken = default)
     {
-        return await patientRepository.GetByDniAsync(dni, cancellationToken);
+        return await patientRepository.GetByDniAsync(dni, institution, cancellationToken);
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public class PatientRegistrationService(
     public async Task<Result<(Patient Patient, string AccessCode), PatientRegistrationError>> RegisterAsync(
         CreatePatientCommand command, CancellationToken cancellationToken = default)
     {
-        if (await patientRepository.GetByDniAsync(command.Dni, cancellationToken) is not null)
+        if (await patientRepository.GetByDniAsync(command.Dni, command.Institution ?? string.Empty, cancellationToken) is not null)
             return new Result<(Patient, string), PatientRegistrationError>.Failure(
                 new PatientRegistrationError(EPatientRegistrationErrorType.Conflict,
                     $"A patient with DNI {command.Dni} is already registered."));
@@ -110,7 +110,7 @@ public class PatientRegistrationService(
         if (patient is null)
             return NotFound(patientId);
 
-        if (await patientRepository.GetByDniAsync(command.Dni, cancellationToken) is not null)
+        if (await patientRepository.GetByDniAsync(command.Dni, patient.Institution, cancellationToken) is not null)
             return Conflict($"A patient with DNI {command.Dni} is already registered.");
 
         try
