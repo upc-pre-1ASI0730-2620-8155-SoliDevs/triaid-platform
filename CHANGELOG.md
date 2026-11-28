@@ -21,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+---
+
+## [1.8.0] - 2026-11-28
+
+### Added
+- `POST /api/v1/vouchers/referral/{id}/email` delivers the sealed voucher by e-mail (Resend, HTML with the QR) and can store the address as the patient's e-mail. Credentials come from `Resend__ApiKey` / `Resend__From`; without them the endpoint answers `503`.
+
 ## [1.7.0] - 2026-11-28
 
 ### Changed
