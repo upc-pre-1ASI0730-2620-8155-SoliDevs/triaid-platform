@@ -19,6 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+---
+
+## [1.7.0] - 2026-11-28
+
+### Changed
+- The DNI and the e-mail of a patient are unique **per institution** instead of system-wide: a person may hold a record at several institutions, each with its own history. The schema upgrade swaps both indexes on startup.
+- The patient portal sign-in resolves the record by access code when the same DNI exists at more than one institution.
+
 ## [1.6.0] - 2026-11-28
 
 ### Added
