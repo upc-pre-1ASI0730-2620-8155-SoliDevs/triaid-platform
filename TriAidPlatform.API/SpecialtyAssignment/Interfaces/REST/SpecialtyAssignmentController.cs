@@ -73,7 +73,7 @@ public class SpecialtyAssignmentController(
     public async Task<ActionResult<ReferralResource>> Refer(string episodeId,
         [FromBody] ReferEpisodeResource resource, CancellationToken cancellationToken)
     {
-        var command = new ReferEpisodeCommand(episodeId, resource.SpecialtyId);
+        var command = new ReferEpisodeCommand(episodeId, resource.SpecialtyId, resource.Institution);
         var result = await assignmentService.ReferAsync(command, resource.Symptom, cancellationToken);
         return await ToReferralResultAsync(result, cancellationToken);
     }

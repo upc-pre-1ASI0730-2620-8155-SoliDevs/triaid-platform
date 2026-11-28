@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+---
+
+## [1.5.0] - 2026-11-27
+
+### Fixed
+- Referrals created from the triage flow now carry the institution of the signed-in staff member. Before they were stored with an empty institution, so the web client's tenant-scoped reads hid them and the panel, patients and reports kept showing the episode as not referred.
+
 ## [1.4.0] - 2026-11-27
 
 ### Added
