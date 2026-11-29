@@ -19,7 +19,8 @@ namespace TriAidPlatform.API.Incidents.Interfaces.Rest;
 [Tags("Incidents")]
 public class IncidentsController(
     IIncidentCommandService incidentCommandService,
-    IIncidentQueryService incidentQueryService) : ControllerBase
+    IIncidentQueryService incidentQueryService,
+    Shared.Infrastructure.Localization.IApiMessages messages) : ControllerBase
 {
     [HttpGet]
     [EndpointSummary("Get All Incidents")]
@@ -65,8 +66,8 @@ public class IncidentsController(
             created => CreatedAtAction(
                 nameof(GetIncidentById),
                 new { id = created.Id.Value },
-                IncidentResourceFromEntityAssembler.ToResourceFromEntity(created))
-        );
+                IncidentResourceFromEntityAssembler.ToResourceFromEntity(created)),
+            messages);
     }
 
     [HttpPut("{id:int}")]
@@ -86,7 +87,7 @@ public class IncidentsController(
         return IncidentsActionResultAssembler.ToActionResultFromCommandResult(
             this,
             result,
-            updated => Ok(IncidentResourceFromEntityAssembler.ToResourceFromEntity(updated))
-        );
+            updated => Ok(IncidentResourceFromEntityAssembler.ToResourceFromEntity(updated)),
+            messages);
     }
 }

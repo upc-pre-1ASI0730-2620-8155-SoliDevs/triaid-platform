@@ -1,3 +1,4 @@
+using TriAidPlatform.API.Shared.Infrastructure.Localization;
 using Microsoft.AspNetCore.Mvc;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp;
 using TriAidPlatform.API.Shared.Domain.Repositories;
@@ -31,7 +32,8 @@ public class ClassificationsController(
     IClassificationService classificationService,
     ClassificationQueryService queryService,
     IClassificationRepository classificationRepository,
-    IUnitOfWork unitOfWork) : ControllerBase
+    IUnitOfWork unitOfWork,
+    IApiMessages messages) : ControllerBase
 {
     /// <summary>Records the NT-158 suggestion for an episode (US19).</summary>
     /// <param name="episodeId">Identifier of the episode.</param>
@@ -74,7 +76,7 @@ public class ClassificationsController(
         [FromBody] ModifyClassificationResource resource, CancellationToken cancellationToken)
     {
         if (!Enum.IsDefined(typeof(ETriageLevel), resource.NewLevel))
-            return BadRequest(new { message = "The triage level must be between 1 and 5." });
+            return BadRequest(new { message = messages["InvalidTriageLevel"] });
         var command = new ModifyClassificationCommand(
             classificationId, (ETriageLevel)resource.NewLevel, resource.Justification);
         var result = await classificationService.ModifyAsync(
@@ -94,7 +96,7 @@ public class ClassificationsController(
     {
         var classification = await queryService.GetByEpisodeAsync(episodeId, cancellationToken);
         return classification is null
-            ? NotFound(new { message = $"Episode with id {episodeId} is not classified yet." })
+            ? NotFound(new { message = messages["EpisodeNotClassified", episodeId] })
             : Ok(ClassificationResourceFromEntityAssembler.ToResourceFromEntity(classification));
     }
 
@@ -141,7 +143,7 @@ public class ClassificationsController(
         [FromBody] SaveClassificationResource resource, CancellationToken cancellationToken)
     {
         if (await classificationRepository.FindByEpisodeIdAsync(resource.EpisodeId, cancellationToken) is not null)
-            return Conflict(new { message = $"Episode with id {resource.EpisodeId} is already classified." });
+            return Conflict(new { message = messages["EpisodeAlreadyClassified", resource.EpisodeId] });
 
         var classification = new Classification(new SuggestClassificationCommand(
                 resource.EpisodeId,
@@ -176,7 +178,7 @@ public class ClassificationsController(
     {
         var classification = await classificationRepository.FindByIdAsync(id, cancellationToken);
         if (classification is null)
-            return NotFound(new { message = $"Classification with id {id} was not found." });
+            return NotFound(new { message = messages["ClassificationNotFound", id] });
 
         classification.ApplyRecord(
             ClassificationResourceFromEntityAssembler.FromLevelKey(resource.SuggestedLevel),
@@ -190,8 +192,8 @@ public class ClassificationsController(
 
     private ActionResult<ClassificationResource> ToErrorResponse(ClassificationError error) => error.Type switch
     {
-        EClassificationError.NotFound => NotFound(new { message = error.Message }),
-        EClassificationError.Conflict => Conflict(new { message = error.Message }),
-        _ => BadRequest(new { message = error.Message })
+        EClassificationError.NotFound => NotFound(new { message = (messages.Find("Classification", error.Type) ?? error.Message) }),
+        EClassificationError.Conflict => Conflict(new { message = (messages.Find("Classification", error.Type) ?? error.Message) }),
+        _ => BadRequest(new { message = (messages.Find("Classification", error.Type) ?? error.Message) })
     };
 }

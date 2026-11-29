@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="DeviceNotFound" xml:space="preserve">
+    <value>Associated device not found.</value>
+  </data>
+  <data name="InvalidBloodPressure" xml:space="preserve">
+    <value>Invalid blood pressure values. Systolic must be greater than diastolic.</value>
+  </data>
+  <data name="InvalidTemperature" xml:space="preserve">
+    <value>Invalid body temperature value. Must be within a realistic physiological range.</value>
+  </data>
+  <data name="InvalidHeartRate" xml:space="preserve">
+    <value>Invalid heart rate value. Must be between 1 and 300 bpm.</value>
+  </data>
+  <data name="InvalidOxygenSaturation" xml:space="preserve">
+    <value>Invalid oxygen saturation value. Must be between 0% and 100%.</value>
+  </data>
+  <data name="PortalNoEpisode" xml:space="preserve">
+    <value>No episode found.</value>
+  </data>
+  <data name="PortalNotReferred" xml:space="preserve">
+    <value>Not referred yet.</value>
+  </data>
+  <data name="PortalPatientNotFound" xml:space="preserve">
+    <value>Patient not found.</value>
+  </data>
+  <data name="PatientDniNotFound" xml:space="preserve">
+    <value>No patient registered with DNI {0}.</value>
+  </data>
+  <data name="PatientNotFound" xml:space="preserve">
+    <value>Patient with id {0} was not found.</value>
+  </data>
+  <data name="EpisodeNotFound" xml:space="preserve">
+    <value>Triage episode with id {0} was not found.</value>
+  </data>
+  <data name="ReferralNotFound" xml:space="preserve">
+    <value>Referral with id {0} was not found.</value>
+  </data>
+  <data name="SpecialtyNotInCatalog" xml:space="preserve">
+    <value>Specialty {0} is not part of the catalog.</value>
+  </data>
+  <data name="InstitutionRequired" xml:space="preserve">
+    <value>The institution is required.</value>
+  </data>
+  <data name="VoucherEpisodeNotFound" xml:space="preserve">
+    <value>Episode {0} not found.</value>
+  </data>
+  <data name="VoucherReferralNotFound" xml:space="preserve">
+    <value>Referral {0} not found.</value>
+  </data>
+  <data name="EmailRequired" xml:space="preserve">
+    <value>A valid e-mail address is required.</value>
+  </data>
+  <data name="EmailNotConfigured" xml:space="preserve">
+    <value>E-mail delivery is not configured on this deployment.</value>
+  </data>
+  <data name="CodeNotEpisode" xml:space="preserve">
+    <value>The code does not identify an episode.</value>
+  </data>
+  <data name="EmailRejected" xml:space="preserve">
+    <value>The e-mail provider rejected the message.</value>
+  </data>
+  <data name="InstitutionNameExists" xml:space="preserve">
+    <value>An institution named &#x27;{0}&#x27; already exists.</value>
+  </data>
+  <data name="InstitutionRucExists" xml:space="preserve">
+    <value>An institution with RUC {0} already exists.</value>
+  </data>
+  <data name="InstitutionNotFound" xml:space="preserve">
+    <value>Institution with id {0} was not found.</value>
+  </data>
+  <data name="InstitutionNameRequired" xml:space="preserve">
+    <value>The institution name is required.</value>
+  </data>
+  <data name="ClassificationNotFound" xml:space="preserve">
+    <value>Classification with id {0} was not found.</value>
+  </data>
+  <data name="EpisodeNotClassified" xml:space="preserve">
+    <value>Episode with id {0} is not classified yet.</value>
+  </data>
+  <data name="EpisodeAlreadyClassified" xml:space="preserve">
+    <value>Episode with id {0} is already classified.</value>
+  </data>
+  <data name="InvalidTriageLevel" xml:space="preserve">
+    <value>The triage level must be between 1 and 5.</value>
+  </data>
+  <data name="Specialty.NotFound" xml:space="preserve">
+    <value>The requested record was not found.</value>
+  </data>
+  <data name="Specialty.Conflict" xml:space="preserve">
+    <value>The operation conflicts with the current state of the referral.</value>
+  </data>
+  <data name="Specialty.Validation" xml:space="preserve">
+    <value>The request has invalid values.</value>
+  </data>
+  <data name="Classification.NotFound" xml:space="preserve">
+    <value>The classification was not found.</value>
+  </data>
+  <data name="Classification.Conflict" xml:space="preserve">
+    <value>The episode already has a classification in that state.</value>
+  </data>
+  <data name="Classification.Validation" xml:space="preserve">
+    <value>The classification request has invalid values.</value>
+  </data>
+  <data name="Registration.NotFound" xml:space="preserve">
+    <value>The patient or episode was not found.</value>
+  </data>
+  <data name="Registration.Conflict" xml:space="preserve">
+    <value>The patient already has a record in that state.</value>
+  </data>
+  <data name="Registration.Validation" xml:space="preserve">
+    <value>The registration request has invalid values.</value>
+  </data>
+  <data name="Incident.IncidentNotFound" xml:space="preserve">
+    <value>The incident was not found.</value>
+  </data>
+  <data name="Incident.InvalidIncidentData" xml:space="preserve">
+    <value>The incident data is invalid.</value>
+  </data>
+  <data name="Incident.InvalidStateTransition" xml:space="preserve">
+    <value>The incident is already in a final state.</value>
+  </data>
+  <data name="Incident.UnauthorizedClinicAccess" xml:space="preserve">
+    <value>The incident belongs to another institution.</value>
+  </data>
+  <data name="Incident.DatabaseError" xml:space="preserve">
+    <value>A database error occurred while processing the incident.</value>
+  </data>
+  <data name="Incident.InternalServerError" xml:space="preserve">
+    <value>An unexpected error occurred while processing the incident.</value>
+  </data>
+  <data name="Iam.InvalidCredentials" xml:space="preserve">
+    <value>Invalid credentials.</value>
+  </data>
+  <data name="Iam.UsernameAlreadyTaken" xml:space="preserve">
+    <value>The username is already taken.</value>
+  </data>
+  <data name="Iam.InstitutionAlreadyRegistered" xml:space="preserve">
+    <value>The institution is already registered.</value>
+  </data>
+  <data name="Iam.UserNotFound" xml:space="preserve">
+    <value>The user was not found.</value>
+  </data>
+  <data name="Iam.NotEnoughPermissions" xml:space="preserve">
+    <value>You do not have enough permissions.</value>
+  </data>
+  <data name="Iam.SeatLimitReached" xml:space="preserve">
+    <value>The plan&#x27;s seat limit has been reached.</value>
+  </data>
+  <data name="Iam.UserCreationFailed" xml:space="preserve">
+    <value>The user could not be created.</value>
+  </data>
+</root>

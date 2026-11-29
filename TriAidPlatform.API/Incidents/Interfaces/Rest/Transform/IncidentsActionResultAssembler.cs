@@ -1,3 +1,4 @@
+using TriAidPlatform.API.Shared.Infrastructure.Localization;
 ﻿using Microsoft.AspNetCore.Mvc;
 using TriAidPlatform.API.Incidents.Domain.Model.Aggregates;
 using TriAidPlatform.API.Incidents.Domain.Model.Errors;
@@ -25,7 +26,8 @@ public static class IncidentsActionResultAssembler
     public static IActionResult ToActionResultFromCommandResult(
         ControllerBase controller,
         Result<Incident> result,
-        Func<Incident, IActionResult> onSuccess)
+        Func<Incident, IActionResult> onSuccess,
+        IApiMessages? messages = null)
     {
         if (result.IsSuccess) return onSuccess(result.Value!);
 
@@ -35,7 +37,8 @@ public static class IncidentsActionResultAssembler
 
         return controller.Problem(
             title: string.IsNullOrWhiteSpace(result.DomainError.Code) ? "IncidentError" : result.DomainError.Code,
-            detail: result.Message,
+            // Follows the client's language when the catalog has the error; the domain message otherwise.
+            detail: messages?.Find("Incident", result.DomainError.Code) ?? result.Message,
             statusCode: statusCode
         );
     }

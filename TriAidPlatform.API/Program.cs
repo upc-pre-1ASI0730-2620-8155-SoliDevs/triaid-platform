@@ -32,7 +32,11 @@ using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCor
 using TriAidPlatform.API.Incidents.Infrastructure.Persistence.EntityFrameworkCore.Schema;
 using TriAidPlatform.API.PatientRegistration.Infrastructure.Persistence.EntityFrameworkCore.Schema;
 using TriAidPlatform.API.Shared.Domain.Repositories;
+using System.Globalization;
+using Microsoft.Extensions.Localization;
 using TriAidPlatform.API.Shared.Infrastructure.Email;
+using TriAidPlatform.API.Shared.Infrastructure.Localization;
+using TriAidPlatform.API.Shared.Resources.Messages;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp.Configuration.OpenApi;
 using TriAidPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
@@ -73,6 +77,11 @@ builder.Services.AddScoped<TriAidPlatform.API.Iam.Application.Internal.OutboundS
 builder.Services.AddScoped<TriAidPlatform.API.Iam.Application.Internal.CommandServices.IPatientSignInService, TriAidPlatform.API.Iam.Application.Internal.CommandServices.PatientSignInService>();
 builder.Services.AddScoped<ITriageEpisodeRepository, TriageEpisodeRepository>();
 builder.Services.AddScoped<ITriageEpisodeService, TriageEpisodeService>();
+
+// Localized API messages (en base, es) following the request culture
+builder.Services.AddLocalization(options => options.ResourcesPath = "");   // the marker type lives next to its .resx
+builder.Services.AddSingleton<IStringLocalizer<ApiMessages>, StringLocalizer<ApiMessages>>();
+builder.Services.AddSingleton<IApiMessages, ApiMessagesAccessor>();
 
 // Transactional e-mail (Resend)
 builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>();
@@ -144,6 +153,14 @@ var app = builder.Build();
 
 // OpenAPI and Scalar documentation are exposed in every environment for public access
 app.MapOpenApi();
+// Answer in the client's language: Accept-Language (then ?culture=), English by default.
+var supportedCultures = new[] { "en", "es" };
+app.UseRequestLocalization(options => options
+    .SetDefaultCulture(supportedCultures[0])
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures)
+    .RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localization.AcceptLanguageHeaderRequestCultureProvider()));
+
 app.MapScalarApiReference();
 
 // Upgrade legacy tables, then create the database schema if it does not exist yet

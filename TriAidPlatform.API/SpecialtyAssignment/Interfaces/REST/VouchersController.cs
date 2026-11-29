@@ -1,3 +1,4 @@
+using TriAidPlatform.API.Shared.Infrastructure.Localization;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using QRCoder;
@@ -38,7 +39,8 @@ public class VouchersController(
     ISpecialtyRepository specialtyRepository,
     VoucherCodeCipher cipher,
     IUnitOfWork unitOfWork,
-    Shared.Infrastructure.Email.IEmailSender emailSender) : ControllerBase
+    Shared.Infrastructure.Email.IEmailSender emailSender,
+    IApiMessages messages) : ControllerBase
 {
     /**
      * <summary>
@@ -62,7 +64,7 @@ public class VouchersController(
     public async Task<IActionResult> Issue(int referralId, CancellationToken cancellationToken)
     {
         var referral = await referralRepository.FindByIdAsync(referralId, cancellationToken);
-        if (referral is null) return NotFound(new { message = $"Referral {referralId} not found." });
+        if (referral is null) return NotFound(new { message = messages["VoucherReferralNotFound", referralId] });
 
         var plain = $"TRI-AID|{referral.EpisodeId}|{referral.Room}|{referral.QueuePosition}";
         var token = cipher.Seal(plain);
@@ -92,10 +94,10 @@ public class VouchersController(
     public async Task<IActionResult> Verify(string code, CancellationToken cancellationToken)
     {
         var episodeId = ParseEpisodeId(code);
-        if (episodeId is null) return NotFound(new { message = "The code does not identify an episode." });
+        if (episodeId is null) return NotFound(new { message = messages["CodeNotEpisode"] });
 
         var episode = await episodeRepository.FindByIdAsync(episodeId.Value, cancellationToken);
-        if (episode is null) return NotFound(new { message = $"Episode {episodeId} not found." });
+        if (episode is null) return NotFound(new { message = messages["VoucherEpisodeNotFound", episodeId] });
 
         var patient = await patientRepository.FindByIdAsync(episode.PatientId, cancellationToken);
         var referral = await referralRepository.FindByEpisodeIdAsync(episode.Id.ToString(), cancellationToken);
@@ -198,12 +200,12 @@ public class VouchersController(
     {
         var email = resource.Email?.Trim().ToLowerInvariant() ?? string.Empty;
         if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-            return BadRequest(new { message = "A valid e-mail address is required." });
+            return BadRequest(new { message = messages["EmailRequired"] });
         if (!emailSender.IsConfigured)
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "E-mail delivery is not configured on this deployment." });
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = messages["EmailNotConfigured"] });
 
         var referral = await referralRepository.FindByIdAsync(referralId, cancellationToken);
-        if (referral is null) return NotFound(new { message = $"Referral {referralId} not found." });
+        if (referral is null) return NotFound(new { message = messages["VoucherReferralNotFound", referralId] });
         var episode = await episodeRepository.FindByIdAsync(int.Parse(referral.EpisodeId), cancellationToken);
         var patient = episode is null ? null : await patientRepository.FindByIdAsync(episode.PatientId, cancellationToken);
         var specialty = (await specialtyRepository.ListAsync(cancellationToken)).FirstOrDefault(s => s.Id == referral.SpecialtyId);
@@ -222,7 +224,7 @@ public class VouchersController(
         var html = VoucherEmailHtml(name, specialty?.Name ?? "Especialidad", referral.Room, referral.QueuePosition, referral.EpisodeId, qrImage);
 
         var sent = await emailSender.SendAsync(new Shared.Infrastructure.Email.EmailMessage(email, $"Tu comprobante de derivación · Tri-Aid · EP-{referral.EpisodeId}", html), cancellationToken);
-        if (!sent) return StatusCode(StatusCodes.Status502BadGateway, new { message = "The e-mail provider rejected the message." });
+        if (!sent) return StatusCode(StatusCodes.Status502BadGateway, new { message = messages["EmailRejected"] });
 
         return Ok(new EmailVoucherSentResource(email, resource.AttachToPatient && patient is not null));
     }

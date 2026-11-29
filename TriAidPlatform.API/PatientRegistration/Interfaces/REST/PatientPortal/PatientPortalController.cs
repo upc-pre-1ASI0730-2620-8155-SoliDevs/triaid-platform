@@ -1,3 +1,4 @@
+using TriAidPlatform.API.Shared.Infrastructure.Localization;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using TriAidPlatform.API.Iam.Domain.Model.Aggregates;
@@ -36,7 +37,8 @@ public class PatientPortalController(
     IClassificationRepository classificationRepository,
     IReferralRepository referralRepository,
     ISpecialtyRepository specialtyRepository,
-    IVoucherRepository voucherRepository) : ControllerBase
+    IVoucherRepository voucherRepository,
+    IApiMessages messages) : ControllerBase
 {
     /// <summary>Average minutes per patient used to estimate the wait when there is no history.</summary>
     private const int MinutesPerPatient = 8;
@@ -57,7 +59,7 @@ public class PatientPortalController(
     {
         var session = Current;
         var patient = await patientRepository.FindByIdAsync(session.PatientId, cancellationToken);
-        if (patient is null) return NotFound(new { message = "Patient not found." });
+        if (patient is null) return NotFound(new { message = messages["PortalPatientNotFound"] });
 
         var episode = (await episodeRepository.FindByPatientIdAsync(session.PatientId, cancellationToken))
             .OrderByDescending(e => e.ArrivalTime)
@@ -118,11 +120,11 @@ public class PatientPortalController(
         var episode = (await episodeRepository.FindByPatientIdAsync(session.PatientId, cancellationToken))
             .OrderByDescending(e => e.ArrivalTime)
             .FirstOrDefault();
-        if (episode is null) return NotFound(new { message = "No episode found." });
+        if (episode is null) return NotFound(new { message = messages["PortalNoEpisode"] });
 
         var episodeId = episode.Id.ToString();
         var referral = await referralRepository.FindByEpisodeIdAsync(episodeId, cancellationToken);
-        if (referral is null) return NotFound(new { message = "Not referred yet." });
+        if (referral is null) return NotFound(new { message = messages["PortalNotReferred"] });
 
         var classification = await classificationRepository.FindByEpisodeIdAsync(episodeId, cancellationToken);
         return Ok(await ComputeQueueAsync(episodeId, referral, classification, cancellationToken));

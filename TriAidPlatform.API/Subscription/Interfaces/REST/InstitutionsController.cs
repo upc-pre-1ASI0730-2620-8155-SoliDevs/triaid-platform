@@ -1,3 +1,4 @@
+using TriAidPlatform.API.Shared.Infrastructure.Localization;
 using Microsoft.AspNetCore.Mvc;
 using TriAidPlatform.API.Subscription.Domain.Model;
 using TriAidPlatform.API.Subscription.Domain.Repositories;
@@ -12,7 +13,8 @@ namespace TriAidPlatform.API.Subscription.Interfaces.REST;
  */
 [ApiController]
 [Route("institutions")]
-public class InstitutionsController(IInstitutionRepository repository) : ControllerBase
+public class InstitutionsController(IInstitutionRepository repository,
+    IApiMessages messages) : ControllerBase
 {
     /// <summary>Lists every registered institution.</summary>
     [HttpGet]
@@ -28,7 +30,7 @@ public class InstitutionsController(IInstitutionRepository repository) : Control
     {
         var institution = await repository.FindByIdAsync(id, cancellationToken);
         return institution is null
-            ? NotFound(new { message = $"Institution with id {id} was not found." })
+            ? NotFound(new { message = messages["InstitutionNotFound", id] })
             : Ok(InstitutionResourceFromEntityAssembler.ToResource(institution));
     }
 
@@ -38,13 +40,13 @@ public class InstitutionsController(IInstitutionRepository repository) : Control
         [FromBody] CreateInstitutionResource resource, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(resource.Name))
-            return BadRequest(new { message = "The institution name is required." });
+            return BadRequest(new { message = messages["InstitutionNameRequired"] });
 
         if (await repository.ExistsByRucAsync(resource.Ruc, cancellationToken))
-            return Conflict(new { message = $"An institution with RUC {resource.Ruc} already exists." });
+            return Conflict(new { message = messages["InstitutionRucExists", resource.Ruc] });
 
         if (await repository.FindByNameAsync(resource.Name.Trim(), cancellationToken) is not null)
-            return Conflict(new { message = $"An institution named '{resource.Name}' already exists." });
+            return Conflict(new { message = messages["InstitutionNameExists", resource.Name] });
 
         var institution = new Institution
         {
