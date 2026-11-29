@@ -41,13 +41,5 @@ public static class CatalogSeed
             Features = ["Unlimited triage users", "Assisted NT-158 classification + analytics",
                 "Multi-specialty routing", "Priority support"]
         };
-        yield return new Plan
-        {
-            Id = "plan-institucional", Name = "Institutional",
-            For = "For health networks and smart-city projects",
-            MonthlyPrice = 249, AnnualPrice = 2390, MaxUsers = 100,
-            Features = ["Multi-campus management", "API integration with hospital systems",
-                "SLA + dedicated onboarding"]
-        };
     }
 }

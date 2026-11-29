@@ -23,6 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+---
+
+## [1.9.0] - 2026-11-28
+
+### Removed
+- The Institutional plan. Its features (multi-site, hospital API integration, SLA) are not part of the product; the catalog now offers the Essential and Professional plans only.
+
 ## [1.8.0] - 2026-11-28
 
 ### Added
