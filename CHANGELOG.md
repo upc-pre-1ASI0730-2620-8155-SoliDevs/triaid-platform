@@ -25,6 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+---
+
+## [1.10.0] - 2026-11-28
+
+### Added
+- **Localized API messages:** the REST layer resolves the message of every error by key from `Shared/Resources/Messages/ApiMessages.resx` (English) and `ApiMessages.es.resx` (Spanish), following the request culture (`Accept-Language`, then `?culture=`). The domain keeps its own messages as fallback. Covers the thirty inline controller messages and the typed errors of specialty assignment, classification, registration, incidents and IAM.
+
 ## [1.9.0] - 2026-11-28
 
 ### Removed
