@@ -1,3 +1,4 @@
+using TriAidPlatform.API.Shared.Infrastructure.Localization;
 using Microsoft.AspNetCore.Mvc;
 using TriAidPlatform.API.Shared.Domain.Repositories;
 using TriAidPlatform.API.PatientRegistration.Domain.Model.Aggregates;
@@ -23,7 +24,8 @@ namespace TriAidPlatform.API.PatientRegistration.Interfaces.REST;
 public class TriageEpisodesController(
     ITriageEpisodeService triageEpisodeService,
     ITriageEpisodeRepository episodeRepository,
-    IUnitOfWork unitOfWork) : ControllerBase
+    IUnitOfWork unitOfWork,
+    IApiMessages messages) : ControllerBase
 {
     /// <summary>Lists every triage episode.</summary>
     [HttpGet]
@@ -41,7 +43,7 @@ public class TriageEpisodesController(
     {
         var episode = await episodeRepository.FindByIdAsync(episodeId, cancellationToken);
         return episode is null
-            ? NotFound(new { message = $"Triage episode with id {episodeId} was not found." })
+            ? NotFound(new { message = messages["EpisodeNotFound", episodeId] })
             : Ok(TriageEpisodeResourceFromEntityAssembler.ToResourceFromEntity(episode));
     }
 
@@ -129,8 +131,8 @@ public class TriageEpisodesController(
 
     private ActionResult<TriageEpisodeResource> ToErrorResponse(PatientRegistrationError error) => error.Type switch
     {
-        EPatientRegistrationErrorType.NotFound => NotFound(new { message = error.Message }),
-        EPatientRegistrationErrorType.Conflict => Conflict(new { message = error.Message }),
-        _ => BadRequest(new { message = error.Message })
+        EPatientRegistrationErrorType.NotFound => NotFound(new { message = (messages.Find("Registration", error.Type) ?? error.Message) }),
+        EPatientRegistrationErrorType.Conflict => Conflict(new { message = (messages.Find("Registration", error.Type) ?? error.Message) }),
+        _ => BadRequest(new { message = (messages.Find("Registration", error.Type) ?? error.Message) })
     };
 }

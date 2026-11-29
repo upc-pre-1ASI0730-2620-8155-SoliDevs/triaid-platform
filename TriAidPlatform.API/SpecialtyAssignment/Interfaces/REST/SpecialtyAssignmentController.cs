@@ -1,3 +1,4 @@
+using TriAidPlatform.API.Shared.Infrastructure.Localization;
 using Microsoft.AspNetCore.Mvc;
 using TriAidPlatform.API.Shared.Infrastructure.Interfaces.Asp;
 using TriAidPlatform.API.Shared.Application.Patterns;
@@ -31,7 +32,8 @@ public class SpecialtyAssignmentController(
     ISpecialtyAssignmentService assignmentService,
     IReferralRepository referralRepository,
     ISpecialtyRepository specialtyRepository,
-    IUnitOfWork unitOfWork) : ControllerBase
+    IUnitOfWork unitOfWork,
+    IApiMessages messages) : ControllerBase
 {
     /// <summary>Lists the specialty catalog.</summary>
     /// <param name="onlyActive">When true, only active specialties are returned.</param>
@@ -60,8 +62,8 @@ public class SpecialtyAssignmentController(
             suggestion => Ok(suggestion),
             error => error.Type switch
             {
-                ESpecialtyError.Validation => BadRequest(new { message = error.Message }),
-                _ => NotFound(new { message = error.Message })
+                ESpecialtyError.Validation => BadRequest(new { message = (messages.Find("Specialty", error.Type) ?? error.Message) }),
+                _ => NotFound(new { message = (messages.Find("Specialty", error.Type) ?? error.Message) })
             });
     }
 
@@ -141,10 +143,10 @@ public class SpecialtyAssignmentController(
         [FromBody] SaveReferralResource resource, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(resource.Institution))
-            return BadRequest(new { message = "The institution is required." });
+            return BadRequest(new { message = messages["InstitutionRequired"] });
         var specialty = await FindByNameAsync(resource.Specialty, cancellationToken);
         if (specialty is null)
-            return BadRequest(new { message = $"Specialty {resource.Specialty} is not part of the catalog." });
+            return BadRequest(new { message = messages["SpecialtyNotInCatalog", resource.Specialty] });
 
         var referral = new Referral(
                 new ReferEpisodeCommand(resource.EpisodeId, specialty.Id), specialty.Room,
@@ -174,10 +176,10 @@ public class SpecialtyAssignmentController(
     {
         var referral = (await referralRepository.ListAsync(cancellationToken)).FirstOrDefault(r => r.Id == id);
         if (referral is null)
-            return NotFound(new { message = $"Referral with id {id} was not found." });
+            return NotFound(new { message = messages["ReferralNotFound", id] });
         var specialty = await FindByNameAsync(resource.Specialty, cancellationToken);
         if (specialty is null)
-            return BadRequest(new { message = $"Specialty {resource.Specialty} is not part of the catalog." });
+            return BadRequest(new { message = messages["SpecialtyNotInCatalog", resource.Specialty] });
 
         referral.ApplyRecordUpdate(specialty.Id, specialty.Room, resource.QueuePosition,
             resource.State, resource.ChangeReason);
@@ -212,8 +214,8 @@ public class SpecialtyAssignmentController(
 
     private ActionResult<ReferralResource> ToErrorResponse(SpecialtyError error) => error.Type switch
     {
-        ESpecialtyError.NotFound => NotFound(new { message = error.Message }),
-        ESpecialtyError.Conflict => Conflict(new { message = error.Message }),
-        _ => BadRequest(new { message = error.Message })
+        ESpecialtyError.NotFound => NotFound(new { message = (messages.Find("Specialty", error.Type) ?? error.Message) }),
+        ESpecialtyError.Conflict => Conflict(new { message = (messages.Find("Specialty", error.Type) ?? error.Message) }),
+        _ => BadRequest(new { message = (messages.Find("Specialty", error.Type) ?? error.Message) })
     };
 }

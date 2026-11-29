@@ -1,3 +1,4 @@
+using TriAidPlatform.API.Shared.Infrastructure.Localization;
 using Microsoft.AspNetCore.Mvc;
 using TriAidPlatform.API.PatientRegistration.Domain.Model.Aggregates;
 using TriAidPlatform.API.PatientRegistration.Domain.Model.Commands;
@@ -22,7 +23,8 @@ namespace TriAidPlatform.API.PatientRegistration.Interfaces.REST;
 [Produces("application/json")]
 public class PatientsController(
     IPatientRegistrationService patientRegistrationService,
-    IPatientRepository patientRepository) : ControllerBase
+    IPatientRepository patientRepository,
+    IApiMessages messages) : ControllerBase
 {
     /// <summary>Lists every registered patient.</summary>
     [HttpGet]
@@ -40,7 +42,7 @@ public class PatientsController(
     {
         var patient = await patientRepository.FindByIdAsync(patientId, cancellationToken);
         return patient is null
-            ? NotFound(new { message = $"Patient with id {patientId} was not found." })
+            ? NotFound(new { message = messages["PatientNotFound", patientId] })
             : Ok(PatientResourceFromEntityAssembler.ToResourceFromEntity(patient));
     }
 
@@ -50,7 +52,7 @@ public class PatientsController(
     {
         var patient = await patientRegistrationService.FindByDniAsync(dni, HttpContext.StaffInstitution() ?? string.Empty, cancellationToken);
         return patient is null
-            ? NotFound(new { message = $"No patient registered with DNI {dni}." })
+            ? NotFound(new { message = messages["PatientDniNotFound", dni] })
             : Ok(PatientResourceFromEntityAssembler.ToResourceFromEntity(patient));
     }
 
@@ -132,8 +134,8 @@ public class PatientsController(
         return result.Fold<ActionResult<PortalEnabledResource>>(
             r => Ok(new PortalEnabledResource(r.Patient.Id, r.Patient.Email, r.AccessCode)),
             error => error.Type == EPatientRegistrationErrorType.NotFound
-                ? NotFound(new { message = error.Message })
-                : BadRequest(new { message = error.Message }));
+                ? NotFound(new { message = (messages.Find("Registration", error.Type) ?? error.Message) })
+                : BadRequest(new { message = (messages.Find("Registration", error.Type) ?? error.Message) }));
     }
 
     /// <summary>Patient just registered, with the one-time portal access code.</summary>
@@ -154,8 +156,8 @@ public class PatientsController(
 
     private ActionResult ToErrorResponse(PatientRegistrationError error) => error.Type switch
     {
-        EPatientRegistrationErrorType.NotFound => NotFound(new { message = error.Message }),
-        EPatientRegistrationErrorType.Conflict => Conflict(new { message = error.Message }),
-        _ => BadRequest(new { message = error.Message })
+        EPatientRegistrationErrorType.NotFound => NotFound(new { message = (messages.Find("Registration", error.Type) ?? error.Message) }),
+        EPatientRegistrationErrorType.Conflict => Conflict(new { message = (messages.Find("Registration", error.Type) ?? error.Message) }),
+        _ => BadRequest(new { message = (messages.Find("Registration", error.Type) ?? error.Message) })
     };
 }

@@ -1,3 +1,4 @@
+using TriAidPlatform.API.Shared.Infrastructure.Localization;
 ﻿using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using TriAidPlatform.API.Devices.Domain.Repositories;
@@ -16,7 +17,8 @@ namespace TriAidPlatform.API.Devices.Interfaces.REST.Controllers;
 public class VitalSignsReadingsController(
     IVitalSignsReadingRepository vitalSignsReadingRepository,
     IDeviceRepository deviceRepository,
-    IUnitOfWork unitOfWork) : ControllerBase
+    IUnitOfWork unitOfWork,
+    IApiMessages messages) : ControllerBase
 {
     /// <summary>
     /// Creates a new vital signs reading.
@@ -27,20 +29,20 @@ public class VitalSignsReadingsController(
         // Validate the device and get the id (EDeviceType)
         var device = await deviceRepository.FindByIdAsync(resource.DeviceId, cancellationToken);
         if (device is null) 
-            return BadRequest(new { message = "Associated device not found." });
+            return BadRequest(new { message = messages["DeviceNotFound"] });
 
         // Validate the vital signs values
         if (resource.HeartRate <= 0 || resource.HeartRate > 300)
-            return BadRequest(new { message = "Invalid heart rate value. Must be between 1 and 300 bpm." });
+            return BadRequest(new { message = messages["InvalidHeartRate"] });
             
         if (resource.SystolicPressure <= 0 || resource.DiastolicPressure <= 0 || resource.SystolicPressure <= resource.DiastolicPressure)
-            return BadRequest(new { message = "Invalid blood pressure values. Systolic must be greater than diastolic." });
+            return BadRequest(new { message = messages["InvalidBloodPressure"] });
             
         if (resource.OxygenSaturation < 0 || resource.OxygenSaturation > 100)
-            return BadRequest(new { message = "Invalid oxygen saturation value. Must be between 0% and 100%." });
+            return BadRequest(new { message = messages["InvalidOxygenSaturation"] });
             
         if (resource.Temperature < 30 || resource.Temperature > 45)
-            return BadRequest(new { message = "Invalid body temperature value. Must be within a realistic physiological range." });
+            return BadRequest(new { message = messages["InvalidTemperature"] });
 
         // creation and saving the vital signs reading
         var reading = VitalSignsReadingAssembler.ToModelFromCreate(resource, device.Type);
